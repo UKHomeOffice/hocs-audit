@@ -3,9 +3,9 @@ package uk.gov.digital.ho.hocs.audit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
-
 
 @Service
 @Slf4j
@@ -18,11 +18,10 @@ public class AuditDataService {
         this.auditRepository = auditRepository;
     }
 
-    public AuditData createAudit(String correlationID, String raisingService, String before, String after, String namespace, String type, String userID){
-        log.debug("Creating Audit: {}, ID: {}, Raised by: {}, By user: {}", correlationID, raisingService, userID);
-        AuditData auditData = new AuditData(correlationID, raisingService, before, after, namespace, type, userID);
+    public AuditData createAudit(CreateAuditDto createAuditDto){
+        AuditData auditData = AuditData.fromDto(createAuditDto);
         auditRepository.save(auditData);
-        log.info("Creating Audit: {}, ID: {}, Raised by: {}, By user: {}", correlationID, raisingService, userID);
+        log.info("Created Audit: UUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}", auditData.getUuid(), auditData.getCorrelationID(), auditData.getRaisingService(), auditData.getUserID(), auditData.getAuditTimestamp());
         return auditData;
     }
 }

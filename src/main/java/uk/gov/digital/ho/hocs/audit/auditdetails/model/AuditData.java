@@ -2,6 +2,7 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 
 import javax.persistence.*;
@@ -32,13 +33,9 @@ public class AuditData implements Serializable {
     @Getter
     private String raisingService;
 
-    @Column(name = "before")
+    @Column(name = "audit_payload")
     @Getter
-    private String before;
-
-    @Column(name = "after")
-    @Getter
-    private String after;
+    private String auditPayload;
 
     @Column(name = "namespace")
     @Getter
@@ -56,18 +53,27 @@ public class AuditData implements Serializable {
     @Getter
     private String userID;
 
-    public AuditData(String correlationID, String raisingService, String before, String after, String namespace, String type, String userID) {
+    public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, String type, String userID) {
         if (correlationID == null || raisingService == null || namespace == null ||type == null ) {
-            throw new EntityCreationException("Cannot create Audit(%s,%s,%s,%s,%s,`%s,%s).", correlationID, raisingService,before, after, namespace, type, userID);
+            throw new EntityCreationException("Cannot create Audit(%s,%s,%s,%s,%s,%s).", correlationID, raisingService,auditPayload, namespace, type, userID);
         }
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
-        this.before = before;
-        this.after = after;
+        this.auditPayload = auditPayload;
         this.namespace = namespace;
         this.auditTimestamp = LocalDateTime.now();
         this.type = type;
         this.userID = userID;
+    }
+
+
+    public static AuditData fromDto(CreateAuditDto createAuditDto) {
+        return new AuditData(createAuditDto.getCorrelationID(),
+                createAuditDto.getRaisingService(),
+                createAuditDto.getAuditPayload(),
+                createAuditDto.getNamespace(),
+                createAuditDto.getType(),
+                createAuditDto.getUserID());
     }
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class CreateAuditRequest {
+public class CreateAuditDto {
 
     @JsonProperty("correlation_id")
     private String correlationID;
@@ -14,11 +14,8 @@ public class CreateAuditRequest {
     @JsonProperty("raising_service")
     private String raisingService;
 
-    @JsonProperty("before")
-    private String before;
-
-    @JsonProperty("after")
-    private String after;
+    @JsonProperty("audit_payload")
+    private String auditPayload;
 
     @JsonProperty("namespace")
     private String namespace;
@@ -30,3 +27,9 @@ public class CreateAuditRequest {
     private String userID;
 
 }
+
+/*
+
+aws --endpoint-url=http://localhost:4576 sqs send-message --queue-url http://localstack:4576/queue/reporting-queue --message-body ' { "correlation_id":"corrID", "raising_service":"raising", "audit_payload":"{\"code\":3,\"type\":\"AES\"}", "namespace":"namespace1", "type":"type", "user_id":"usID"}'
+
+*/
