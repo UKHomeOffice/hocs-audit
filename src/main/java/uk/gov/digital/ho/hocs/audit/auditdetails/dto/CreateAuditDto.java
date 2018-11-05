@@ -8,28 +8,22 @@ import lombok.Getter;
 @Getter
 public class CreateAuditDto {
 
-    @JsonProperty("correlation_id")
+    @JsonProperty(value= "correlation_id", required = true)
     private String correlationID;
 
-    @JsonProperty("raising_service")
+    @JsonProperty(value= "raising_service", required = true)
     private String raisingService;
 
-    @JsonProperty("audit_payload")
+    @JsonProperty(value= "audit_payload")
     private String auditPayload;
 
-    @JsonProperty("namespace")
+    @JsonProperty(value= "namespace", required = true)
     private String namespace;
 
-    @JsonProperty("type")
+    @JsonProperty(value= "type", required = true)
     private String type;
 
-    @JsonProperty("user_id")
+    @JsonProperty(value= "user_id", required = true)
     private String userID;
 
 }
-
-/*
-
-aws --endpoint-url=http://localhost:4576 sqs send-message --queue-url http://localstack:4576/queue/reporting-queue --message-body ' { "correlation_id":"corrID", "raising_service":"raising", "audit_payload":"{\"code\":3,\"type\":\"AES\"}", "namespace":"namespace1", "type":"type", "user_id":"usID"}'
-
-*/

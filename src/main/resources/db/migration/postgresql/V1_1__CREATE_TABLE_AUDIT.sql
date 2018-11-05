@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS audit_data
   namespace              TEXT        NOT NULL,
   audit_timestamp        TIMESTAMP   NOT NULL,
   type                   TEXT        NOT NULL,
-  user_id                TEXT        NOT NULL DEFAULT 'anon',
+  user_id                TEXT        NOT NULL,
 
 
   CONSTRAINT audit_uuid_idempotent UNIQUE (uuid)

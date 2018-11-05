@@ -54,9 +54,6 @@ public class AuditData implements Serializable {
     private String userID;
 
     public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, String type, String userID) {
-        if (correlationID == null || raisingService == null || namespace == null ||type == null ) {
-            throw new EntityCreationException("Cannot create Audit(%s,%s,%s,%s,%s,%s).", correlationID, raisingService,auditPayload, namespace, type, userID);
-        }
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;

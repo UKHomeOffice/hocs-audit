@@ -27,4 +27,5 @@ class AuditDataResource {
         AuditData auditData = auditDataService.createAudit(request);
         return ResponseEntity.ok(CreateAuditResponse.from(auditData));
     }
+
 }
