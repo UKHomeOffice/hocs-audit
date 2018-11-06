@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AuditConsumerTest extends CamelTestSupport {
 
-    private static final String auditQueue = "seda:reporting-queue";
+    private static final String auditQueue = "direct:reporting-queue";
     private static final String dlq = "mock:reporting-queue-dlq";
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -74,8 +74,10 @@ public class AuditConsumerTest extends CamelTestSupport {
                 "testRaisingService",
                 "{\"name1\":\"value1\",\"name2\":\"value2\"}",
                 "namespaceEventOccurredIn",
-                "",
+                LocalDateTime.now(),
                 "testAuditType",
                 "testUser");
     }
 }
+
+//aws --endpoint-url=http://localhost:4576 sqs send-message --queue-url http://localstack:4576/queue/reporting-queue --message-body ' { "correlation_id":"corrID", "raising_service":"raising", "audit_payload":"{\"code\":3,\"type\":\"AES\"}", "namespace":"namespace1", "audit_timestamp":"{"dayOfYear":310,"dayOfWeek":"TUESDAY","month":"NOVEMBER","dayOfMonth":6,"year":2018,"monthValue":11,"hour":17,"minute":23,"second":29,"nano":957000000,"chronology":{"id":"ISO","calendarType":"iso8601”}}", "type":"type", "user_id":"usID"}'
