@@ -10,6 +10,8 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationExcepti
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -30,12 +32,7 @@ public class AuditServiceTest {
 
     @Test
     public void shouldCreateAuditWithValidParams() {
-        CreateAuditDto request = new CreateAuditDto("correlationID1",
-                "raisingServiceName",
-                "",
-                "namespaceEventOccurredIn",
-                "eventAuditType",
-                "userXYZ");
+        CreateAuditDto request = buildValidAuditDto();
 
         auditService.createAudit(request);
 
@@ -46,21 +43,16 @@ public class AuditServiceTest {
     @Test
     public void shouldConvertDTOToAuditData() {
 
-        CreateAuditDto request = new CreateAuditDto("correlationID1",
-                "raisingServiceName",
-                "",
-                "namespaceEventOccurredIn",
-                "eventAuditType",
-                "userXYZ");
+        CreateAuditDto request = buildValidAuditDto();
 
         AuditData auditData = AuditData.fromDto(request);
 
-        assertThat(auditData.getCorrelationID()).isEqualTo("correlationID1");
-        assertThat(auditData.getRaisingService()).isEqualTo("raisingServiceName");
-        assertThat(auditData.getAuditPayload()).isEqualTo("");
+        assertThat(auditData.getCorrelationID()).isEqualTo("correlationIDTest");
+        assertThat(auditData.getRaisingService()).isEqualTo("testRaisingService");
+        assertThat(auditData.getAuditPayload()).isEqualTo("{\"name1\":\"value1\",\"name2\":\"value2\"}");
         assertThat(auditData.getNamespace()).isEqualTo("namespaceEventOccurredIn");
-        assertThat(auditData.getType()).isEqualTo("eventAuditType");
-        assertThat(auditData.getUserID()).isEqualTo("userXYZ");
+        assertThat(auditData.getType()).isEqualTo("testAuditType");
+        assertThat(auditData.getUserID()).isEqualTo("testUser");
     }
 
     @Test(expected = EntityCreationException.class)
@@ -69,6 +61,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         auditService.createAudit(request);
@@ -80,6 +73,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         try {
@@ -87,7 +81,6 @@ public class AuditServiceTest {
         } catch (EntityCreationException e){
             //Do Nothing
         }
-
         verifyNoMoreInteractions(auditRepository);
     }
 
@@ -97,6 +90,7 @@ public class AuditServiceTest {
                 null,
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         auditService.createAudit(request);
@@ -108,6 +102,7 @@ public class AuditServiceTest {
                 null,
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         try {
@@ -125,6 +120,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 null,
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         auditService.createAudit(request);
@@ -136,6 +132,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 null,
+                LocalDateTime.now(),
                 "eventAuditType",
                 "userXYZ");
         try {
@@ -146,6 +143,34 @@ public class AuditServiceTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenTimestampIsNullException() {
+        CreateAuditDto request = new CreateAuditDto("correlationID1",
+                "raisingServiceName",
+                "",
+                "namespaceEventOccurredIn",
+                null,
+                "eventAuditType",
+                "userXYZ");
+        auditService.createAudit(request);
+    }
+
+    @Test
+    public void shouldNotCreateAuditWhenTimestampIsNull() {
+        CreateAuditDto request = new CreateAuditDto("correlationID1",
+                "raisingServiceName",
+                "",
+                "namespaceEventOccurredIn",
+                null,
+                "eventAuditType",
+                "userXYZ");
+        try {
+            auditService.createAudit(request);
+        } catch (EntityCreationException e){
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
 
     @Test(expected = EntityCreationException.class)
     public void shouldNotCreateAuditWhenTypeIsNullException() {
@@ -153,6 +178,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 null,
                 "userXYZ");
         auditService.createAudit(request);
@@ -164,6 +190,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 null,
                 "userXYZ");
         try {
@@ -180,6 +207,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 null);
         auditService.createAudit(request);
@@ -191,6 +219,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 null);
         try {
@@ -208,6 +237,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "\"Test name\" \"Test value\"",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 null);
         auditService.createAudit(request);
@@ -219,6 +249,7 @@ public class AuditServiceTest {
                 "raisingServiceName",
                 "\"Test name\" \"Test value\"",
                 "namespaceEventOccurredIn",
+                LocalDateTime.now(),
                 "eventAuditType",
                 null);
         try {
@@ -227,5 +258,15 @@ public class AuditServiceTest {
             //Do Nothing
         }
         verifyNoMoreInteractions(auditRepository);
+    }
+
+    private CreateAuditDto buildValidAuditDto(){
+        return new CreateAuditDto("correlationIDTest",
+                "testRaisingService",
+                "{\"name1\":\"value1\",\"name2\":\"value2\"}",
+                "namespaceEventOccurredIn",
+                LocalDateTime.now(),
+                "testAuditType",
+                "testUser");
     }
 }

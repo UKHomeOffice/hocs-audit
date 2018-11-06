@@ -11,6 +11,7 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 
 @Service
@@ -38,41 +39,44 @@ public class AuditDataService {
     }
 
 
-    public void validate(CreateAuditDto createAuditDto) {
+    private void validate(CreateAuditDto createAuditDto) {
         validateNotNull(createAuditDto);
         validatePayload(createAuditDto);
     }
 
-    public void validateNotNull(CreateAuditDto createAuditDto) {
+    private void validateNotNull(CreateAuditDto createAuditDto) {
         String correlationID = createAuditDto.getCorrelationID();
         String raisingService = createAuditDto.getRaisingService();
         String namespace = createAuditDto.getNamespace();
+        LocalDateTime auditTimestamp = createAuditDto.getAuditTimestamp();
         String type = createAuditDto.getType();
         String userID = createAuditDto.getUserID();
 
-        if (correlationID == null || raisingService == null || namespace == null ||type == null || userID == null) {
-            throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s)",
+        if (correlationID == null || raisingService == null || namespace == null || auditTimestamp == null || type == null || userID == null) {
+            throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s, %s)",
                     correlationID,
                     raisingService,
                     createAuditDto.getAuditPayload(),
                     namespace,
+                    auditTimestamp,
                     type,
                     userID);
         }
     }
 
-    public void validatePayload(CreateAuditDto createAuditDto){
+    private void validatePayload(CreateAuditDto createAuditDto){
         String auditPayload = createAuditDto.getAuditPayload();
         if (auditPayload != null){
             try {
                 final ObjectMapper mapper = new ObjectMapper();
                 mapper.readTree(auditPayload);
             } catch (IOException e) {
-                throw new EntityCreationException("Cannot create Audit - invalid Json (%s, %s, %s, %s, %s, %s)",
+                throw new EntityCreationException("Cannot create Audit - invalid Json (%s, %s, %s, %s, %s, %s, %s)",
                         createAuditDto.getCorrelationID(),
                         createAuditDto.getRaisingService(),
                         createAuditDto.getAuditPayload(),
                         createAuditDto.getNamespace(),
+                        createAuditDto.getAuditTimestamp(),
                         createAuditDto.getType(),
                         createAuditDto.getUserID());
             }

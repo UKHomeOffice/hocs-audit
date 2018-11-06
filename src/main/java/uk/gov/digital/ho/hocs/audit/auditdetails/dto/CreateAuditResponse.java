@@ -15,7 +15,13 @@ public class CreateAuditResponse {
     @JsonProperty("uuid")
     private final UUID uuid;
 
+    @JsonProperty("correlation_id")
+    private String correlationID;
+
+    @JsonProperty("user_id")
+    private String userID;
+
     public static CreateAuditResponse from(AuditData auditData) {
-        return new CreateAuditResponse(auditData.getUuid());
+        return new CreateAuditResponse(auditData.getUuid(), auditData.getCorrelationID(), auditData.getUserID());
     }
 }

@@ -3,7 +3,6 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -53,23 +52,23 @@ public class AuditData implements Serializable {
     @Getter
     private String userID;
 
-    public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, String type, String userID) {
+    public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
         this.auditPayload = auditPayload;
         this.namespace = namespace;
-        this.auditTimestamp = LocalDateTime.now();
+        this.auditTimestamp = auditTimestamp;
         this.type = type;
         this.userID = userID;
     }
-
 
     public static AuditData fromDto(CreateAuditDto createAuditDto) {
         return new AuditData(createAuditDto.getCorrelationID(),
                 createAuditDto.getRaisingService(),
                 createAuditDto.getAuditPayload(),
                 createAuditDto.getNamespace(),
+                createAuditDto.getAuditTimestamp(),
                 createAuditDto.getType(),
                 createAuditDto.getUserID());
     }

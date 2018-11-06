@@ -62,4 +62,6 @@ dependencies {
 	testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: camelVersion
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.assertj:assertj-core')
+	testCompile "com.github.tomakehurst:wiremock-standalone:2.18.0"
+
 }

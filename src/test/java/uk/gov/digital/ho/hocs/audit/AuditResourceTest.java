@@ -5,11 +5,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -35,12 +38,13 @@ public class AuditResourceTest {
         raisingService = "raisingServiceName";
         auditPayload = "";
         namespace = "namespaceEventOccurredIn";
+        LocalDateTime auditTimestamp = LocalDateTime.now();
         type = "eventAuditType";
         userID = "userXYZ";
 
-        CreateAuditDto request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace,type, userID);
+        CreateAuditDto request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
 
-        AuditData auditData = new AuditData(correlationID, raisingService, auditPayload, namespace,type, userID);
+        AuditData auditData = new AuditData(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
 
         when(auditService.createAudit(any())).thenReturn(auditData);
 
