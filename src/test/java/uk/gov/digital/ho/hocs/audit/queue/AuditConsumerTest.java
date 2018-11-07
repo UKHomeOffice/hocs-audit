@@ -2,9 +2,11 @@ package uk.gov.digital.ho.hocs.audit.queue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -14,6 +16,7 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityNotFoundException;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -24,24 +27,30 @@ public class AuditConsumerTest extends CamelTestSupport {
 
     private static final String auditQueue = "direct:reporting-queue";
     private static final String dlq = "mock:reporting-queue-dlq";
-    private ObjectMapper mapper = new ObjectMapper();
-
+    private ObjectMapper mapper;
 
     @Mock
     private AuditDataService mockDataService;
 
+    @Before
+    public void setup(){
+        mapper = new ObjectMapper();
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new AuditConsumer(mockDataService, auditQueue, dlq, 0,0,0);
+
     }
     @Test
     public void shouldCallAddDocumentToAuditService() throws JsonProcessingException, EntityCreationException, EntityNotFoundException {
 
         CreateAuditDto auditDto = buildAuditDto();
-
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
-
         verify(mockDataService, times(1)).createAudit(any());
     }
 
@@ -61,13 +70,11 @@ public class AuditConsumerTest extends CamelTestSupport {
 
         doThrow(EntityCreationException.class)
                 .when(mockDataService).createAudit(any());
-
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
         getMockEndpoint(dlq).assertIsSatisfied();
     }
-
 
     private CreateAuditDto buildAuditDto(){
         return new CreateAuditDto("correlationIDTest",
@@ -79,5 +86,3 @@ public class AuditConsumerTest extends CamelTestSupport {
                 "testUser");
     }
 }
-
-//aws --endpoint-url=http://localhost:4576 sqs send-message --queue-url http://localstack:4576/queue/reporting-queue --message-body ' { "correlation_id":"corrID", "raising_service":"raising", "audit_payload":"{\"code\":3,\"type\":\"AES\"}", "namespace":"namespace1", "audit_timestamp":"{"dayOfYear":310,"dayOfWeek":"TUESDAY","month":"NOVEMBER","dayOfMonth":6,"year":2018,"monthValue":11,"hour":17,"minute":23,"second":29,"nano":957000000,"chronology":{"id":"ISO","calendarType":"iso8601”}}", "type":"type", "user_id":"usID"}'
