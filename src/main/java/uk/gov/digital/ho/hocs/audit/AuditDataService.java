@@ -4,15 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 import java.time.LocalDateTime;
-
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -26,7 +22,6 @@ public class AuditDataService {
     }
 
     public AuditData createAudit(CreateAuditDto createAuditDto) {
-        validate(createAuditDto);
         AuditData auditData = AuditData.fromDto(createAuditDto);
         auditRepository.save(auditData);
         log.info("Created Audit: UUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}",
@@ -39,48 +34,12 @@ public class AuditDataService {
     }
 
 
-    private void validate(CreateAuditDto createAuditDto) {
-        validateNotNull(createAuditDto);
-        validatePayload(createAuditDto);
+    public Set<AuditData> getAuditDataByCorrelationID(String correlationID){
+        LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
+        return auditRepository.findAuditDataByCorrelationID(correlationID, lastWeek);
     }
 
-    private void validateNotNull(CreateAuditDto createAuditDto) {
-        String correlationID = createAuditDto.getCorrelationID();
-        String raisingService = createAuditDto.getRaisingService();
-        String namespace = createAuditDto.getNamespace();
-        LocalDateTime auditTimestamp = createAuditDto.getAuditTimestamp();
-        String type = createAuditDto.getType();
-        String userID = createAuditDto.getUserID();
-
-        if (correlationID == null || raisingService == null || namespace == null || auditTimestamp == null || type == null || userID == null) {
-            throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s, %s)",
-                    correlationID,
-                    raisingService,
-                    createAuditDto.getAuditPayload(),
-                    namespace,
-                    auditTimestamp,
-                    type,
-                    userID);
-        }
+    public Set<AuditData> getAuditDataByCorrelationIDByDateRange(String correlationID, LocalDateTime fromDate, LocalDateTime toDate){
+        return auditRepository.findAuditDataByCorrelationIDAndDateRange(correlationID, fromDate, toDate);
     }
-
-    private void validatePayload(CreateAuditDto createAuditDto){
-        String auditPayload = createAuditDto.getAuditPayload();
-        if (auditPayload != null){
-            try {
-                final ObjectMapper mapper = new ObjectMapper();
-                mapper.readTree(auditPayload);
-            } catch (IOException e) {
-                throw new EntityCreationException("Cannot create Audit - invalid Json (%s, %s, %s, %s, %s, %s, %s)",
-                        createAuditDto.getCorrelationID(),
-                        createAuditDto.getRaisingService(),
-                        createAuditDto.getAuditPayload(),
-                        createAuditDto.getNamespace(),
-                        createAuditDto.getAuditTimestamp(),
-                        createAuditDto.getType(),
-                        createAuditDto.getUserID());
-            }
-        }
-    }
-
 }

@@ -239,7 +239,7 @@ public class AuditServiceTest {
                 "namespaceEventOccurredIn",
                 LocalDateTime.now(),
                 "eventAuditType",
-                null);
+                "testUser");
         auditService.createAudit(request);
     }
 
@@ -251,7 +251,7 @@ public class AuditServiceTest {
                 "namespaceEventOccurredIn",
                 LocalDateTime.now(),
                 "eventAuditType",
-                null);
+                "testUser");
         try {
             auditService.createAudit(request);
         } catch (EntityCreationException e) {
