@@ -231,8 +231,8 @@ public class AuditServiceTest {
     }
 
 
-    @Test(expected = EntityCreationException.class)
-    public void shouldNotCreateAuditWhenAuditPayloadIsInvalidException() {
+    @Test
+    public void shouldCreateAuditWhenAuditPayloadIsInvalid() {
         CreateAuditDto request = new CreateAuditDto("correlationID1",
                 "raisingServiceName",
                 "\"Test name\" \"Test value\"",
@@ -240,25 +240,19 @@ public class AuditServiceTest {
                 LocalDateTime.now(),
                 "eventAuditType",
                 "testUser");
-        auditService.createAudit(request);
+        AuditData auditData = auditService.createAudit(request);
+        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verifyNoMoreInteractions(auditRepository);
+
+//        assertThat(auditData.getCorrelationID()).isEqualTo("correlationID1");
+//        assertThat(auditData.getRaisingService()).isEqualTo("raisingServiceName");
+//        assertThat(auditData.getAuditPayload()).isEqualTo("\"Test name\" \"Test value\"");
+//        assertThat(auditData.getNamespace()).isEqualTo("namespaceEventOccurredIn");
+//        assertThat(auditData.getType()).isEqualTo("eventAuditType");
+//        assertThat(auditData.getUserID()).isEqualTo("testUser");
     }
 
-    @Test
-    public void shouldNotCreateAuditWhenAuditPayloadIsInvalid() {
-        CreateAuditDto request = new CreateAuditDto("correlationID1",
-                "raisingServiceName",
-                "\"Test name\" \"Test value\"",
-                "namespaceEventOccurredIn",
-                LocalDateTime.now(),
-                "eventAuditType",
-                "testUser");
-        try {
-            auditService.createAudit(request);
-        } catch (EntityCreationException e) {
-            //Do Nothing
-        }
-        verifyNoMoreInteractions(auditRepository);
-    }
+
 
     private CreateAuditDto buildValidAuditDto(){
         return new CreateAuditDto("correlationIDTest",

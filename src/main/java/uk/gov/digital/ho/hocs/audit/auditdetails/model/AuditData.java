@@ -1,21 +1,22 @@
 package uk.gov.digital.ho.hocs.audit.auditdetails.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import org.json.JSONObject;
+import org.json.JSONException;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.json.simple.JsonObject;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
-import com.google.gson.JsonParser;
 
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Base64;
 import javax.persistence.Entity;
 
 @Slf4j
@@ -41,8 +42,8 @@ public class AuditData implements Serializable {
     @Getter
     private String raisingService;
 
-    @Column(name = "audit_payload")
     @Getter
+    @Column(name = "audit_payload")
     private String auditPayload;
 
     @Column(name = "namespace")
@@ -72,12 +73,25 @@ public class AuditData implements Serializable {
         this.userID = userID;
     }
 
-    public static AuditData fromDto(CreateAuditDto createAuditDto) throws EntityCreationException {
+    public String getAuditPayload() {
+        try {
+            JSONObject jsonObject = new JSONObject(auditPayload);
+            if (jsonObject.has("invalid_json")) {
+                String encodedPayload = jsonObject.getString("invalid_json");
+                byte[] decodedPayload = Base64.getDecoder().decode(encodedPayload);
+                return new String(decodedPayload);
+            }
+        } catch (JSONException e) { // Do nothing
+             }
+            return auditPayload;
+        }
+
+    public static AuditData fromDto(CreateAuditDto createAuditDto){
         validateNotNull(createAuditDto);
-        validatePayload(createAuditDto);
+        String auditPayload = validatePayload(createAuditDto);
         return new AuditData(createAuditDto.getCorrelationID(),
                 createAuditDto.getRaisingService(),
-                createAuditDto.getAuditPayload(),
+                auditPayload,
                 createAuditDto.getNamespace(),
                 createAuditDto.getAuditTimestamp(),
                 createAuditDto.getType(),
@@ -104,14 +118,14 @@ public class AuditData implements Serializable {
         }
     }
 
-    public static void validatePayload(CreateAuditDto createAuditDto) throws EntityCreationException{
-        String auditPayload = createAuditDto.getAuditPayload();
-        if (createAuditDto.getAuditPayload() != null) {
+    private static String validatePayload(CreateAuditDto createAuditDto) {
+         String auditPayload = createAuditDto.getAuditPayload();
+        if (auditPayload != null) {
             try {
-                JsonParser parser = new JsonParser();
+                com.google.gson.JsonParser parser = new JsonParser();
                 parser.parse(auditPayload);
             } catch (JsonSyntaxException e) {
-                throw new EntityCreationException("Cannot create Audit - invalid Json (%s, %s, %s, %s, %s, %s, %s)",
+                log.info("Created audit with invalid json in payload - Correlation ID: {}, Raised by: {}, Invalid json payload: {}, Namespace: {}, Timestamp: {}, EventType: {}, User: {}\")",
                         createAuditDto.getCorrelationID(),
                         createAuditDto.getRaisingService(),
                         auditPayload,
@@ -119,31 +133,11 @@ public class AuditData implements Serializable {
                         createAuditDto.getAuditTimestamp(),
                         createAuditDto.getType(),
                         createAuditDto.getUserID());
+                // Encode invalid json to base 64, otherwise it can be seen as nested invalid json
+                byte[] encodedPayload = Base64.getEncoder().encode(auditPayload.getBytes());
+                return "{\"invalid_json\":\"" + new String(encodedPayload) + "\"}";
             }
         }
+        return auditPayload;
     }
-
-
-
-//    }public static String validatePayload(String auditPayload) {
-//        if (auditPayload != null) {
-//            try {
-//                JsonParser parser = new JsonParser();
-//                parser.parse(auditPayload);
-//            } catch (JsonSyntaxException e) {
-//
-//
-//
-// //               return "{\"invalid_json\": " + "\"name1\":\"value1\",\"name2\"\"value2\"" + "}\"" ;
-//                return "{\"invalid_json\": " + auditPayload + "}\"" ;
-//
-////                JsonObject test = new JsonObject();
-////                test.put("invalid_json", auditPayload);
-////                return test.toString();
-//
-//
-//            }
-//        }
-//        return auditPayload;
-//    }
 }
