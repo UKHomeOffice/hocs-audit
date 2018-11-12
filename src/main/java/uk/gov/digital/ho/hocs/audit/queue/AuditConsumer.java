@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.AuditDataService;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 
-import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static uk.gov.digital.ho.hocs.audit.application.RequestData.transferHeadersToMDC;
 
 @Component

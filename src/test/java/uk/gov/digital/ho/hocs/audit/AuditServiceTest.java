@@ -13,7 +13,6 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

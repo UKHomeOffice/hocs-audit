@@ -17,7 +17,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Base64;
-import javax.persistence.Entity;
+
 
 @Slf4j
 @Entity

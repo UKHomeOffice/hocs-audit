@@ -6,22 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
-public class GetAuditsResponse {
+public class GetAuditListResponse {
 
     @JsonProperty(value= "audits")
-    private Set<GetAuditResponse> audits;
+    private List<GetAuditResponse> audits;
 
-    public static GetAuditsResponse from(Set<AuditData> auditDatas) {
-        Set<GetAuditResponse> auditDataResponses = auditDatas
+    public static GetAuditListResponse from(List<AuditData> auditDataSet) {
+        List<GetAuditResponse> auditDataResponses = auditDataSet
                 .stream()
                 .map(GetAuditResponse::from)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        return new GetAuditsResponse(auditDataResponses);
+        return new GetAuditListResponse(auditDataResponses);
     }
 }

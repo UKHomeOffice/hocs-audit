@@ -19,7 +19,6 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityNotFoundExcepti
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,7 +40,7 @@ public class AuditConsumerTest extends CamelTestSupport {
     }
 
     @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
+    protected RouteBuilder createRouteBuilder() {
         return new AuditConsumer(mockDataService, auditQueue, dlq, 0,0,0);
 
     }
