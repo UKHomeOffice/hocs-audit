@@ -67,7 +67,7 @@ pipeline:
       - VERSION=build-${DRONE_BUILD_NUMBER}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_dev
+      - hocs_audit_dev
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -82,8 +82,8 @@ pipeline:
       - ENVIRONMENT=${DRONE_DEPLOY_TO}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_dev
-      - hocs_casework_qa
+      - hocs_audit_dev
+      - hocs_audit_qa
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -99,7 +99,7 @@ pipeline:
       - VERSION=${IMAGE_VERSION}
       - KUBE_SERVER=https://kube-api-prod.prod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_prod
+      - hocs_audit_prod
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
