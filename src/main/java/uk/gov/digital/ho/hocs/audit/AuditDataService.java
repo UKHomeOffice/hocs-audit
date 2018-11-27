@@ -71,12 +71,6 @@ public class AuditDataService {
         return auditRepository.findAuditDataByCorrelationID(correlationID, lastWeek, pageRequest);
     }
 
-    public List<AuditData> getAuditDataByCorrelationIDByDateRange(String correlationID, String fromDate, String toDate, int page, int limit){
-        log.info("Requesting audits for Correlation ID: {}, from dates: {} to {} ", correlationID, fromDate, toDate);
-        pageRequest = PageRequest.of(page,limit);
-        return auditRepository.findAuditDataByCorrelationIDAndDateRange(correlationID, convertLocalDateToStartOfLocalDateTime(fromDate), convertLocalDateToEndOfLocalDateTime(toDate), pageRequest);
-    }
-
     public List<AuditData> getAuditDataByUserID(String userID, int page, int limit){
         log.info("Requesting audits for User ID: {} from last seven days", userID);
         pageRequest = PageRequest.of(page,limit);

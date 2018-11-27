@@ -85,25 +85,12 @@ class AuditDataResource {
         return ResponseEntity.ok(GetAuditListResponse.from(auditData));
     }
 
-    @GetMapping(value = "/audit/correlation/{correlationID}", params = {"fromDate", "toDate"}, produces = APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<GetAuditListResponse> getAuditDataByCorrelationIDAndDateRange(@PathVariable String correlationID, @RequestParam("fromDate") String fromDate,
-                                                                                        @RequestParam("toDate") String toDate, @RequestParam("page") int page, @RequestParam int limit){
-        List<AuditData> auditData = auditDataService.getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate, page, limit);
-        return ResponseEntity.ok(GetAuditListResponse.from(auditData));
-    }
-
     @GetMapping(value = "/audit/correlation/{correlationID}/summary", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditListSummaryResponse> getAuditDataSummaryByCorrelationID(@PathVariable String correlationID, @RequestParam("page") int page, @RequestParam int limit) {
         List<AuditData> auditData = auditDataService.getAuditDataByCorrelationID(correlationID, page, limit);
         return ResponseEntity.ok(GetAuditListSummaryResponse.from(auditData));
     }
 
-    @GetMapping(value = "/audit/correlation/{correlationID}/summary", params = {"fromDate", "toDate"}, produces = APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<GetAuditListSummaryResponse> getAuditDataSummaryByCorrelationIDAndDateRange(@PathVariable String correlationID, @RequestParam("fromDate") String fromDate, @RequestParam("toDate") String toDate,
-                                                                                                      @RequestParam("page") int page, @RequestParam int limit){
-        List<AuditData> auditData = auditDataService.getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate, page, limit);
-        return ResponseEntity.ok(GetAuditListSummaryResponse.from(auditData));
-    }
 
 
 

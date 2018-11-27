@@ -165,16 +165,6 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAllAuditsFromCorrelationIDAndFromDateRange() throws EntityNotFoundException {
-        when(auditService.getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate, page, limit)).thenReturn(new ArrayList<>());
-
-        ResponseEntity<GetAuditListResponse> response = auditResource.getAuditDataByCorrelationIDAndDateRange(correlationID, fromDate, toDate , page, limit);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(auditService, times(1)).getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate , page, limit);
-        verifyNoMoreInteractions(auditService);
-    }
-
-    @Test
     public void shouldReturnAuditSummariesFromCorrelationIDAndDefaultDateRange() throws EntityNotFoundException {
         when(auditService.getAuditDataByCorrelationID(correlationID, page, limit)).thenReturn(new ArrayList<>());
 
@@ -183,17 +173,6 @@ public class AuditResourceTest {
         verify(auditService, times(1)).getAuditDataByCorrelationID(correlationID, page, limit);
         verifyNoMoreInteractions(auditService);
     }
-
-    @Test
-    public void shouldReturnAuditSummariesFromCorrelationIDAndDateRange() throws EntityNotFoundException {
-        when(auditService.getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate , page, limit)).thenReturn(new ArrayList<>());
-
-        ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditDataSummaryByCorrelationIDAndDateRange(correlationID, fromDate, toDate , page, limit);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(auditService, times(1)).getAuditDataByCorrelationIDByDateRange(correlationID, fromDate, toDate , page, limit);
-        verifyNoMoreInteractions(auditService);
-    }
-
 
 
 
