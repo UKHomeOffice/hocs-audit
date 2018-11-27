@@ -27,6 +27,7 @@ public class AuditResourceTest {
 
     private AuditDataResource auditResource;
     private String correlationID, raisingService, auditPayload, namespace, type, userID;
+    private LocalDateTime auditTimestamp;
     private AuditData validAudit;
 
     private CreateAuditDto request;
@@ -39,12 +40,11 @@ public class AuditResourceTest {
     @Before
     public void setUp() {
 
-
         correlationID = "correlationID1";
         raisingService = "raisingServiceName";
         auditPayload = "";
         namespace = "namespaceEventOccurredIn";
-        LocalDateTime auditTimestamp = LocalDateTime.now();
+        auditTimestamp = LocalDateTime.now();
         type = "eventAuditType";
         userID = "userXYZ";
 
@@ -58,24 +58,34 @@ public class AuditResourceTest {
 
         page = 5;
         limit = 10;
-
     }
 
     @Test
     public void shouldCreateAuditWithValidParams() throws EntityCreationException {
 
-        when(auditService.createAudit(any())).thenReturn(validAudit);
+        when(auditService.createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                auditTimestamp,
+                type,
+                userID)).thenReturn(validAudit);
 
         ResponseEntity response = auditResource.createAudit(request);
 
-        verify(auditService, times(1)).createAudit(any());
+        verify(auditService, times(1)).createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                auditTimestamp,
+                type,
+                userID);
 
         verifyNoMoreInteractions(auditService);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
-
 
 
 

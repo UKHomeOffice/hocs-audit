@@ -25,13 +25,18 @@ class AuditDataResource {
     }
 
 
-
     @PostMapping(value = "/audit", consumes = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CreateAuditResponse> createAudit(@RequestBody CreateAuditDto request) {
-        AuditData auditData = auditDataService.createAudit(request);
+        AuditData auditData = auditDataService.createAudit(
+                request.getCorrelationID(),
+                request.getRaisingService(),
+                request.getAuditPayload(),
+                request.getNamespace(),
+                request.getAuditTimestamp(),
+                request.getType(),
+                request.getUserID());
         return ResponseEntity.ok(CreateAuditResponse.from(auditData));
     }
-
 
 
     @GetMapping(value = "/audits", produces = APPLICATION_JSON_UTF8_VALUE)

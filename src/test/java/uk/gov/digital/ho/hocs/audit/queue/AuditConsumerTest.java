@@ -28,6 +28,14 @@ public class AuditConsumerTest extends CamelTestSupport {
     private static final String dlq = "mock:reporting-queue-dlq";
     private ObjectMapper mapper;
 
+    private String correlationID;
+    private String raisingService;
+    private String auditPayload;
+    private String namespace;
+    private LocalDateTime auditTimestamp;
+    private String type;
+    private String userID;
+
     @Mock
     private AuditDataService mockDataService;
 
@@ -37,6 +45,14 @@ public class AuditConsumerTest extends CamelTestSupport {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        correlationID = "correlationIDTest";
+        raisingService = "testRaisingService";
+        auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
+        namespace = "namespaceEventOccurredIn";
+        auditTimestamp = LocalDateTime.now();
+        type = "testAuditType";
+        userID = "testUser";
     }
 
     @Override
@@ -47,10 +63,10 @@ public class AuditConsumerTest extends CamelTestSupport {
     @Test
     public void shouldCallAddDocumentToAuditService() throws JsonProcessingException, EntityCreationException, EntityNotFoundException {
 
-        CreateAuditDto auditDto = buildAuditDto();
+        CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
-        verify(mockDataService, times(1)).createAudit(any());
+        verify(mockDataService, times(1)).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     }
 
     @Test
@@ -58,30 +74,21 @@ public class AuditConsumerTest extends CamelTestSupport {
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString("{invalid:invalid}");
         template.sendBody(auditQueue, json);
-        verify(mockDataService, never()).createAudit(any());
+        verify(mockDataService, never()).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         getMockEndpoint(dlq).assertIsSatisfied();
     }
 
     @Test
     public void shouldTransferToDLQOnFailure() throws JsonProcessingException, InterruptedException, EntityCreationException, EntityNotFoundException {
 
-        CreateAuditDto auditDto = buildAuditDto();
+        CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp,type,userID);
 
         doThrow(EntityCreationException.class)
-                .when(mockDataService).createAudit(any());
+                .when(mockDataService).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
         getMockEndpoint(dlq).assertIsSatisfied();
     }
 
-    private CreateAuditDto buildAuditDto(){
-        return new CreateAuditDto("correlationIDTest",
-                "testRaisingService",
-                "{\"name1\":\"value1\",\"name2\":\"value2\"}",
-                "namespaceEventOccurredIn",
-                LocalDateTime.now(),
-                "testAuditType",
-                "testUser");
-    }
 }

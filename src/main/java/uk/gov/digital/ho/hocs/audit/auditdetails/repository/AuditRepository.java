@@ -19,13 +19,13 @@ public interface AuditRepository extends PagingAndSortingRepository<AuditData, S
     @Query(value = "SELECT a.* FROM audit_data a WHERE a.correlation_id = ?1 AND a.audit_timestamp > ?2", nativeQuery = true)
     List<AuditData> findAuditDataByCorrelationID(String correlationID, LocalDateTime dateTime, Pageable pageRequest);
 
-    @Query(value = "SELECT a.* FROM audit_data a WHERE a.correlation_id = ?1 AND a.audit_timestamp > ?2 AND a.audit_timestamp < ?3", nativeQuery = true)
+    @Query(value = "SELECT a.* FROM audit_data a WHERE a.correlation_id = ?1 AND BETWEEN a.audit_timestamp = ?2 AND a.audit_timestamp = ?3", nativeQuery = true)
     List<AuditData> findAuditDataByCorrelationIDAndDateRange(String correlationID, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageRequest);
 
     @Query(value = "SELECT a.* FROM audit_data a WHERE a.user_id = ?1 AND a.audit_timestamp > ?2", nativeQuery = true)
     List<AuditData> findAuditDataByUserID(String userID, LocalDateTime dateTime, Pageable pageRequest);
 
-    @Query(value = "SELECT a.* FROM audit_data a WHERE a.user_id = ?1 AND a.audit_timestamp > ?2 AND a.audit_timestamp < ?3", nativeQuery = true)
+    @Query(value = "SELECT a.* FROM audit_data a WHERE a.user_id = ?1 AND BETWEEN a.audit_timestamp = ?2 AND a.audit_timestamp = ?3", nativeQuery = true)
     List<AuditData> findAuditDataByUserIDAndDateRange(String userID, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageRequest);
 
     @Query(value = "SELECT a.* FROM audit_data a WHERE a.audit_timestamp > ?1", nativeQuery = true)

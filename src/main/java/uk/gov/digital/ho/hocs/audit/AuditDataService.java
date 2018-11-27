@@ -1,11 +1,13 @@
 package uk.gov.digital.ho.hocs.audit;
 
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
+import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
@@ -13,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,14 +32,15 @@ public class AuditDataService {
         this.auditRepository = auditRepository;
     }
 
-    public AuditData createAudit(CreateAuditDto createAuditDto) {
-        AuditData auditData = AuditData.fromDto(createAuditDto);
+    public AuditData createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+        String validAuditPayload = validatePayload(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        AuditData auditData = new AuditData(correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
+        validateNotNull(auditData);
         auditRepository.save(auditData);
-        log.info("Created Audit: UUID: {}, Correlation ID: {}, Raised by: {}, Payload: {}, By user: {}, at timestamp: {}",
+        log.info("Created Audit: UUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}",
                 auditData.getUuid(),
                 auditData.getCorrelationID(),
                 auditData.getRaisingService(),
-                auditData.getAuditPayload(),
                 auditData.getUserID(),
                 auditData.getAuditTimestamp());
         return auditData;
@@ -87,13 +91,54 @@ public class AuditDataService {
     }
 
 
-    public LocalDateTime convertLocalDateToStartOfLocalDateTime(String date){
+    private LocalDateTime convertLocalDateToStartOfLocalDateTime(String date){
         LocalDate fromDate = LocalDate.parse(date);
         return LocalDateTime.of(fromDate, LocalTime.MIN);
     }
 
-    public LocalDateTime convertLocalDateToEndOfLocalDateTime(String date){
+    private LocalDateTime convertLocalDateToEndOfLocalDateTime(String date){
         LocalDate toDate = LocalDate.parse(date);
         return LocalDateTime.of(toDate, LocalTime.MAX);
+    }
+
+    private static void validateNotNull(AuditData auditData) {
+        String correlationID = auditData.getCorrelationID();
+        String raisingService = auditData.getRaisingService();
+        String namespace = auditData.getNamespace();
+        LocalDateTime auditTimestamp = auditData.getAuditTimestamp();
+        String type = auditData.getType();
+        String userID = auditData.getUserID();
+
+        if (correlationID == null || raisingService == null || namespace == null || auditTimestamp == null || type == null || userID == null) {
+            throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s, %s)",
+                    correlationID,
+                    raisingService,
+                    auditData.getAuditPayload(),
+                    namespace,
+                    auditTimestamp,
+                    type,
+                    userID);
+        }
+    }
+
+    private static String validatePayload(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+        if (auditPayload != null) {
+            try {
+                com.google.gson.JsonParser parser = new JsonParser();
+                parser.parse(auditPayload);
+            } catch (JsonSyntaxException e) {
+                log.info("Created audit with invalid json in payload - Correlation ID: {}, Raised by: {}, Namespace: {}, Timestamp: {}, EventType: {}, User: {}\")",
+                        correlationID,
+                        raisingService,
+                        namespace,
+                        auditTimestamp,
+                        type,
+                        userID);
+                // Encode invalid json to base 64, otherwise it can be seen as nested invalid json
+                byte[] encodedPayload = Base64.getEncoder().encode(auditPayload.getBytes());
+                return "{\"invalid_json\":\"" + new String(encodedPayload) + "\"}";
+            }
+        }
+        return auditPayload;
     }
 }
