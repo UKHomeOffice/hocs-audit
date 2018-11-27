@@ -3,6 +3,12 @@ pipeline:
   build-project:
     image: quay.io/ukhomeofficedigital/openjdk8
     commands:
+      - export SPRING_PROFILES_ACTIVE='development, local'
+      - export SERVER_PORT='8080'
+      - export AUDIT_QUEUE_NAME='audit-queue'
+      - export AUDIT_QUEUE_DLQ_NAME='audit-queue-dlq'
+      - export DB_HOST='postgres'
+      - export AWS_LOCAL_HOST='localstack'
       - ./gradlew build
     when:
       event: [push, pull_request, tag]
@@ -84,12 +90,13 @@ pipeline:
     secrets:
       - hocs_audit_dev
       - hocs_audit_qa
+      - hocs_audit_demo
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
     when:
       event: deployment
-      environment: [dev, qa]
+      environment: [dev, qa, demo]
 
   deploy-to-prod:
     image: quay.io/ukhomeofficedigital/kd:v0.8.0
