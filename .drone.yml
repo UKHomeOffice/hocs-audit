@@ -67,7 +67,7 @@ pipeline:
       - VERSION=build-${DRONE_BUILD_NUMBER}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_dev
+      - hocs_audit_dev
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -82,8 +82,8 @@ pipeline:
       - ENVIRONMENT=${DRONE_DEPLOY_TO}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_dev
-      - hocs_casework_qa
+      - hocs_audit_dev
+      - hocs_audit_qa
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -99,10 +99,41 @@ pipeline:
       - VERSION=${IMAGE_VERSION}
       - KUBE_SERVER=https://kube-api-prod.prod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_casework_prod
+      - hocs_audit_prod
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
     when:
       event: deployment
       environment: prod
+
+services:
+  postgres:
+    image: quay.io/ukhomeofficedigital/postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: dev
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      HOSTNAME_EXTERNAL: localstack
+      DEFAULT_REGION: eu-west-2
+      SERVICES: sqs,s3
+  aws_cli:
+    image: garland/aws-cli-docker
+    command:
+      - /bin/sh
+      - -c
+      - |
+        aws --endpoint-url=http://localstack:4572 s3 mb s3://untrusted-bucket
+        aws --endpoint-url=http://localstack:4572 s3 mb s3://trusted-bucket
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name case-queue
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name case-queue-dlq
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name document-queue
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name document-queue-dlq
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name reporting-queue
+        aws --endpoint-url=http://localstack:4576 sqs create-queue --queue-name reporting-queue-dlq
+    environment:
+      AWS_ACCESS_KEY_ID: UNSET
+      AWS_SECRET_ACCESS_KEY: UNSET
+      AWS_DEFAULT_REGION: 'eu-west-2'
