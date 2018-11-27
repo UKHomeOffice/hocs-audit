@@ -61,7 +61,7 @@ public class AuditConsumerTest extends CamelTestSupport {
 
     }
     @Test
-    public void shouldCallAddDocumentToAuditService() throws JsonProcessingException, EntityCreationException, EntityNotFoundException {
+    public void shouldCallAddAuditToAuditService() throws JsonProcessingException, EntityCreationException, EntityNotFoundException {
 
         CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         String json = mapper.writeValueAsString(auditDto);
