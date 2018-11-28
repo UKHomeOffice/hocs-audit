@@ -2,14 +2,14 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import javax.persistence.Entity;
 
+@Slf4j
 @Entity
 @Table(name = "audit_data")
 @NoArgsConstructor
@@ -32,13 +32,9 @@ public class AuditData implements Serializable {
     @Getter
     private String raisingService;
 
-    @Column(name = "before")
     @Getter
-    private String before;
-
-    @Column(name = "after")
-    @Getter
-    private String after;
+    @Column(name = "audit_payload")
+    private String auditPayload;
 
     @Column(name = "namespace")
     @Getter
@@ -56,18 +52,15 @@ public class AuditData implements Serializable {
     @Getter
     private String userID;
 
-    public AuditData(String correlationID, String raisingService, String before, String after, String namespace, String type, String userID) {
-        if (correlationID == null || raisingService == null || namespace == null ||type == null ) {
-            throw new EntityCreationException("Cannot create Audit(%s,%s,%s,%s,%s,`%s,%s).", correlationID, raisingService,before, after, namespace, type, userID);
-        }
+    public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
-        this.before = before;
-        this.after = after;
+        this.auditPayload = auditPayload;
         this.namespace = namespace;
-        this.auditTimestamp = LocalDateTime.now();
+        this.auditTimestamp = auditTimestamp;
         this.type = type;
         this.userID = userID;
     }
+
 }
