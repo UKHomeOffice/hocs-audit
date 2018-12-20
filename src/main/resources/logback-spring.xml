@@ -12,7 +12,7 @@
                 <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
             </layout>
         </appender>
-        <logger name="uk.gov" additivity="false" level="DEBUG">
+        <logger name="uk.gov" additivity="false" level="INFO">
             <appender-ref ref="consoleAppender"/>
         </logger>
     </springProfile>
@@ -21,16 +21,20 @@
         <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeCallerInfo>true</includeCallerInfo>
+                <fieldNames>
+                    <!-- Do not output the standard message field.  It will be output by the pattern provider below -->
+                    <message>[ignore]</message>
+                </fieldNames>
+                <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+                    <pattern>
+                        {
+                        "message": "%replace(%msg){'([A-Za-z]\\s*[A-Za-z]\\s*[0-9]\\s*[0-9]\\s*[0-9]\\s*)[0-9]\\s*[0-9]\\s*[0-9]\\s*[A-Da-d]','$1****'}"
+                        }
+                    </pattern>
+                </provider>
             </encoder>
         </appender>
-        <logger name="uk.gov" additivity="false" level="INFO">
-            <appender-ref ref="consoleAppender"/>
-        </logger>
     </springProfile>
-
-    <logger name="org.camunda" additivity="false" level="INFO">
-        <appender-ref ref="consoleAppender"/>
-    </logger>
 
     <logger name="org.eclipse.jetty" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
@@ -44,16 +48,20 @@
         <appender-ref ref="consoleAppender"/>
     </logger>
 
-    <logger name="org.apache.camel" additivity="false" level="DEBUG">
+    <logger name="org.apache.camel" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
     </logger>
 
-    <logger name="org.hibernate" additivity="false" level="INFO">
+    <logger name="org.hibernate" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
     </logger>
 
     <logger name="com.zaxxer" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
     </logger>
+
+    <root level="INFO">
+        <appender-ref ref="consoleAppender"/>
+    </root>
 
 </configuration>
