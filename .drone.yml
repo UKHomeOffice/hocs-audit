@@ -45,18 +45,19 @@ pipeline:
       branch: master
       event: push
 
-  tag-docker-image-with-git-tag:
-    image: docker:17.09.1
+  docker-semver-tag:
+    image: quay.io/ukhomeofficedigital/hocs-version-bot:build-18
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
+      - DOCKER_API_VERSION=1.37
     secrets:
+      - github_password
       - docker_password
     commands:
-      - docker login -u="ukhomeofficedigital+hocs" -p=$${DOCKER_PASSWORD} quay.io
-      - docker tag hocs-audit quay.io/ukhomeofficedigital/hocs-audit:$${DRONE_TAG}
-      - docker push quay.io/ukhomeofficedigital/hocs-audit:$${DRONE_TAG}
+      - /app/hocs-deploy --version=${SEMVER} --service=hocs-audit --gitToken=$${GITHUB_PASSWORD} --gitRepo="https://gitlab.digital.homeoffice.gov.uk/hocs/hocs-versions.git" --environment=qa --dockerRepository=quay.io/ukhomeofficedigital --sourceBuild=${IMAGE_VERSION} --registryUser=ukhomeofficedigital+hocs --registryPassword=$${DOCKER_PASSWORD}
     when:
-      event: tag
+      event: deployment
+      environment: qa
 
   clone-kube-project:
     image: plugins/git
@@ -65,8 +66,25 @@ pipeline:
     when:
       event: [push, tag, deployment]
 
+  deploy-to-qa:
+    image: quay.io/ukhomeofficedigital/kd:v1.12.1
+    environment:
+      - KUBE_NAMESPACE=cs-qa
+      - ENVIRONMENT=qa
+      - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
+    secrets:
+      - hocs_audit_qa
+    commands:
+      - source version.txt
+      - echo $VERSION
+      - cd kube-hocs-audit
+      - ./deploy.sh
+    when:
+      event: deployment
+      environment: qa
+
   deploy-to-dev-from-build-number:
-    image: quay.io/ukhomeofficedigital/kd:v0.8.0
+    image: quay.io/ukhomeofficedigital/kd:v1.12.1
     environment:
       - KUBE_NAMESPACE=cs-dev
       - ENVIRONMENT=dev
@@ -82,24 +100,23 @@ pipeline:
       event: [push, tag]
 
   deployment:
-    image: quay.io/ukhomeofficedigital/kd:v0.8.0
+    image: quay.io/ukhomeofficedigital/kd:v1.12.1
     environment:
       - KUBE_NAMESPACE=cs-${DRONE_DEPLOY_TO}
       - ENVIRONMENT=${DRONE_DEPLOY_TO}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
       - hocs_audit_dev
-      - hocs_audit_qa
       - hocs_audit_demo
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
     when:
       event: deployment
-      environment: [dev, qa, demo]
+      environment: [dev, demo]
 
   deploy-to-prod:
-    image: quay.io/ukhomeofficedigital/kd:v0.8.0
+    image: quay.io/ukhomeofficedigital/kd:v1.12.1
     environment:
       - KUBE_NAMESPACE=cs-prod
       - ENVIRONMENT=prod
