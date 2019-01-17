@@ -1,7 +1,7 @@
 # hocs-audit
 
 This is the Home Office Correspondence Service (HOCS) auditing service. This service is designed to 
-receive audit event messages from an sqs queue for persistent storage.
+receive audit event messages from an SQS queue for persistent storage.
 
 The HOCS project is comprised of a set of micro-services:
 * [hocs-workflow](https://github.com/UKHomeOffice/hocs-workflow): models the business processes between the services
@@ -22,29 +22,73 @@ The source for this service can be found on [GitHub](https://github.com/UKHomeOf
 
 * ```Java 8```
 * ```Docker```
-<!--- Postgres/SQS/ --->
+* ```Postgres```
+* ```SQS```
+* ```LocalStack```
 
 
-##Building and running locally
+## Build and Run the Audit Service
 
-In order to run the service locally, a postgres database and and sqs queue are required. 
-These are available through the [docker-compose.yml](docker-compose.yml) at the root of the project.
+### Preparation
+In order to run the service locally, a postgres database, SQS queues, and LocalStack are required. 
+These are available through the [docker-compose.yml](docker-compose.yml) file.
 
-<!--- Do you need to include sqs queues here?. --->
-
-To start the database instance through Docker, execute 
+To start postgres, sqs, and localstack containers through Docker, from the root of the project run 
 
 ```
  docker-compose up 
  ```
-<!--- need to talk about bringing down the db --->
+In order to stop the containers, run
+````$xslt
+docker-compose down
+````
 
-If you are using an IDE, such as IntelliJ, the service can be run by running the ```HocsAuditApplication``` main class. 
-It can then be accessed at ```http://localhost:8088```.
+### Running in an IDE
 
+If you are using an IDE, such as IntelliJ, this audit service can be started by running the ```HocsAuditApplication``` main class. 
+The service can then be accessed at ```http://localhost:8088```.
+
+### Building and running without an IDE
+
+This service is built using Gradle. In order to build the project from the command line, run
+
+```
+gradle clean build
+```
+in the root of the project.
+
+
+<!--- building container locally with gradle clean build and running --->
 
 
 Alternatively, the corresponding Docker image for this service is available at [quay.io](https://quay.io/repository/ukhomeofficedigital/hocs-audit).
+
+### Flyway and database management
+
+When changes are made to the postgres database through the service they are tracked with Flyway. Any changes which are not tracked will require the database to be restarted. 
+To restart the database, from the root of the project run
+
+```$xslt
+docker-compose stop postgres
+```
+and when stopped, restart it by running
+```$xslt
+docker-compose start postgres
+```
+and there will be a new instance of postgres.
+
+## Tests
+
+<!--- describe tests here --->
+
+The suite of tests includes unit tests for the resource and services classes, and integration tests. In order to run the integration tests, an instance of postgres must be running.
+
+
+## Deployment
+
+ See the [pipeline](.drone.yml) for the steps involved in the build and deployment.
+
+## Running the HOCS project
 
 The entire set of services can be run in Docker containers from the
  [hocs-frontend](https://github.com/UKHomeOffice/hocs-frontend) project. Navigate to ```/docker``` from the frontend directory, then run
@@ -52,39 +96,19 @@ The entire set of services can be run in Docker containers from the
  ```$xslt
 ./scripts/infrastructure.sh
 ```
-to initiate the infrastructure service containers. These include the postgres, AWS command line interface, and the localstack images. 
+to initiate the infrastructure service containers. These include the postgres, SQS, and LocalStack images. 
 When the containers are set up and the services have completed starting, then run
 
 ```$xslt
 ./scripts/services.sh
 ```
-to launch the HOCS micro-services.
+to launch the set of HOCS micro-services.
 
-
-<!--- building container locally with gradle clean build and docker build -t hocs-audit-local . --->
-
-<!--- Flyway --->  
-
-##Tests
-
-In order to run the integration tests, an instance of Postgres must be running before starting the tests.
-
-<!--- describe tests here --->
-
-## Deployment
-
-Deployment is managed with Drone, using Gradle to build. On evey push to master, Drone will:
-* checkout and build the project using Gradle
-* create the Docker image for the service 
-* push the Docker image to Quay.io
-* deployed with kubernetes ???
-
- See the [pipeline](.drone.yml) for the steps involved in the build and deployment.
-
-
+To stop and clear the service containers run
+```
+./scripts/clean.sh
+```
 ## Using the Service
-
-
 
 <!--- Describe the format of an audit event here. --->
 
@@ -101,12 +125,14 @@ An example audit event message looks like:
 }
 ```
 
-###Contributing
 
-###Versioning
+### Versioning
 
+For versioning this project uses [SemVer](https://semver.org/).
 
 ### Authors
+
+This project is authored by the Home Office.
 
 ### License 
 
