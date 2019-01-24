@@ -65,7 +65,7 @@ public class AuditConsumerTest extends CamelTestSupport {
         CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
-        verify(mockDataService, times(1)).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        verify(mockDataService, times(1)).createAudit(null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         verifyNoMoreInteractions(mockDataService);
     }
 
@@ -84,7 +84,7 @@ public class AuditConsumerTest extends CamelTestSupport {
         CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp,type,userID);
 
         doThrow(EntityCreationException.class)
-                .when(mockDataService).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+                .when(mockDataService).createAudit(null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
