@@ -24,6 +24,10 @@ public class AuditData implements Serializable {
     @Getter
     private UUID uuid;
 
+    @Column(name = "case_uuid")
+    @Getter
+    private UUID caseUUID;
+
     @Column(name = "correlation_id")
     @Getter
     private String correlationID;
@@ -52,7 +56,7 @@ public class AuditData implements Serializable {
     @Getter
     private String userID;
 
-    public AuditData(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditData( String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
@@ -61,6 +65,12 @@ public class AuditData implements Serializable {
         this.auditTimestamp = auditTimestamp;
         this.type = type;
         this.userID = userID;
+    }
+
+    public AuditData(UUID caseUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+        this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        this.caseUUID = caseUUID;
+
     }
 
 }

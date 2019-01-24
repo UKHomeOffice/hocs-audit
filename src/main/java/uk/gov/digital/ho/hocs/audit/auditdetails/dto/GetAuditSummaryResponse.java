@@ -23,6 +23,9 @@ public class GetAuditSummaryResponse {
     @JsonProperty(value = "raising_service", required = true)
     private String raisingService;
 
+
+
+
     @JsonProperty(value = "namespace", required = true)
     private String namespace;
 
