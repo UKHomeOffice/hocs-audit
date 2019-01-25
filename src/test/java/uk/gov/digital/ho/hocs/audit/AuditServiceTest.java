@@ -16,13 +16,13 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AuditServiceTest {
     
-    private String correlationID;
-    private String raisingService;
-    private String auditPayload;
-    private String namespace;
-    private LocalDateTime dateTime;
-    private String auditType;
-    private String userID;
+    private String correlationID = "correlationIDTest";
+    private String raisingService = "testRaisingService";
+    private String auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
+    private String namespace = "namespaceEventOccurredIn";
+    private LocalDateTime dateTime = LocalDateTime.now();
+    private String auditType = "testAuditType";
+    private String userID = "testUser";
     
     @Mock
     private AuditRepository auditRepository;
@@ -33,13 +33,6 @@ public class AuditServiceTest {
     @Before
     public void setUp() {
         this.auditService = new AuditDataService(auditRepository);
-        correlationID = "correlationIDTest";
-        raisingService = "testRaisingService";
-        auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
-        namespace = "namespaceEventOccurredIn";
-        dateTime = LocalDateTime.now();
-        auditType = "testAuditType";
-        userID = "testUser";
     }
 
     @Test
@@ -58,7 +51,7 @@ public class AuditServiceTest {
     }
 
     @Test(expected = EntityCreationException.class)
-    public void shouldNotCreateAuditWhencorrelationnIDIsNullException() {
+    public void shouldNotCreateAuditWhenCorrelationnIDIsNullException() {
         auditService.createAudit(null,
                 raisingService,
                 auditPayload,
@@ -69,7 +62,7 @@ public class AuditServiceTest {
     }
 
     @Test
-    public void shouldNotCreateAuditWhencorrelationnIDIsNull() {
+    public void shouldNotCreateAuditWhenCorrelationnIDIsNull() {
         try {
             auditService.createAudit(null,
                     raisingService,
@@ -224,7 +217,7 @@ public class AuditServiceTest {
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsInvalid() {
-        AuditData auditData = auditService.createAudit(correlationID,
+        auditService.createAudit(correlationID,
                 raisingService,
                 "\"Test name\" \"Test value\"",
                 namespace,
@@ -234,12 +227,6 @@ public class AuditServiceTest {
         verify(auditRepository, times(1)).save(any(AuditData.class));
         verifyNoMoreInteractions(auditRepository);
 
-//        assertThat(auditData.getcorrelationnID()).isEqualTo(correlationID);
-//        assertThat(auditData.getRaisingService()).isEqualTo(raisingService);
-//        assertThat(auditData.getAuditPayload()).isEqualTo(auditPayload);
-//        assertThat(auditData.getNamespace()).isEqualTo(namespace);
-//        assertThat(auditData.getType()).isEqualTo(auditType);
-//        assertThat(auditData.getUserID()).isEqualTo(userID);
     }
 
 }

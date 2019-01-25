@@ -30,6 +30,10 @@ public interface AuditRepository extends PagingAndSortingRepository<AuditData, S
 
     @Query(value = "SELECT a.* FROM audit_data a WHERE a.audit_timestamp > ?1 AND a.audit_timestamp < ?2", nativeQuery = true)
     List<AuditData> findAuditDataByDateRange(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageRequest);
+
+    @Query(value = "SELECT a.* FROM audit_data a WHERE a.case_uuid = ?1 AND a.type IN ?2", nativeQuery = true)
+    List<AuditData> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
+
 }
 
 

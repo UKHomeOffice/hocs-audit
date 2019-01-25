@@ -14,7 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.AuditDataService;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityNotFoundException;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -24,8 +23,8 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AuditConsumerTest extends CamelTestSupport {
 
-    private static final String auditQueue = "direct:reporting-queue";
-    private static final String dlq = "mock:reporting-queue-dlq";
+    private String auditQueue = "direct:reporting-queue";
+    private String dlq = "mock:reporting-queue-dlq";
     private ObjectMapper mapper;
 
     private String correlationID;
@@ -40,7 +39,7 @@ public class AuditConsumerTest extends CamelTestSupport {
     private AuditDataService mockDataService;
 
     @Before
-    public void setup(){
+    public void setUpTest(){
         mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
         mapper.registerModule(new JavaTimeModule());
@@ -61,16 +60,17 @@ public class AuditConsumerTest extends CamelTestSupport {
 
     }
     @Test
-    public void shouldCallAddAuditToAuditService() throws JsonProcessingException, EntityCreationException, EntityNotFoundException {
+    public void shouldCallAddAuditToAuditService() throws JsonProcessingException {
 
         CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);
-        verify(mockDataService, times(1)).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        verify(mockDataService, times(1)).createAudit(null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        verifyNoMoreInteractions(mockDataService);
     }
 
     @Test
-    public void shouldNotProcessMessgeWhenMarshellingFails() throws JsonProcessingException, InterruptedException, EntityCreationException, EntityNotFoundException {
+    public void shouldNotProcessMessgeWhenMarshellingFails() throws JsonProcessingException, InterruptedException {
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString("{invalid:invalid}");
         template.sendBody(auditQueue, json);
@@ -79,12 +79,12 @@ public class AuditConsumerTest extends CamelTestSupport {
     }
 
     @Test
-    public void shouldTransferToDLQOnFailure() throws JsonProcessingException, InterruptedException, EntityCreationException, EntityNotFoundException {
+    public void shouldTransferToDLQOnFailure() throws JsonProcessingException, InterruptedException {
 
         CreateAuditDto auditDto = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp,type,userID);
 
         doThrow(EntityCreationException.class)
-                .when(mockDataService).createAudit(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+                .when(mockDataService).createAudit(null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString(auditDto);
         template.sendBody(auditQueue, json);

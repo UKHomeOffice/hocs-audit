@@ -8,12 +8,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.*;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityNotFoundException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,45 +24,36 @@ public class AuditResourceTest {
     @Mock
     private AuditDataService auditService;
 
+    private String correlationID = "correlationID1";
+    private String raisingService = "raisingServiceName";
+    private String auditPayload = "";
+    private String namespace = "namespaceEventOccurredIn";
+    private String type = "eventAuditType";
+    private String userID = "userXYZ";
+    private LocalDateTime auditTimestamp = LocalDateTime.now();
+    private UUID caseUUID = UUID.randomUUID();
+
+    private AuditData validAudit = new AuditData(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     private AuditDataResource auditResource;
-    private String correlationID, raisingService, auditPayload, namespace, type, userID;
-    private LocalDateTime auditTimestamp;
-    private AuditData validAudit;
 
-    private CreateAuditDto request;
+    private CreateAuditDto request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    private CreateAuditDto requestWithCaseUUID = new CreateAuditDto(caseUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
 
-    private String toDate;
-    private String fromDate;
-    private int page;
-    private int limit;
+
+    private String toDate = "2018-11-02";
+    private String fromDate = "2018-08-02";
+    private int page = 5;
+    private int limit = 10;
 
     @Before
     public void setUp() {
-
-        correlationID = "correlationID1";
-        raisingService = "raisingServiceName";
-        auditPayload = "";
-        namespace = "namespaceEventOccurredIn";
-        auditTimestamp = LocalDateTime.now();
-        type = "eventAuditType";
-        userID = "userXYZ";
-
-        request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-        validAudit = new AuditData(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-
         auditResource = new AuditDataResource(auditService);
-
-        fromDate = "2018-08-02";
-        toDate = "2018-11-02";
-
-        page = 5;
-        limit = 10;
     }
 
     @Test
-    public void shouldCreateAuditWithValidParams() throws EntityCreationException {
+    public void shouldCreateAuditWithValidParams() {
 
-        when(auditService.createAudit(correlationID,
+        when(auditService.createAudit(null, correlationID,
                 raisingService,
                 auditPayload,
                 namespace,
@@ -73,7 +63,7 @@ public class AuditResourceTest {
 
         ResponseEntity response = auditResource.createAudit(request);
 
-        verify(auditService, times(1)).createAudit(correlationID,
+        verify(auditService, times(1)).createAudit(null, correlationID,
                 raisingService,
                 auditPayload,
                 namespace,
@@ -87,10 +77,37 @@ public class AuditResourceTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Test
+    public void shouldCreateAuditWithValidParamsCaseUUID() {
 
+        when(auditService.createAudit(caseUUID,
+                correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                auditTimestamp,
+                type,
+                userID)).thenReturn(validAudit);
+
+        ResponseEntity response = auditResource.createAudit(requestWithCaseUUID);
+
+        verify(auditService, times(1)).createAudit(caseUUID,
+                correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                auditTimestamp,
+                type,
+                userID);
+
+        verifyNoMoreInteractions(auditService);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 
     @Test
-    public void shouldReturnAllAuditsFromDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAllAuditsFromDefaultDateRange() {
         when(auditService.getAuditDataList(page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListResponse> response = auditResource.getAudits(page, limit);
@@ -100,7 +117,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAllAuditsFromDateRange() throws EntityNotFoundException {
+    public void shouldReturnAllAuditsFromDateRange() {
         when(auditService.getAuditDataByDateRange(fromDate,toDate, page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListResponse> response = auditResource.getAuditDataByDateRange(fromDate,toDate, page, limit);
@@ -110,7 +127,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAllAuditSummariesFromDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAllAuditSummariesFromDefaultDateRange() {
         when(auditService.getAuditDataList(page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditsSummary(page, limit);
@@ -120,7 +137,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAllAuditSummariesFromDateRange() throws EntityNotFoundException {
+    public void shouldReturnAllAuditSummariesFromDateRange() {
         when(auditService.getAuditDataByDateRange(fromDate,toDate, page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditDataSummaryByDateRange(fromDate,toDate, page, limit);
@@ -129,10 +146,8 @@ public class AuditResourceTest {
         verifyNoMoreInteractions(auditService);
     }
 
-
-
     @Test
-    public void shouldReturnAuditForUUID() throws EntityNotFoundException {
+    public void shouldReturnAuditForUUID() {
         when(auditService.getAuditDataByUUID(any())).thenReturn(validAudit);
 
         ResponseEntity<GetAuditResponse> response = auditResource.getAudit(any());
@@ -142,7 +157,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAuditSummaryForUUID() throws EntityNotFoundException {
+    public void shouldReturnAuditSummaryForUUID() {
         when(auditService.getAuditDataByUUID(any())).thenReturn(validAudit);
 
         ResponseEntity<GetAuditSummaryResponse> response = auditResource.getAuditSummary(any());
@@ -151,11 +166,8 @@ public class AuditResourceTest {
         verifyNoMoreInteractions(auditService);
     }
 
-
-
-
     @Test
-    public void shouldReturnAuditsFromCorrelationIDAndFromDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAuditsFromCorrelationIDAndFromDefaultDateRange() {
         when(auditService.getAuditDataByCorrelationID(correlationID, page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListResponse> response = auditResource.getAuditDataByCorrelationID(correlationID, page, limit);
@@ -165,7 +177,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAuditSummariesFromCorrelationIDAndDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAuditSummariesFromCorrelationIDAndDefaultDateRange() {
         when(auditService.getAuditDataByCorrelationID(correlationID, page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditDataSummaryByCorrelationID(correlationID, page, limit);
@@ -175,9 +187,8 @@ public class AuditResourceTest {
     }
 
 
-
     @Test
-    public void shouldReturnAuditsFromUserIDAndFromDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAuditsFromUserIDAndFromDefaultDateRange() {
         when(auditService.getAuditDataByUserID(userID , page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListResponse> response = auditResource.getAuditDataByUserID(userID , page, limit);
@@ -187,7 +198,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAllAuditsFromUserIDAndFromDateRange() throws EntityNotFoundException {
+    public void shouldReturnAllAuditsFromUserIDAndFromDateRange() {
         when(auditService.getAuditDataByUserIDByDateRange(userID, fromDate, toDate , page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListResponse> response = auditResource.getAuditDataByUserIDAndDateRange(userID, fromDate, toDate , page, limit);
@@ -197,7 +208,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAuditSummariesFromUserIDAndDefaultDateRange() throws EntityNotFoundException {
+    public void shouldReturnAuditSummariesFromUserIDAndDefaultDateRange() {
         when(auditService.getAuditDataByUserID(userID , page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditDataSummaryByUserID(userID , page, limit);
@@ -207,7 +218,7 @@ public class AuditResourceTest {
     }
 
     @Test
-    public void shouldReturnAuditSummariesFromUserIDAndDateRange() throws EntityNotFoundException {
+    public void shouldReturnAuditSummariesFromUserIDAndDateRange() {
         when(auditService.getAuditDataByUserIDByDateRange(userID, fromDate, toDate , page, limit)).thenReturn(new ArrayList<>());
 
         ResponseEntity<GetAuditListSummaryResponse> response = auditResource.getAuditDataSummaryByUserIDAndDateRange(userID, fromDate, toDate , page, limit);

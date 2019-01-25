@@ -18,16 +18,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 class AuditDataResource {
     private final AuditDataService auditDataService;
 
-
     @Autowired
     public AuditDataResource(AuditDataService auditDataService) {
         this.auditDataService = auditDataService;
     }
 
-
     @PostMapping(value = "/audit", consumes = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<CreateAuditResponse> createAudit(@RequestBody CreateAuditDto request) {
         AuditData auditData = auditDataService.createAudit(
+                request.getCaseUUID(),
                 request.getCorrelationID(),
                 request.getRaisingService(),
                 request.getAuditPayload(),
@@ -37,7 +36,6 @@ class AuditDataResource {
                 request.getUserID());
         return ResponseEntity.ok(CreateAuditResponse.from(auditData));
     }
-
 
     @GetMapping(value = "/audits", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditListResponse> getAudits(@RequestParam("page") int page, @RequestParam int limit) {
@@ -63,8 +61,6 @@ class AuditDataResource {
         return ResponseEntity.ok(GetAuditListSummaryResponse.from(auditData));
     }
 
-
-
     @GetMapping(value = "/audit/{auditUUID}", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditResponse> getAudit(@PathVariable UUID auditUUID) {
         AuditData auditData = auditDataService.getAuditDataByUUID(auditUUID);
@@ -77,8 +73,6 @@ class AuditDataResource {
         return ResponseEntity.ok(GetAuditSummaryResponse.from(auditData));
     }
 
-
-
     @GetMapping(value = "/audit/correlation/{correlationID}", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditListResponse> getAuditDataByCorrelationID(@PathVariable String correlationID, @RequestParam("page") int page, @RequestParam int limit) {
         List<AuditData> auditData = auditDataService.getAuditDataByCorrelationID(correlationID, page, limit);
@@ -90,9 +84,6 @@ class AuditDataResource {
         List<AuditData> auditData = auditDataService.getAuditDataByCorrelationID(correlationID, page, limit);
         return ResponseEntity.ok(GetAuditListSummaryResponse.from(auditData));
     }
-
-
-
 
     @GetMapping(value = "/audit/username/{userID}", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditListResponse> getAuditDataByUserID(@PathVariable String userID, @RequestParam("page") int page, @RequestParam int limit) {

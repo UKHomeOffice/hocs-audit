@@ -32,9 +32,14 @@ public class AuditDataService {
         this.auditRepository = auditRepository;
     }
 
+
     public AuditData createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+         return createAudit(null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    }
+
+    public AuditData createAudit(UUID caseUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         String validAuditPayload = validatePayload(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-        AuditData auditData = new AuditData(correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
+        AuditData auditData = new AuditData(caseUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
         validateNotNull(auditData);
         auditRepository.save(auditData);
         log.info("Created Audit: UUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}",
@@ -49,6 +54,12 @@ public class AuditDataService {
     public AuditData getAuditDataByUUID(UUID auditUUID) {
         log.info("Requesting Audit for Audit UUID: {} ", auditUUID);
         return auditRepository.findAuditDataByUuid(auditUUID);
+    }
+
+    public List<AuditData> getAuditDataByCaseUUID(UUID caseUUID, String types) {
+        log.info("Requesting Audit for Case UUID: {} ", caseUUID);
+        String[] filterTypes = types.split(",");
+        return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
     public List<AuditData> getAuditDataList(int page, int limit){

@@ -1,7 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 @Getter
 public class GetAuditListResponse {
 
-    @JsonProperty(value= "audits")
     private List<GetAuditResponse> audits;
 
     public static GetAuditListResponse from(List<AuditData> auditDataSet) {
