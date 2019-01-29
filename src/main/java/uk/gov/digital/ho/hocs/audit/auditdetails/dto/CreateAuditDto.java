@@ -2,7 +2,6 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
@@ -19,6 +18,9 @@ public class CreateAuditDto {
 
     @JsonProperty(value= "caseUUID")
     private UUID caseUUID;
+
+    @JsonProperty(value= "stageUUID")
+    private UUID stageUUID;
 
     @JsonProperty(value= "raising_service", required = true)
     private String raisingService;
@@ -49,9 +51,10 @@ public class CreateAuditDto {
         this.userID = userID;
     }
 
-    public CreateAuditDto(UUID caseUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){
+    public CreateAuditDto(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
+        this.stageUUID = stageUUID;
     }
 
 }

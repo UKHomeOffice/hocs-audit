@@ -16,6 +16,7 @@ import java.util.UUID;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.doesNotHave;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,12 +33,13 @@ public class AuditResourceTest {
     private String userID = "userXYZ";
     private LocalDateTime auditTimestamp = LocalDateTime.now();
     private UUID caseUUID = UUID.randomUUID();
+    private UUID stageUUID = UUID.randomUUID();
 
     private AuditData validAudit = new AuditData(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     private AuditDataResource auditResource;
 
     private CreateAuditDto request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-    private CreateAuditDto requestWithCaseUUID = new CreateAuditDto(caseUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    private CreateAuditDto requestWithCaseUUID = new CreateAuditDto(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
 
 
     private String toDate = "2018-11-02";
@@ -53,7 +55,7 @@ public class AuditResourceTest {
     @Test
     public void shouldCreateAuditWithValidParams() {
 
-        when(auditService.createAudit(null, correlationID,
+        when(auditService.createAudit(null, null, correlationID,
                 raisingService,
                 auditPayload,
                 namespace,
@@ -63,7 +65,7 @@ public class AuditResourceTest {
 
         ResponseEntity response = auditResource.createAudit(request);
 
-        verify(auditService, times(1)).createAudit(null, correlationID,
+        verify(auditService, times(1)).createAudit(null, null, correlationID,
                 raisingService,
                 auditPayload,
                 namespace,
@@ -80,7 +82,7 @@ public class AuditResourceTest {
     @Test
     public void shouldCreateAuditWithValidParamsCaseUUID() {
 
-        when(auditService.createAudit(caseUUID,
+        when(auditService.createAudit(caseUUID, stageUUID,
                 correlationID,
                 raisingService,
                 auditPayload,
@@ -91,7 +93,7 @@ public class AuditResourceTest {
 
         ResponseEntity response = auditResource.createAudit(requestWithCaseUUID);
 
-        verify(auditService, times(1)).createAudit(caseUUID,
+        verify(auditService, times(1)).createAudit(caseUUID, stageUUID,
                 correlationID,
                 raisingService,
                 auditPayload,

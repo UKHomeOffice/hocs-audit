@@ -27,6 +27,7 @@ class AuditDataResource {
     public ResponseEntity<CreateAuditResponse> createAudit(@RequestBody CreateAuditDto request) {
         AuditData auditData = auditDataService.createAudit(
                 request.getCaseUUID(),
+                request.getStageUUID(),
                 request.getCorrelationID(),
                 request.getRaisingService(),
                 request.getAuditPayload(),

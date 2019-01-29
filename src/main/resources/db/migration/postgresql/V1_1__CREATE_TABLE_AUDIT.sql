@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS audit_data
   id                     BIGSERIAL   PRIMARY KEY,
   uuid                   UUID        NOT NULL,
   case_uuid              UUID,
+  stage_uuid             UUID,
   correlation_id         TEXT        NOT NULL,
   raising_service        TEXT        NOT NULL,
   audit_payload          JSONB,
