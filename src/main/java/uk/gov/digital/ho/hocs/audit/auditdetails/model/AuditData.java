@@ -28,6 +28,10 @@ public class AuditData implements Serializable {
     @Getter
     private UUID caseUUID;
 
+    @Column(name = "stage_uuid")
+    @Getter
+    private UUID stageUUID;
+
     @Column(name = "correlation_id")
     @Getter
     private String correlationID;
@@ -67,9 +71,10 @@ public class AuditData implements Serializable {
         this.userID = userID;
     }
 
-    public AuditData(UUID caseUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditData(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
+        this.stageUUID = stageUUID;
 
     }
 

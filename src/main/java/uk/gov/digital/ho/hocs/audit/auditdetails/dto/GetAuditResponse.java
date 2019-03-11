@@ -17,6 +17,12 @@ public class GetAuditResponse {
     @JsonProperty(value = "uuid")
     private UUID uuid;
 
+    @JsonProperty(value = "caseUUID")
+    private UUID caseUUID;
+
+    @JsonProperty(value = "stageUUID")
+    private UUID stageUUID;
+
     @JsonProperty(value = "correlation_id")
     private String correlationID;
 
@@ -42,6 +48,8 @@ public class GetAuditResponse {
     public static GetAuditResponse from(AuditData auditData) {
         return new GetAuditResponse(
                 auditData.getUuid(),
+                auditData.getCaseUUID(),
+                auditData.getStageUUID(),
                 auditData.getCorrelationID(),
                 auditData.getRaisingService(),
                 auditData.getAuditPayload(),
