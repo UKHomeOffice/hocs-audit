@@ -27,4 +27,6 @@ class CaseAuditDataResource {
         List<AuditData> auditData = auditDataService.getAuditDataByCaseUUID(caseUUID, types);
         return ResponseEntity.ok(GetAuditListResponse.from(auditData));
     }
+
+
 }
