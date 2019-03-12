@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
@@ -129,7 +130,10 @@ public class AuditDataService {
     }
 
     private static String validatePayload(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        if (auditPayload != null) {
+        if (StringUtils.isEmpty(auditPayload)) {
+            return "{}";
+        }
+        else {
             try {
                 com.google.gson.JsonParser parser = new JsonParser();
                 parser.parse(auditPayload);

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuditServiceTest {
+public class AuditServiceCreateTest {
     
     private String correlationID = "correlationIDTest";
     private String raisingService = "testRaisingService";
@@ -220,6 +220,34 @@ public class AuditServiceTest {
         auditService.createAudit(correlationID,
                 raisingService,
                 "\"Test name\" \"Test value\"",
+                namespace,
+                dateTime,
+                auditType,
+                userID);
+        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verifyNoMoreInteractions(auditRepository);
+
+    }
+
+    @Test
+    public void shouldCreateAuditWhenAuditPayloadIsEmpty() {
+        auditService.createAudit(correlationID,
+                raisingService,
+                "",
+                namespace,
+                dateTime,
+                auditType,
+                userID);
+        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verifyNoMoreInteractions(auditRepository);
+
+    }
+
+    @Test
+    public void shouldCreateAuditWhenAuditPayloadIsNull() {
+        auditService.createAudit(correlationID,
+                raisingService,
+                null,
                 namespace,
                 dateTime,
                 auditType,
