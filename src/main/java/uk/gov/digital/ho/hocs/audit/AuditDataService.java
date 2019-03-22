@@ -20,6 +20,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
+
 @Service
 @Slf4j
 public class AuditDataService {
@@ -50,17 +53,17 @@ public class AuditDataService {
                 auditData.getStageUUID(),
                 auditData.getRaisingService(),
                 auditData.getUserID(),
-                auditData.getAuditTimestamp());
+                auditData.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
         return auditData;
     }
 
     public AuditData getAuditDataByUUID(UUID auditUUID) {
-        log.info("Requesting Audit for Audit UUID: {} ", auditUUID);
+        log.debug("Requesting Audit for Audit UUID: {} ", auditUUID);
         return auditRepository.findAuditDataByUuid(auditUUID);
     }
 
     public List<AuditData> getAuditDataByCaseUUID(UUID caseUUID, String types) {
-        log.info("Requesting Audit for Case UUID: {} ", caseUUID);
+        log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
         String[] filterTypes = types.split(",");
         return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
@@ -73,27 +76,27 @@ public class AuditDataService {
     }
 
     public List<AuditData> getAuditDataByDateRange(String fromDate, String toDate, int page, int limit){
-        log.info("Requesting all audits for dates: {} to {} ", fromDate, toDate);
+        log.debug("Requesting all audits for dates: {} to {} ", fromDate, toDate);
         pageRequest = PageRequest.of(page,limit);
         return auditRepository.findAuditDataByDateRange(convertLocalDateToStartOfLocalDateTime(fromDate), convertLocalDateToEndOfLocalDateTime(toDate), pageRequest);
     }
 
     public List<AuditData> getAuditDataByCorrelationID(String correlationID, int page, int limit){
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
-        log.info("Requesting audits for Correlation ID: {} from last seven days", correlationID);
+        log.debug("Requesting audits for Correlation ID: {} from last seven days", correlationID);
         pageRequest = PageRequest.of(page,limit);
         return auditRepository.findAuditDataByCorrelationID(correlationID, lastWeek, pageRequest);
     }
 
     public List<AuditData> getAuditDataByUserID(String userID, int page, int limit){
-        log.info("Requesting audits for User ID: {} from last seven days", userID);
+        log.debug("Requesting audits for User ID: {} from last seven days", userID);
         pageRequest = PageRequest.of(page,limit);
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
         return auditRepository.findAuditDataByUserID(userID, lastWeek, pageRequest);
     }
 
     public List<AuditData> getAuditDataByUserIDByDateRange(String userID, String fromDate, String toDate, int page, int limit){
-        log.info("Requesting audits for User IDL {}, from dates: {} to {} ", userID, fromDate, toDate);
+        log.debug("Requesting audits for User IDL {}, from dates: {} to {} ", userID, fromDate, toDate);
         pageRequest = PageRequest.of(page,limit);
         return auditRepository.findAuditDataByUserIDAndDateRange(userID, convertLocalDateToStartOfLocalDateTime(fromDate), convertLocalDateToEndOfLocalDateTime(toDate), pageRequest);
     }
@@ -138,13 +141,13 @@ public class AuditDataService {
                 com.google.gson.JsonParser parser = new JsonParser();
                 parser.parse(auditPayload);
             } catch (JsonSyntaxException e) {
-                log.info("Created audit with invalid json in payload - Correlation ID: {}, Raised by: {}, Namespace: {}, Timestamp: {}, EventType: {}, User: {}\")",
+                log.warn("Created audit with invalid json in payload - Correlation ID: {}, Raised by: {}, Namespace: {}, Timestamp: {}, EventType: {}, User: {}\")",
                         correlationID,
                         raisingService,
                         namespace,
                         auditTimestamp,
                         type,
-                        userID);
+                        userID, value(EVENT, INVALID_AUDIT_PALOAD_STORED));
                 // Encode invalid json to base 64, otherwise it can be seen as nested invalid json
                 byte[] encodedPayload = Base64.getEncoder().encode(auditPayload.getBytes());
                 return "{\"invalid_json\":\"" + new String(encodedPayload) + "\"}";

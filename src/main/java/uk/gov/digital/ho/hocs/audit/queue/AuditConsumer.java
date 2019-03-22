@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.queue;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.aws.sqs.SqsConstants;
@@ -22,7 +23,6 @@ public class AuditConsumer extends RouteBuilder {
     private final int redeliveryDelay;
     private final int backOffMultiplier;
 
-    //
     @Autowired
     public AuditConsumer(AuditDataService auditDataService,
                          @Value("${audit.queue}") String auditQueue,
@@ -43,23 +43,27 @@ public class AuditConsumer extends RouteBuilder {
 
         errorHandler(deadLetterChannel(dlq)
                 .loggingLevel(LoggingLevel.ERROR)
-                .log("Failed to add audit after configured back-off. ${body}")
-                .useOriginalMessage()
                 .retryAttemptedLogLevel(LoggingLevel.WARN)
+                .useOriginalMessage()
                 .maximumRedeliveries(maximumRedeliveries)
                 .redeliveryDelay(redeliveryDelay)
                 .backOffMultiplier(backOffMultiplier)
                 .asyncDelayedRedelivery()
-                .logRetryStackTrace(true));
+                .logRetryStackTrace(false)
+                .onPrepareFailure(exchange -> {
+                    exchange.getIn().setHeader("FailureMessage", exchange.getProperty(Exchange.EXCEPTION_CAUGHT,
+                            Exception.class).getMessage());
+                    exchange.getIn().setHeader(SqsConstants.RECEIPT_HANDLE, exchangeProperty(SqsConstants.RECEIPT_HANDLE));
+                }));
 
         from(auditQueue)
                 .setProperty(SqsConstants.RECEIPT_HANDLE, header(SqsConstants.RECEIPT_HANDLE))
                 .process(transferHeadersToMDC())
-                .log("Command received: ${body}")
+                .log(LoggingLevel.INFO, "Audit request received")
                 .unmarshal().json(JsonLibrary.Jackson, CreateAuditDto.class)
-                .log("Command unmarshalled")
+                .log(LoggingLevel.DEBUG,  "Audit unmarshalled")
                 .bean(auditDataService, "createAudit(${body.caseUUID}, ${body.stageUUID}, ${body.correlationID}, ${body.raisingService}, ${body.auditPayload}, ${body.namespace}, ${body.auditTimestamp}, ${body.type}, ${body.userID})")
-                .log("Command processed")
+                .log(LoggingLevel.INFO, "Audit request processed")
                 .setHeader(SqsConstants.RECEIPT_HANDLE, exchangeProperty(SqsConstants.RECEIPT_HANDLE));
     }
 }
