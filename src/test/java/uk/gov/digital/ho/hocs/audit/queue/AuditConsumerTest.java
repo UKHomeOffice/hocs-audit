@@ -45,6 +45,7 @@ public class AuditConsumerTest extends CamelTestSupport {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+        context.setStreamCaching(true);
         correlationID = "correlationIDTest";
         raisingService = "testRaisingService";
         auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
@@ -57,8 +58,8 @@ public class AuditConsumerTest extends CamelTestSupport {
     @Override
     protected RouteBuilder createRouteBuilder() {
         return new AuditConsumer(mockDataService, auditQueue, dlq, 0,0,0);
-
     }
+
     @Test
     public void shouldCallAddAuditToAuditService() throws JsonProcessingException {
 
