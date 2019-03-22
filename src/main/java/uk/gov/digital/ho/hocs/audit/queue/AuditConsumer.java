@@ -59,7 +59,7 @@ public class AuditConsumer extends RouteBuilder {
         from(auditQueue)
                 .setProperty(SqsConstants.RECEIPT_HANDLE, header(SqsConstants.RECEIPT_HANDLE))
                 .process(transferHeadersToMDC())
-                .log(LoggingLevel.INFO, "Audit request received received")
+                .log(LoggingLevel.INFO, "Audit request received")
                 .unmarshal().json(JsonLibrary.Jackson, CreateAuditDto.class)
                 .log(LoggingLevel.DEBUG,  "Audit unmarshalled")
                 .bean(auditDataService, "createAudit(${body.caseUUID}, ${body.stageUUID}, ${body.correlationID}, ${body.raisingService}, ${body.auditPayload}, ${body.namespace}, ${body.auditTimestamp}, ${body.type}, ${body.userID})")
