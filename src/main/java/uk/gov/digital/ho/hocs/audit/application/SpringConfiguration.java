@@ -47,21 +47,4 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public JacksonDataFormat jacksonDataFormat(ObjectMapper objectMapper) {
         return new JacksonDataFormat(objectMapper, Object.class);
     }
-
-
-    @Bean
-    public CamelContextConfiguration contextConfiguration() {
-        return new CamelContextConfiguration() {
-            @Override
-            public void beforeApplicationStart(CamelContext context) {
-                context.setUseMDCLogging(true);
-                context.setStreamCaching(true);
-            }
-
-            @Override
-            public void afterApplicationStart(CamelContext camelContext) {
-                // no changes after started required.
-            }
-        };
-    }
 }
