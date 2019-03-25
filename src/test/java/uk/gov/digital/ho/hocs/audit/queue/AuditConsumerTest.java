@@ -17,6 +17,7 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationExcepti
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -28,6 +29,8 @@ public class AuditConsumerTest extends CamelTestSupport {
     private ObjectMapper mapper;
 
     private String correlationID;
+    private UUID caseUUID;
+    private UUID stageUUID;
     private String raisingService;
     private String auditPayload;
     private String namespace;
@@ -47,6 +50,8 @@ public class AuditConsumerTest extends CamelTestSupport {
 
         context.setStreamCaching(true);
         correlationID = "correlationIDTest";
+        caseUUID = UUID.randomUUID();
+        stageUUID = UUID.randomUUID();
         raisingService = "testRaisingService";
         auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
         namespace = "namespaceEventOccurredIn";
@@ -71,7 +76,17 @@ public class AuditConsumerTest extends CamelTestSupport {
     }
 
     @Test
-    public void shouldNotProcessMessgeWhenMarshellingFails() throws JsonProcessingException, InterruptedException {
+    public void shouldCallAddAuditToAuditServiceCaseUUID() throws JsonProcessingException {
+
+        CreateAuditDto auditDto = new CreateAuditDto(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        String json = mapper.writeValueAsString(auditDto);
+        template.sendBody(auditQueue, json);
+        verify(mockDataService, times(1)).createAudit(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+        verifyNoMoreInteractions(mockDataService);
+    }
+
+    @Test
+    public void shouldNotProcessMessageWhenMarshallingFails() throws JsonProcessingException, InterruptedException {
         getMockEndpoint(dlq).setExpectedCount(1);
         String json = mapper.writeValueAsString("{invalid:invalid}");
         template.sendBody(auditQueue, json);
