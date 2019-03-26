@@ -1,8 +1,14 @@
 package uk.gov.digital.ho.hocs.audit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.AUDIT_STARTUP_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.EVENT;
+
+@Slf4j
 @SpringBootApplication
 public class HocsAuditApplication {
 
@@ -12,7 +18,9 @@ public class HocsAuditApplication {
 			SpringApplication.run(HocsAuditApplication.class, args);
 		}
 		catch(Exception e) {
-			e.printStackTrace();
+			//Log error message to avoid silent camel startup failure
+			log.error("Error starting application {}", e.getMessage(), value(EVENT, AUDIT_STARTUP_FAILURE));
+			throw e;
 		}
 	}
 

@@ -16,19 +16,19 @@ public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityCreationException.class)
     public ResponseEntity handle(EntityCreationException e) {
-        log.error("EntityCreationException: {}", e.getMessage(), value(EVENT, AUDIT_EVENT_CREATION_FAILED));
+        log.error("EntityCreationException", value(EVENT, AUDIT_EVENT_CREATION_FAILED), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity handle(EntityNotFoundException e) {
-        log.error("EntityNotFoundException: {}", e.getMessage(),value(EVENT, AUDIT_RECORD_NOT_FOUND));
+        log.error("EntityNotFoundException", value(EVENT, AUDIT_RECORD_NOT_FOUND), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity handle(Exception e) {
-        log.error("Exception: {}", e.getMessage(), value(EVENT, UNCAUGHT_EXCEPTION));
+        log.error("Exception", value(EVENT, UNCAUGHT_EXCEPTION), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
