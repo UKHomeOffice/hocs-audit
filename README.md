@@ -124,7 +124,6 @@ An example audit event message looks like:
 }
 ```
 
-
 ### Versioning
 
 For versioning this project uses [SemVer](https://semver.org/).
