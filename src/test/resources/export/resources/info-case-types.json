@@ -1,0 +1,46 @@
+{
+  "caseTypes": [
+    {
+      "label": "DCU Treat Official",
+      "value": "TRO",
+      "displayName": "DCU Treat Official",
+      "shortCode": "a2",
+      "type": "TRO"
+    },
+    {
+      "label": "UKVI Ministerial REF",
+      "value": "IMCM",
+      "displayName": "UKVI Ministerial REF",
+      "shortCode": "b2",
+      "type": "IMCM"
+    },
+    {
+      "label": "UKVI B REF",
+      "value": "IMCB",
+      "displayName": "UKVI B REF",
+      "shortCode": "b1",
+      "type": "IMCB"
+    },
+    {
+      "label": "UKVI Number 10",
+      "value": "UTEN",
+      "displayName": "UKVI Number 10",
+      "shortCode": "b3",
+      "type": "UTEN"
+    },
+    {
+      "label": "DCU Ministerial",
+      "value": "MIN",
+      "displayName": "DCU Ministerial",
+      "shortCode": "a1",
+      "type": "MIN"
+    },
+    {
+      "label": "DCU Number 10",
+      "value": "DTEN",
+      "displayName": "DCU Number 10",
+      "shortCode": "a3",
+      "type": "DTEN"
+    }
+  ]
+}
