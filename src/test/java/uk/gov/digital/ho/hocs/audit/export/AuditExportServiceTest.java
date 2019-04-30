@@ -12,6 +12,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -83,6 +84,36 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void caseDataExportShouldReturnCSVData() throws IOException {
+
+        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
+
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(3);
+
+        CSVRecord row = rows.get(0);
+        assertThat(row.get("CopyNumberTen")).isEqualTo("FALSE");
+
+        assertThat(row.get("DateReceived")).isEqualTo("2019-04-23");
+
+        assertThat(row.get("Correspondents")).isEqualTo("09a89901-d2f1-4778-befe-ebab57659b90");
+        assertThat(row.get("OriginalChannel")).isEqualTo("EMAIL");
+        assertThat(row.get("DateOfCorrespondence")).isEqualTo("2019-04-23");
+        assertThat(row.get("caseType")).isEqualTo("MIN");
+        assertThat(row.get("caseUuid")).isEqualTo("3e5cf44f-e86a-4b21-891a-018e2343cda1");
+        assertThat(row.get("reference")).isEqualTo("MIN/0120101/19");
+        assertThat(row.get("deadline")).isEqualTo("2019-05-22");
+        assertThat(row.get("DateReceived")).isEqualTo("2019-04-23");
+        assertThat(row.get("primaryTopic")).isEmpty();
+        assertThat(row.get("primaryCorrespondent")).isEqualTo("09a89901-d2f1-4778-befe-ebab57659b90");
+    }
+
+    @Test
     public void caseDataExportShouldReturnRowHeaders() throws IOException {
         Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toSet());
         expectedHeaders.addAll(fields);
@@ -109,35 +140,6 @@ public class AuditExportServiceTest {
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
 
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
-    }
-
-    @Test
-    public void caseDataExportShouldReturnCSVData() throws IOException {
-
-        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
-
-        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
-
-        OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
-
-        verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
-        List<CSVRecord> rows = getCSVRows(outputStream.toString());
-        assertThat(rows.size()).isEqualTo(3);
-
-        CSVRecord row = rows.get(0);
-        assertThat(row.get("DateReceived")).isEqualTo("2019-04-23");
-        assertThat(row.get("CopyNumberTen")).isEqualTo("FALSE");
-        assertThat(row.get("Correspondents")).isEqualTo("09a89901-d2f1-4778-befe-ebab57659b90");
-        assertThat(row.get("OriginalChannel")).isEqualTo("EMAIL");
-        assertThat(row.get("DateOfCorrespondence")).isEqualTo("2019-04-23");
-        assertThat(row.get("caseType")).isEqualTo("MIN");
-        assertThat(row.get("caseUuid")).isEqualTo("3e5cf44f-e86a-4b21-891a-018e2343cda1");
-        assertThat(row.get("reference")).isEqualTo("MIN/0120101/19");
-        assertThat(row.get("deadline")).isEqualTo("2019-05-22");
-        assertThat(row.get("DateReceived")).isEqualTo("2019-04-23");
-        assertThat(row.get("primaryTopic")).isEmpty();
-        assertThat(row.get("primaryCorrespondent")).isEqualTo("09a89901-d2f1-4778-befe-ebab57659b90");
     }
 
     @Test
@@ -219,8 +221,8 @@ public class AuditExportServiceTest {
         return csvParser.getHeaderMap();
     }
 
-    private Set<AuditData> getCaseDataAuditData() {
-         return new HashSet<AuditData>(){{
+    private LinkedHashSet<AuditData> getCaseDataAuditData() {
+         return new LinkedHashSet<AuditData>(){{
             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"data\": {\"valid\": \"true\", \"DateReceived\": \"2019-04-23\", \"CopyNumberTen\": \"FALSE\", \"Correspondents\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"OriginalChannel\": \"EMAIL\", \"DateOfCorrespondence\": \"2019-04-23\"}, \"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T12:57:19.738532\", \"reference\": \"MIN/0120101/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\", \"primaryTopic\": null, \"primaryCorrespondent\": \"09a89901-d2f1-4778-befe-ebab57659b90\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "CASE_UPDATED", UUID.randomUUID().toString()));
              add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T09:18:26.446343\", \"reference\": \"MIN/0120091/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
