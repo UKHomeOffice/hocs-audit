@@ -59,7 +59,6 @@ in the root of the project.
 
 <!--- building container locally with gradle clean build and running --->
 
-
 Alternatively, the corresponding Docker image for this service is available at [quay.io](https://quay.io/repository/ukhomeofficedigital/hocs-audit).
 
 ### Flyway and database management
