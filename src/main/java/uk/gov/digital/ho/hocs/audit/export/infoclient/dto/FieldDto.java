@@ -29,7 +29,7 @@ public class FieldDto {
     @JsonProperty("summary")
     private boolean summary;
 
-    @JsonProperty("uk.gov.digital.ho.hocs.audit.export")
+    @JsonProperty("export")
     private boolean export;
 
     @JsonProperty("active")
