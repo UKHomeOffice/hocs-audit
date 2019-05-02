@@ -1,4 +1,4 @@
-FROM quay.io/ukhomeofficedigital/openjdk8
+FROM quay.io/ukhomeofficedigital/openjdk11
 
 
 ENV USER user_hocs_audit
@@ -24,7 +24,7 @@ ADD scripts /app/scripts
 
 RUN chmod a+x /app/scripts/*
 
-EXPOSE 8000
+EXPOSE 8080
 
 USER ${USER_ID}
 
