@@ -91,6 +91,8 @@ public class AuditExportIntTest {
                 getBasePath() + String.format("/export?fromDate=%s&toDate=%s&caseType=%s&exportType=%s", dateFrom, dateTo, caseType, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
         //Attempt to parse CSV to assert valid
         StringReader reader = new StringReader(result.getBody());
         CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.withFirstRecordAsHeader().withTrim());
