@@ -44,14 +44,16 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-json')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
+
     compile group: 'org.apache.camel', name: 'camel-spring-boot', version: camelVersion
     compile group: 'org.apache.camel', name: 'camel-jackson', version: camelVersion
     compile group: 'org.apache.camel', name: 'camel-aws', version: camelVersion
     compile group: 'org.apache.camel', name: 'camel-http4', version: camelVersion
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.6'
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.380'
+
     compile('org.flywaydb:flyway-core')
-    compile('org.apache.commons:commons-csv:1.6')
+    compile('org.apache.commons:commons-csv:1.5')
 
     runtime('org.postgresql:postgresql')
 

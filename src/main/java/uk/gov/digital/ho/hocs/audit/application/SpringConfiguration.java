@@ -50,12 +50,6 @@ public class SpringConfiguration implements WebMvcConfigurer {
         return m;
     }
 
-    @Bean(name = "json-jackson")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public JacksonDataFormat jacksonDataFormat(ObjectMapper objectMapper) {
-        return new JacksonDataFormat(objectMapper, Object.class);
-    }
-
     @Bean
     public Formatter<LocalDate> localDateFormatter() {
         return new Formatter<LocalDate>() {
