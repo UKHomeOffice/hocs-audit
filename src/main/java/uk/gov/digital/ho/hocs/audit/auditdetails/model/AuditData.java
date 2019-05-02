@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -60,6 +61,10 @@ public class AuditData implements Serializable {
     @Getter
     private String userID;
 
+    @Column(name = "case_type")
+    @Getter
+    private String caseType;
+
     public AuditData( String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
@@ -69,6 +74,9 @@ public class AuditData implements Serializable {
         this.auditTimestamp = auditTimestamp;
         this.type = type;
         this.userID = userID;
+        if(caseUUID != null) {
+            this.caseType = caseUUID.toString().substring(33);
+        }
     }
 
     public AuditData(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
