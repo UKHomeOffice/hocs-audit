@@ -1,7 +1,7 @@
 pipeline:
 
   build-project:
-    image: quay.io/ukhomeofficedigital/openjdk11
+    image: quay.io/ukhomeofficedigital/openjdk8
     commands:
       - export SPRING_PROFILES_ACTIVE='development, local'
       - export SERVER_PORT='8080'
