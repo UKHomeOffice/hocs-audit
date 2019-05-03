@@ -7,7 +7,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.GetCaseTypesResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 
 import java.util.LinkedHashSet;
@@ -31,10 +30,9 @@ public class InfoClient {
     }
 
     public Set<CaseTypeDto> getCaseTypes() {
-        GetCaseTypesResponse response = restHelper.get(serviceBaseURL, "/caseType", GetCaseTypesResponse.class);
-
-        log.info("Got {} case types", response.caseTypes.size(), value(EVENT, INFO_CLIENT_GET_CASE_TYPES_SUCCESS));
-        return response.caseTypes;
+        Set<CaseTypeDto> response = restHelper.get(serviceBaseURL, "/caseType", new ParameterizedTypeReference<Set<CaseTypeDto>>() {});
+        log.info("Got {} case types", response.size(), value(EVENT, INFO_CLIENT_GET_CASE_TYPES_SUCCESS));
+        return response;
     }
 
     public Set<TeamDto> getTeams() {
