@@ -1,5 +1,4 @@
-{
-  "caseTypes": [
+[
     {
       "label": "DCU Treat Official",
       "value": "TRO",
@@ -43,4 +42,3 @@
       "type": "DTEN"
     }
   ]
-}
