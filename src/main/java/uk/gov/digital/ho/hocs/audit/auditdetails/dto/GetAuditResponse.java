@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -36,8 +39,9 @@ public class GetAuditResponse {
     private String namespace;
 
     @JsonProperty(value = "audit_timestamp")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss Z", timezone = "UTC")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime auditTimestamp;
+    private ZonedDateTime auditTimestamp;
 
     @JsonProperty(value = "type")
     private String type;
@@ -54,7 +58,7 @@ public class GetAuditResponse {
                 auditData.getRaisingService(),
                 auditData.getAuditPayload(),
                 auditData.getNamespace(),
-                auditData.getAuditTimestamp(),
+                ZonedDateTime.of(auditData.getAuditTimestamp(), ZoneOffset.UTC),
                 auditData.getType(),
                 auditData.getUserID());
     }
