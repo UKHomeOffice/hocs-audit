@@ -15,6 +15,9 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -36,7 +39,7 @@ public class ExportService {
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED"};
-    public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM"};
+    public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM","STAGE_CREATED", "STAGE_COMPLETED"};
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient) {
         this.auditRepository = auditRepository;
@@ -76,7 +79,7 @@ public class ExportService {
 
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+            Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_DATA_EVENTS, caseTypeCode);
             data.forEach((audit) -> {
@@ -148,7 +151,7 @@ public class ExportService {
         List<String> headers = Stream.of("timestamp", "event" ,"userId","caseUuid",
                 "correspondentUuid", "fullname", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
-                "reference").collect(Collectors.toList());
+                "reference", "externalKey").collect(Collectors.toList());
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
 
@@ -185,17 +188,20 @@ public class ExportService {
             data.add(correspondentData.getAddress().getCountry());
             data.add(correspondentData.getAddress().getPostcode());
         }
+        else {
+            data.addAll(Arrays.asList("","","","",""));
+        }
 
         data.add(correspondentData.getTelephone());
         data.add(correspondentData.getEmail());
         data.add(correspondentData.getReference());
-
+        data.add(correspondentData.getExternalKey());
         return data;
     }
 
     void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event" ,"userId","caseUuid","stage", "teamUuid").collect(Collectors.toList());
+        List<String> headers = Stream.of("timestamp", "event" ,"userId","caseUuid","stage", "teamUuid", "deadline").collect(Collectors.toList());
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
@@ -221,7 +227,79 @@ public class ExportService {
         data.add(Objects.toString(audit.getCaseUUID(), ""));
         data.add(allocationData.getStage());
         data.add(Objects.toString(allocationData.getTeamUUID(), ""));
+        data.add(Objects.toString(allocationData.getDeadline(), ""));
         return data;
+    }
+
+    public void staticTopicExport(OutputStream output) throws IOException {
+        log.info("Exporting STATIC TOPIC LIST to CSV", value(EVENT, CSV_EXPORT_START));
+
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("topicUUID", "topicName").collect(Collectors.toList());
+
+        Set<TopicDto> topics = infoClient.getTopics();
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+
+            topics.forEach((topic) -> {
+                try {
+                    printer.printRecord(topic.getValue(), topic.getLabel());
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to parse record for static topic {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export STATIC TOPIC LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+
+    }
+
+    public void staticUserExport(OutputStream output) throws IOException {
+
+        log.info("Exporting STATIC USER LIST to CSV", value(EVENT, CSV_EXPORT_START));
+
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("userUUID", "username", "firstName", "lastName", "email").collect(Collectors.toList());
+
+        Set<UserDto> users = infoClient.getUsers();
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+
+            users.forEach((user) -> {
+                try {
+                    printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to parse record for static user {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export STATIC USER LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    public void staticTeamExport(OutputStream output) throws IOException {
+        log.info("Exporting STATIC TEAM LIST to CSV", value(EVENT, CSV_EXPORT_START));
+
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("teamUUID", "teamName").collect(Collectors.toList());
+
+        Set<TeamDto> teams = infoClient.getTeams();
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+
+            teams.forEach((team) -> {
+                try {
+                    printer.printRecord(team.getUuid(), team.getDisplayName());
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to parse record for static team {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export STATIC TEAM LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
     }
 }
 

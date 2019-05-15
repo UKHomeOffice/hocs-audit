@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
 
@@ -33,6 +33,18 @@ public class InfoClient {
         Set<CaseTypeDto> response = restHelper.get(serviceBaseURL, "/caseType", new ParameterizedTypeReference<Set<CaseTypeDto>>() {});
         log.info("Got {} case types", response.size(), value(EVENT, INFO_CLIENT_GET_CASE_TYPES_SUCCESS));
         return response;
+    }
+
+    public Set<UserDto> getUsers() {
+        Set<UserDto> users = restHelper.get(serviceBaseURL, "/users", new ParameterizedTypeReference<Set<UserDto>>() {});
+        log.info("Got Users {}", value(EVENT, INFO_CLIENT_GET_USER_SUCCESS));
+        return users;
+    }
+
+    public Set<TopicDto> getTopics() {
+        Set<TopicDto> infoTopic = restHelper.get(serviceBaseURL, String.format("/topics"), new ParameterizedTypeReference<Set<TopicDto>>() {});
+        log.info("Got Topics", value(EVENT, INFO_CLIENT_GET_TOPIC_SUCCESS));
+        return infoTopic;
     }
 
     public Set<TeamDto> getTeams() {

@@ -75,7 +75,7 @@ public class AuditData implements Serializable {
         this.type = type;
         this.userID = userID;
         if(caseUUID != null) {
-            this.caseType = caseUUID.toString().substring(33);
+            this.caseType = caseUUID.toString().substring(34);
         }
     }
 
@@ -83,7 +83,9 @@ public class AuditData implements Serializable {
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
         this.stageUUID = stageUUID;
-
+        if(caseUUID != null) {
+            this.caseType = caseUUID.toString().substring(34);
+        }
     }
 
 }

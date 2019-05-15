@@ -38,6 +38,7 @@ public interface AuditPayload {
         private UUID stageUUID;
         private UUID teamUUID;
         private String stage;
+        private LocalDate deadline;
     }
 
     @AllArgsConstructor
@@ -135,6 +136,9 @@ public interface AuditPayload {
 
         @JsonProperty("reference")
         private String reference;
+
+        @JsonProperty("externalKey")
+        private String externalKey;
 
     }
 

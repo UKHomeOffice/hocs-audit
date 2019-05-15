@@ -3,24 +3,31 @@ package uk.gov.digital.ho.hocs.audit.export;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Slf4j
-@RestController("/export")
+@RestController()
 public class DataExportResource {
 
     private ExportService exportService;
-
-    public DataExportResource(ExportService exportService) {
+    private InfoClient infoClient;
+    public DataExportResource(ExportService exportService, InfoClient infoClient) {
         this.exportService = exportService;
+        this.infoClient = infoClient;
     }
 
-    @GetMapping( params = {"fromDate", "toDate", "caseType", "exportType"})
+    @GetMapping(value="/export", params = {"fromDate", "toDate", "caseType", "exportType"})
     public @ResponseBody void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
                                             @RequestParam("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
                                             HttpServletResponse response) {
@@ -35,6 +42,51 @@ public class DataExportResource {
              log.error("Error exporting CSV file for case type {} and export type {} for reason {}", caseType, exportType.toString(), ex.toString());
              response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
          }
+    }
+
+    @GetMapping("/export/topics")
+    public void getTopics(HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=topics.csv");
+            exportService.staticTopicExport( response.getOutputStream());
+            response.setStatus(200);
+        }
+        catch(Exception ex) {
+            log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @GetMapping("/export/teams")
+    public void getTeams(HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=teams.csv");
+            exportService.staticTeamExport( response.getOutputStream());
+            response.setStatus(200);
+        }
+        catch(Exception ex) {
+            log.error("Error exporting CSV file for static team list for reason {}", ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    @GetMapping("/export/users")
+    public void getUsers(HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=users.csv");
+            exportService.staticUserExport( response.getOutputStream());
+            response.setStatus(200);
+        }
+        catch(Exception ex) {
+            log.error("Error exporting CSV file for static user list for reason {}", ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     private String getFileName(String caseType, ExportType exportType) {

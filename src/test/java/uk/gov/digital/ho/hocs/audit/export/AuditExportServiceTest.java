@@ -22,6 +22,10 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.CaseTypeDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+
 import java.io.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,7 +92,7 @@ public class AuditExportServiceTest {
 
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
 
-        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
@@ -98,9 +102,7 @@ public class AuditExportServiceTest {
 
         CSVRecord row = rows.get(0);
         assertThat(row.get("CopyNumberTen")).isEqualTo("FALSE");
-
         assertThat(row.get("DateReceived")).isEqualTo("2019-04-23");
-
         assertThat(row.get("Correspondents")).isEqualTo("09a89901-d2f1-4778-befe-ebab57659b90");
         assertThat(row.get("OriginalChannel")).isEqualTo("EMAIL");
         assertThat(row.get("DateOfCorrespondence")).isEqualTo("2019-04-23");
@@ -119,7 +121,7 @@ public class AuditExportServiceTest {
         expectedHeaders.addAll(fields);
 
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
-        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCaseDataAuditData().stream());
+        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
@@ -134,12 +136,12 @@ public class AuditExportServiceTest {
 
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
 
-        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
 
-        verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
+        verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
     }
 
     @Test
@@ -157,7 +159,7 @@ public class AuditExportServiceTest {
     }
 
     @Test
-    public void caseTopicExportShouldOnlyRequestCreateUpdateEventsAndCaseType() throws IOException {
+    public void caseTopicExportShouldOnlyRequestTopicEventsAndCaseType() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS);
@@ -169,7 +171,7 @@ public class AuditExportServiceTest {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid",
                 "correspondentUuid", "fullname", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
-                "reference"};
+                "reference", "externalKey"};
 
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
 
@@ -182,7 +184,7 @@ public class AuditExportServiceTest {
     }
 
     @Test
-    public void caseCorrespondentExportShouldOnlyRequestCreateUpdateEventsAndCaseType() throws IOException {
+    public void caseCorrespondentExportShouldOnlyRequestCorrespondentEventsAndCaseType() throws IOException {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS);
@@ -191,7 +193,7 @@ public class AuditExportServiceTest {
 
     @Test
     public void caseAllocationsExportShouldReturnRowHeaders() throws IOException {
-        String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "teamUuid"};
+        String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "teamUuid", "deadline"};
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS);
@@ -209,6 +211,73 @@ public class AuditExportServiceTest {
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.ALLOCATION_EVENTS, "a1");
     }
 
+
+    @Test
+    public void staticTopicExportShouldReturnCSV() throws IOException {
+        String[] expectedHeaders = new String[]{"topicUUID", "topicName"};
+
+        LinkedHashSet<TopicDto> topics = new LinkedHashSet<TopicDto>(){{
+            add(new TopicDto("Topic 1", UUID.randomUUID()));
+            add(new TopicDto("Topic 2", UUID.randomUUID()));
+        }};
+
+        when(infoClient.getTopics()).thenReturn(topics);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTopicExport(outputStream);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        List<CSVRecord> rows = getCSVRows(csvBody);
+        assertThat(rows.size()).isEqualTo(2);
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+        assertThat(rows.get(0).get("topicName")).isEqualTo("Topic 1");
+    }
+
+    @Test
+    public void staticTeamExportShouldReturnCSV() throws IOException {
+        String[] expectedHeaders = new String[]{"teamUUID", "teamName"};
+
+        LinkedHashSet<TeamDto> teams = new LinkedHashSet<TeamDto>(){{
+            add(new TeamDto("Team 1", UUID.randomUUID(), true));
+            add(new TeamDto("Team 2", UUID.randomUUID(), true));
+        }};
+
+        when(infoClient.getTeams()).thenReturn(teams);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTeamExport(outputStream);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        List<CSVRecord> rows = getCSVRows(csvBody);
+        assertThat(rows.size()).isEqualTo(2);
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+        assertThat(rows.get(0).get("teamName")).isEqualTo("Team 1");
+    }
+
+    @Test
+    public void staticUserExportShouldReturnCSV() throws IOException {
+        String[] expectedHeaders = new String[]{"userUUID", "username", "firstName", "lastName", "email"};
+
+        LinkedHashSet<UserDto> users = new LinkedHashSet<UserDto>(){{
+            add(new UserDto(UUID.randomUUID().toString(), "User 1","first name", "last name", "email address"));
+            add(new UserDto(UUID.randomUUID().toString(), "User 2","first name", "last name", "email address"));
+        }};
+
+        when(infoClient.getUsers()).thenReturn(users);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticUserExport(outputStream);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        List<CSVRecord> rows = getCSVRows(csvBody);
+        assertThat(rows.size()).isEqualTo(2);
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+        assertThat(rows.get(0).get("username")).isEqualTo("User 1");
+    }
+
     private List<CSVRecord> getCSVRows(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
         CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.withFirstRecordAsHeader().withTrim());
@@ -223,9 +292,9 @@ public class AuditExportServiceTest {
 
     private LinkedHashSet<AuditData> getCaseDataAuditData() {
          return new LinkedHashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"data\": {\"valid\": \"true\", \"DateReceived\": \"2019-04-23\", \"CopyNumberTen\": \"FALSE\", \"Correspondents\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"OriginalChannel\": \"EMAIL\", \"DateOfCorrespondence\": \"2019-04-23\"}, \"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T12:57:19.738532\", \"reference\": \"MIN/0120101/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\", \"primaryTopic\": null, \"primaryCorrespondent\": \"09a89901-d2f1-4778-befe-ebab57659b90\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "CASE_UPDATED", UUID.randomUUID().toString()));
+             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"data\": {\"valid\": \"true\", \"DateReceived\": \"2019-04-23\", \"CopyNumberTen\": \"FALSE\", \"Correspondents\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"OriginalChannel\": \"EMAIL\", \"DateOfCorrespondence\": \"2019-04-23\"}, \"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T12:57:19.738532\", \"reference\": \"MIN/0120101/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\", \"primaryTopic\": null, \"primaryCorrespondent\": \"09a89901-d2f1-4778-befe-ebab57659b90\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "CASE_UPDATED", UUID.randomUUID().toString()));
              add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T09:18:26.446343\", \"reference\": \"MIN/0120091/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
-            add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
+             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
 
         }};
     }
