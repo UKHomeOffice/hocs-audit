@@ -39,7 +39,7 @@ public class ExportService {
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED"};
-    public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM","STAGE_CREATED", "STAGE_COMPLETED"};
+    public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM","STAGE_CREATED", "STAGE_COMPLETED","STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient) {
         this.auditRepository = auditRepository;
@@ -201,7 +201,7 @@ public class ExportService {
 
     void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event" ,"userId","caseUuid","stage", "teamUuid", "deadline").collect(Collectors.toList());
+        List<String> headers = Stream.of("timestamp", "event" ,"userId","caseUuid","stage", "allocatedTo", "deadline").collect(Collectors.toList());
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
