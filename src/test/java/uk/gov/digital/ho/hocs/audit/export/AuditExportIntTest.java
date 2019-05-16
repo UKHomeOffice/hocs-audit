@@ -88,7 +88,7 @@ public class AuditExportIntTest {
 
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", dateFrom, dateTo, caseType, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -109,7 +109,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", dateFrom, dateTo, caseType, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -122,7 +122,7 @@ public class AuditExportIntTest {
         String dateTo = "2018/1/55";
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", dateFrom, dateTo, caseType, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -136,7 +136,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", dateFrom, dateTo, caseType, "BAD_TYPE")
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  "BAD_TYPE")
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -149,7 +149,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", dateFrom, dateTo, caseType, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);

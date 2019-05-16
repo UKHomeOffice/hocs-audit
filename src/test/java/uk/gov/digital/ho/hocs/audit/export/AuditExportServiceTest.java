@@ -193,7 +193,7 @@ public class AuditExportServiceTest {
 
     @Test
     public void caseAllocationsExportShouldReturnRowHeaders() throws IOException {
-        String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "teamUuid", "deadline"};
+        String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "allocatedTo", "deadline"};
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS);

@@ -220,13 +220,13 @@ public class ExportService {
 
     private List<String> parseAllocationAuditPayload(AuditData audit) throws IOException {
         List<String> data = new ArrayList<>();
-        AuditPayload.StageTeamAllocation allocationData = mapper.readValue(audit.getAuditPayload(), AuditPayload.StageTeamAllocation.class);
+        AuditPayload.StageAllocation allocationData = mapper.readValue(audit.getAuditPayload(), AuditPayload.StageAllocation.class);
         data.add(audit.getAuditTimestamp().toString());
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID(), ""));
         data.add(allocationData.getStage());
-        data.add(Objects.toString(allocationData.getTeamUUID(), ""));
+        data.add(Objects.toString(allocationData.getAllocatedToUUID(), ""));
         data.add(Objects.toString(allocationData.getDeadline(), ""));
         return data;
     }
