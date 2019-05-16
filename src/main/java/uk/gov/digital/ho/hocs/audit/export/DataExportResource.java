@@ -3,18 +3,10 @@ package uk.gov.digital.ho.hocs.audit.export;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
-import java.util.Set;
 
 @Slf4j
 @RestController()
@@ -27,9 +19,9 @@ public class DataExportResource {
         this.infoClient = infoClient;
     }
 
-    @GetMapping(value="/export", params = {"fromDate", "toDate", "caseType", "exportType"})
+    @GetMapping(value="/export/{caseType}", params = {"fromDate", "toDate", "exportType"})
     public @ResponseBody void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
-                                            @RequestParam("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
+                                            @PathVariable("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
                                             HttpServletResponse response) {
         try {
              response.setContentType("text/csv");
