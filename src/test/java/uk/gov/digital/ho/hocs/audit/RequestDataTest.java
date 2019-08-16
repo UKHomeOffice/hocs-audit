@@ -48,7 +48,7 @@ public class RequestDataTest
 
     @Test
     public void shouldUseUserIdFromRequest() {
-        when(mockHttpServletRequest.getHeader("X-Auth-Userid")).thenReturn("some user id");
+        when(mockHttpServletRequest.getHeader("X-Auth-UserId")).thenReturn("some user id");
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
