@@ -50,9 +50,9 @@ public class AuditDataService {
         auditRepository.save(auditData);
         log.info("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}",
                 auditData.getUuid(),
-                auditData.getCorrelationID(),
                 auditData.getCaseUUID(),
                 auditData.getStageUUID(),
+                auditData.getCorrelationID(),
                 auditData.getRaisingService(),
                 auditData.getUserID(),
                 auditData.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));

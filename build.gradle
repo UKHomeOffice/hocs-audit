@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.5.RELEASE'
+        springBootVersion = '2.1.6.RELEASE'
         camelVersion = '2.22.0'
     }
     repositories {
@@ -53,7 +53,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.380'
 
     compile('org.flywaydb:flyway-core')
-    compile('org.apache.commons:commons-csv:1.5')
+    compile('org.apache.commons:commons-csv:1.6')
 
     runtime('org.postgresql:postgresql')
 
