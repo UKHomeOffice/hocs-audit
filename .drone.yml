@@ -63,7 +63,7 @@ pipeline:
   clone-kube-project:
     image: plugins/git
     commands:
-      - git clone https://github.com/UKHomeOffice/kube-hocs-audit.git
+      - git clone -b feature/WCS --single-branch https://github.com/UKHomeOffice/kube-hocs-audit.git
     when:
       event: [push, tag, deployment]
 
