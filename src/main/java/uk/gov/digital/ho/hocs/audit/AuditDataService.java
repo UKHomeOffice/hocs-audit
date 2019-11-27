@@ -48,7 +48,7 @@ public class AuditDataService {
         AuditData auditData = new AuditData(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
         validateNotNull(auditData);
         auditRepository.save(auditData);
-        log.info("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}",
+        log.info("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}, event {}",
                 auditData.getUuid(),
                 auditData.getCaseUUID(),
                 auditData.getStageUUID(),
