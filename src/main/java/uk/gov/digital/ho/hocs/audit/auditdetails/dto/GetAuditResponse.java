@@ -39,7 +39,7 @@ public class GetAuditResponse {
     private String namespace;
 
     @JsonProperty(value = "audit_timestamp")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss Z", timezone = "UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS Z", timezone = "UTC")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private ZonedDateTime auditTimestamp;
 
