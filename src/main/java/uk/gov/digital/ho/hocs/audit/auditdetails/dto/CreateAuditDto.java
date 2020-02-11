@@ -2,15 +2,11 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
 public class CreateAuditDto {
 
     @JsonProperty(value= "correlation_id", required = true)
@@ -57,5 +53,43 @@ public class CreateAuditDto {
         this.stageUUID = stageUUID;
     }
 
+    public CreateAuditDto() {
+    }
+
+    public String getCorrelationID() {
+        return this.correlationID;
+    }
+
+    public UUID getCaseUUID() {
+        return this.caseUUID;
+    }
+
+    public UUID getStageUUID() {
+        return this.stageUUID;
+    }
+
+    public String getRaisingService() {
+        return this.raisingService;
+    }
+
+    public String getAuditPayload() {
+        return this.auditPayload;
+    }
+
+    public String getNamespace() {
+        return this.namespace;
+    }
+
+    public LocalDateTime getAuditTimestamp() {
+        return this.auditTimestamp;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getUserID() {
+        return this.userID;
+    }
 }
 
