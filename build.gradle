@@ -1,13 +1,17 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.5.RELEASE'
-        camelVersion = '2.22.0'
+        springBootVersion = '2.1.3.RELEASE'
+        camelVersion = '2.23.1'
     }
     repositories {
         mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.21"
     }
 }
 
@@ -16,6 +20,7 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
+apply plugin: "net.ltgt.apt"
 
 task copyLombok(type: Copy) {
     outputs.upToDateWhen { false }
@@ -28,7 +33,8 @@ build.dependsOn(copyLombok)
 
 group = 'uk.gov.digital.ho.hocs'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 repositories {
     mavenCentral()
@@ -50,14 +56,15 @@ dependencies {
     compile group: 'org.apache.camel', name: 'camel-aws', version: camelVersion
     compile group: 'org.apache.camel', name: 'camel-http4', version: camelVersion
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.6'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.380'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.524'
 
     compile('org.flywaydb:flyway-core')
     compile('org.apache.commons:commons-csv:1.5')
 
     runtime('org.postgresql:postgresql')
 
-    compileOnly('org.projectlombok:lombok')
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.6'
+	annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.6'
 
     testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: camelVersion
     testCompile('org.springframework.boot:spring-boot-starter-test')
