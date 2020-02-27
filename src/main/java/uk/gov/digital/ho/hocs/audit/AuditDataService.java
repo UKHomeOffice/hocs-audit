@@ -59,6 +59,17 @@ public class AuditDataService {
         return auditData;
     }
 
+    public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted){
+        log.debug("Case {} setting deleted to {}", caseUUID, deleted);
+        List<AuditData> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
+        for (AuditData audit : audits) {
+            audit.setDeleted(deleted);
+            auditRepository.save(audit);
+        }
+        log.info("Case {} set {} audits deleted to {}", caseUUID, audits.size(), deleted);
+        return audits.size();
+    }
+
     @Transactional(readOnly = true)
     public AuditData getAuditDataByUUID(UUID auditUUID) {
         log.debug("Requesting Audit for Audit UUID: {} ", auditUUID);

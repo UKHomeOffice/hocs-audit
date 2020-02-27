@@ -2,6 +2,7 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
@@ -65,6 +66,11 @@ public class AuditData implements Serializable {
     @Getter
     private String caseType;
 
+    @Column(name = "deleted")
+    @Getter
+    @Setter
+    private Boolean deleted;
+
     public AuditData( String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
@@ -77,6 +83,7 @@ public class AuditData implements Serializable {
         if(caseUUID != null) {
             this.caseType = caseUUID.toString().substring(34);
         }
+        this.deleted = false;
     }
 
     public AuditData(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
