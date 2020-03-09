@@ -109,6 +109,20 @@ public class AuditResourceTest {
     }
 
     @Test
+    public void shouldDeleteCaseAudit() {
+        DeleteCaseAuditDto deleteCaseAuditDto = new DeleteCaseAuditDto("1", true);
+        when(auditService.deleteCaseAudit(caseUUID, true)).thenReturn(2);
+
+        ResponseEntity<DeleteCaseAuditResponse> response = auditResource.deleteCaseAudit(caseUUID, deleteCaseAuditDto);
+
+        verify(auditService).deleteCaseAudit(caseUUID, true);
+        verifyNoMoreInteractions(auditService);
+        assertThat(response).isNotNull();
+        assertThat(response.getBody().getAuditCount()).isEqualTo(2);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
     public void shouldReturnAllAuditsFromDefaultDateRange() {
         when(auditService.getAuditDataList(page, limit)).thenReturn(new ArrayList<>());
 
