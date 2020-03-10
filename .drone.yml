@@ -70,6 +70,7 @@ pipeline:
   deploy-to-cs-dev-from-build-number:
     image: quay.io/ukhomeofficedigital/kd:v1.12.2
     environment:
+      - DOMAIN=cs
       - KUBE_NAMESPACE=cs-dev
       - ENVIRONMENT=dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
@@ -86,6 +87,7 @@ pipeline:
   deploy-to-wcs-dev-from-build-number:
     image: quay.io/ukhomeofficedigital/kd:v1.12.2
     environment:
+      - DOMAIN=wcs
       - KUBE_NAMESPACE=wcs-dev
       - ENVIRONMENT=dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
