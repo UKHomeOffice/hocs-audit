@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.export.infoclient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
@@ -39,8 +40,16 @@ public class InfoClient {
     public Set<UserDto> getUsers() {
         Set<UserDto> users = restHelper.get(serviceBaseURL, "/users", new ParameterizedTypeReference<Set<UserDto>>() {
         });
-        log.info("Got Users {}", value(EVENT, INFO_CLIENT_GET_USER_SUCCESS));
+        log.info("Got Users {}", value(EVENT, INFO_CLIENT_GET_USERS_SUCCESS));
         return users;
+    }
+
+    @Cacheable(value = "getUser", unless = "#result == null")
+    public UserDto getUser(String uuid) {
+        UserDto result = restHelper.get(serviceBaseURL, String.format("/user/%s", uuid), new ParameterizedTypeReference<UserDto>() {
+        });
+        log.info("Got userDto for user uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_USER_SUCCESS));
+        return result;
     }
 
     public Set<TopicDto> getTopics() {
@@ -57,13 +66,20 @@ public class InfoClient {
         return teams;
     }
 
+    @Cacheable(value = "getTeam", unless = "#result == null")
+    public TeamDto getTeam(String uuid) {
+        TeamDto result = restHelper.get(serviceBaseURL, String.format("/team/%s", uuid), new ParameterizedTypeReference<TeamDto>() {
+        });
+        log.info("Got teamDto for team uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_TEAM_SUCCESS));
+        return result;
+    }
+
     public LinkedHashSet<String> getCaseExportFields(String caseType) {
         LinkedHashSet<String> response = restHelper.get(serviceBaseURL, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<LinkedHashSet<String>>() {
         });
         log.info("Got {} case reporting fields for CaseType {}", response.size(), caseType, value(EVENT, INFO_CLIENT_GET_EXPORT_FIELDS_SUCCESS));
         return response;
     }
-
 
     public List<ExportViewDto> getExportViews() {
         List<ExportViewDto> views = restHelper.get(serviceBaseURL, "/export", new ParameterizedTypeReference<List<ExportViewDto>>() {
@@ -75,8 +91,13 @@ public class InfoClient {
     public ExportViewDto getExportView(String code) {
         ExportViewDto view = restHelper.get(serviceBaseURL, String.format("/export/%s", code), new ParameterizedTypeReference<ExportViewDto>() {
         });
-        log.info("Got {} export view, event: {}", view.getDisplayName(), value(EVENT, INFO_CLIENT_GET_EXPORT_VIEW_SUCCESS));
-        return view;
+
+        if (view != null) {
+            log.info("Got {} export view, event: {}", view.getDisplayName(), value(EVENT, INFO_CLIENT_GET_EXPORT_VIEW_SUCCESS));
+            return view;
+        }
+        log.warn("Could not find export view for '{}', event: {}", code, value(EVENT, INFO_CLIENT_GET_EXPORT_VIEW_FAILURE));
+        return null;
     }
 
 

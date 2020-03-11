@@ -6,16 +6,17 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.export.adapter.AbstractExportViewFieldAdapter;
+import uk.gov.digital.ho.hocs.audit.export.adapter.UserEmailAdapter;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -38,17 +39,15 @@ public class ExportService {
     private ObjectMapper mapper;
     private AuditRepository auditRepository;
     private InfoClient infoClient;
-    private CustomExportService customExportService;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
-    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, CustomExportService customExportService) {
+    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
-        this.customExportService = customExportService;
     }
 
     @Transactional(readOnly = true)
@@ -310,9 +309,91 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
 
-        customExportService.getResults(exportViewDto.getCode());
+        List<String> headers = buildHeaders(exportViewDto);
+        List<Object[]> dataList = auditRepository.getResultsFromView(exportViewDto.getCode());
+
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+
+            dataList.forEach((dataRow) -> {
+                try {
+                    printer.printRecord(convertCustomData(exportViewDto.getFields(), dataRow));
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
+        }
 
     }
+
+    private List<String> buildHeaders(ExportViewDto exportViewDto) {
+        List<String> headers = new ArrayList<>();
+
+        for (ExportViewFieldDto viewFieldDto : exportViewDto.getFields()) {
+            if (!shouldHide(viewFieldDto)) {
+                headers.add(viewFieldDto.getDisplayName());
+            }
+        }
+
+        return headers;
+    }
+
+    private boolean shouldHide(ExportViewFieldDto viewFieldDto) {
+
+        for (ExportViewFieldAdapterDto adapterDto : viewFieldDto.getAdapters()) {
+            if (ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(adapterDto.getType())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<String> convertCustomData(List<ExportViewFieldDto> fields, Object[] rawData) {
+        List<String> results = new ArrayList<>();
+        Map<String, AbstractExportViewFieldAdapter> adapters = getAdapters();
+        int index = 0;
+        for (ExportViewFieldDto fieldDto : fields) {
+            if (!shouldHide(fieldDto)) {
+                results.add(applyAdapters(rawData[index], fieldDto.getAdapters(), adapters));
+            }
+            index++;
+        }
+
+
+        return results;
+    }
+
+    private String applyAdapters(Object data, List<ExportViewFieldAdapterDto> adaptersDtos, Map<String, AbstractExportViewFieldAdapter> adapters) {
+
+
+        Object result = data;
+        for (ExportViewFieldAdapterDto adapterDto : adaptersDtos) {
+            AbstractExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
+
+            if (adapterToUse != null) {
+                result = adapterToUse.convert(result);
+            } else {
+                throw new IllegalArgumentException("Cannot convert data for Adapter Type: " + adapterDto.getType());
+            }
+        }
+
+        return result == null ? null : String.valueOf(result);
+
+    }
+
+    private Map<String, AbstractExportViewFieldAdapter> getAdapters() {
+        Map<String, AbstractExportViewFieldAdapter> result = new HashMap<>();
+        result.put(ExportViewConstants.FIELD_ADAPTER_USER_EMAIL, new UserEmailAdapter(infoClient));
+        result.put(ExportViewConstants.FIELD_ADAPTER_USER_EMAIL, new UserEmailAdapter(infoClient));
+
+        return result;
+
+    }
+
+
 }
 
 

@@ -90,16 +90,19 @@ public class DataExportResource {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
 
-        try {
-            response.setContentType("text/csv");
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + exportViewDto.getDisplayName() + ".csv" );
-            exportService.customExport(fromDate, toDate, response.getOutputStream(), exportViewDto);
-            response.setStatus(200);
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for custom report {}", code);
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        if(exportViewDto != null){
+            try {
+                response.setContentType("text/csv");
+                response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + exportViewDto.getDisplayName() + ".csv" );
+                exportService.customExport(fromDate, toDate, response.getOutputStream(), exportViewDto);
+                response.setStatus(200);
+            } catch (Exception ex) {
+                log.error("Error exporting CSV file for custom report {}", code);
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
         }
+
     }
 
     private String getFileName(String caseType, ExportType exportType) {

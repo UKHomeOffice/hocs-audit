@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 
 @Repository
-public interface AuditRepository extends PagingAndSortingRepository<AuditData, String> {
+public interface AuditRepository extends PagingAndSortingRepository<AuditData, String>, AuditRepositoryCustom {
 
 
     AuditData findAuditDataByUuid(UUID uuid);
