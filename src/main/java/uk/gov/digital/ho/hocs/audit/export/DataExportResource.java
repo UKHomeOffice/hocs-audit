@@ -80,19 +80,18 @@ public class DataExportResource {
         }
     }
 
-    @GetMapping(value = "/export/custom/{code}", params = {"fromDate", "toDate"})
+    @GetMapping(value = "/export/custom/{code}")
     public @ResponseBody
-    void getCustomDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
-                             @PathVariable("code") String code, HttpServletResponse response) {
+    void getCustomDataExport(@PathVariable("code") String code, HttpServletResponse response) {
 
         try {
-            customExportService.customExport(fromDate, toDate, response, code);
+            customExportService.customExport(response, code);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for custom report {}", code);
-            if(ex instanceof HttpClientErrorException){
+            if (ex instanceof HttpClientErrorException) {
                 response.setStatus(((HttpClientErrorException) ex).getRawStatusCode());
-            }else{
+            } else {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }

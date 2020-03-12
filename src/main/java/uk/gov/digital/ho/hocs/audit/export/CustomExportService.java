@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class CustomExportService {
     }
 
     @Transactional(readOnly = true)
-    public void customExport(LocalDate from, LocalDate to, HttpServletResponse response, String code) throws IOException {
+    public void customExport(HttpServletResponse response, String code) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
