@@ -80,7 +80,7 @@ public class DataExportResource {
         }
     }
 
-    @GetMapping(value = "/custom/export/{code}", params = {"fromDate", "toDate"})
+    @GetMapping(value = "/export/custom/{code}", params = {"fromDate", "toDate"})
     public @ResponseBody
     void getCustomDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
                              @PathVariable("code") String code, HttpServletResponse response) {
