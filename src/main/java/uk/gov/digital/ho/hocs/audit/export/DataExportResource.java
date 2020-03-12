@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewDto;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
@@ -15,11 +14,11 @@ import java.time.LocalDate;
 public class DataExportResource {
 
     private ExportService exportService;
-    private InfoClient infoClient;
+    private CustomExportService customExportService;
 
-    public DataExportResource(ExportService exportService, InfoClient infoClient) {
+    public DataExportResource(ExportService exportService, CustomExportService customExportService) {
         this.exportService = exportService;
-        this.infoClient = infoClient;
+        this.customExportService = customExportService;
     }
 
     @GetMapping(value = "/export/{caseType}", params = {"fromDate", "toDate", "exportType"})
@@ -86,19 +85,14 @@ public class DataExportResource {
     void getCustomDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
                              @PathVariable("code") String code, HttpServletResponse response) {
 
-
-        ExportViewDto exportViewDto = infoClient.getExportView(code);
-
-
-        if(exportViewDto != null){
-            try {
-                response.setContentType("text/csv");
-                response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=" + exportViewDto.getDisplayName() + ".csv" );
-                exportService.customExport(fromDate, toDate, response.getOutputStream(), exportViewDto);
-                response.setStatus(200);
-            } catch (Exception ex) {
-                log.error("Error exporting CSV file for custom report {}", code);
+        try {
+            customExportService.customExport(fromDate, toDate, response, code);
+            response.setStatus(200);
+        } catch (Exception ex) {
+            log.error("Error exporting CSV file for custom report {}", code);
+            if(ex instanceof HttpClientErrorException){
+                response.setStatus(((HttpClientErrorException) ex).getRawStatusCode());
+            }else{
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }

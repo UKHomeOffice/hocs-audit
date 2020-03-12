@@ -7,9 +7,9 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
 
-public class TeamAdapter extends AbstractExportViewFieldAdapter {
+public class TeamNameAdapter extends AbstractExportViewFieldAdapter {
 
-    public TeamAdapter(InfoClient infoClient) {
+    public TeamNameAdapter(InfoClient infoClient) {
         super(infoClient);
     }
 

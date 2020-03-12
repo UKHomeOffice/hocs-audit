@@ -5,20 +5,20 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
 
-public class UserEmailAdapter extends AbstractUserAdapter {
+public class UsernameAdapter extends AbstractUserAdapter {
 
-    public UserEmailAdapter(InfoClient infoClient) {
+    public UsernameAdapter(InfoClient infoClient) {
         super(infoClient);
     }
 
     @Override
     public String getAdapterType() {
-        return ExportViewConstants.FIELD_ADAPTER_USER_EMAIL;
+        return ExportViewConstants.FIELD_ADAPTER_USERNAME;
     }
 
     @Override
     protected String getUserData(UserDto userDto) {
-        return userDto.getEmail();
+        return userDto.getUsername();
     }
 
 }

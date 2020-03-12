@@ -74,6 +74,14 @@ public class InfoClient {
         return result;
     }
 
+    @Cacheable(value = "getUnitByTeam", unless = "#result == null")
+    public UnitDto getUnitByTeam(String uuid) {
+        UnitDto result = restHelper.get(serviceBaseURL, String.format("/team/%s/unit", uuid), new ParameterizedTypeReference<UnitDto>() {
+        });
+        log.info("Got teamDto for team uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_TEAM_SUCCESS));
+        return result;
+    }
+
     public LinkedHashSet<String> getCaseExportFields(String caseType) {
         LinkedHashSet<String> response = restHelper.get(serviceBaseURL, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<LinkedHashSet<String>>() {
         });

@@ -20,7 +20,9 @@ public enum LogEvent {
     INFO_CLIENT_GET_EXPORT_VIEW_FAILURE,
     CSV_EXPORT_START,
     CSV_EXPORT_COMPETE,
-    CSV_EXPORT_FAILURE, INFO_CLIENT_GET_TOPIC_SUCCESS;
+    CSV_EXPORT_FAILURE,
+    CSV_CUSTOM_CONVERTER_FAILURE,
+    INFO_CLIENT_GET_TOPIC_SUCCESS;
 
     public static final String EVENT = "event_id";
     public static final String EXCEPTION = "exception";
