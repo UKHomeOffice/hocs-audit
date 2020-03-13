@@ -8,4 +8,5 @@ public interface ExportViewConstants {
         String FIELD_ADAPTER_FIRST_AND_LAST_NAME = "userFirstAndLastName";
         String FIELD_ADAPTER_TEAM_NAME = "teamNameAdapter";
         String FIELD_ADAPTER_UNIT_NAME = "unitNameAdapter";
+        String FIELD_ADAPTER_TOPIC_NAME = "topicNameAdapter";
 }
