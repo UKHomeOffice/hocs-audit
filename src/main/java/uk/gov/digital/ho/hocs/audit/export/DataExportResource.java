@@ -88,7 +88,7 @@ public class DataExportResource {
             customExportService.customExport(response, code);
             response.setStatus(200);
         } catch (Exception ex) {
-            log.error("Error exporting CSV file for custom report {}", code);
+            log.error("Error exporting CSV file for custom report {}: {}", code, ex.getMessage());
             if (ex instanceof HttpClientErrorException) {
                 response.setStatus(((HttpClientErrorException) ex).getRawStatusCode());
             } else {
