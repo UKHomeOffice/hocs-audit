@@ -38,6 +38,12 @@ class AuditDataResource {
         return ResponseEntity.ok(CreateAuditResponse.from(auditData));
     }
 
+    @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<DeleteCaseAuditResponse> deleteCaseAudit(@PathVariable UUID caseUUID, @RequestBody DeleteCaseAuditDto request){
+        Integer auditCount = auditDataService.deleteCaseAudit(caseUUID, request.getDeleted());
+        return ResponseEntity.ok(DeleteCaseAuditResponse.from(caseUUID, request, auditCount));
+    }
+
     @GetMapping(value = "/audits", produces = APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<GetAuditListResponse> getAudits(@RequestParam("page") int page, @RequestParam int limit) {
         List<AuditData> auditData = auditDataService.getAuditDataList(page, limit);
