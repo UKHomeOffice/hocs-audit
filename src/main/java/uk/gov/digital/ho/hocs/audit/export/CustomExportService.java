@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.adapter.*;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewDto;
@@ -35,13 +36,14 @@ public class CustomExportService {
 
     private AuditRepository auditRepository;
     private InfoClient infoClient;
+    private CaseworkClient caseworkClient;
 
-    private Map<String, AbstractExportViewFieldAdapter> adapters;
+    private Map<String, ExportViewFieldAdapter> adapters;
 
-    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient) {
+    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CaseworkClient caseworkClient) {
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
-        this.adapters = buildAdapters();
+        this.caseworkClient = caseworkClient;
     }
 
     @Transactional(readOnly = true)
@@ -98,6 +100,8 @@ public class CustomExportService {
     }
 
     private List<String> convertCustomData(List<ExportViewFieldDto> fields, Object[] rawData) {
+        this.adapters = buildAdapters();
+
         List<String> results = new ArrayList<>();
         int index = 0;
         for (ExportViewFieldDto fieldDto : fields) {
@@ -116,7 +120,7 @@ public class CustomExportService {
 
         Object result = data;
         for (ExportViewFieldAdapterDto adapterDto : adaptersDtos) {
-            AbstractExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
+            ExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
 
             if (adapterToUse != null) {
                 try {
@@ -133,15 +137,18 @@ public class CustomExportService {
 
     }
 
-    private Map<String, AbstractExportViewFieldAdapter> buildAdapters() {
+    private Map<String, ExportViewFieldAdapter> buildAdapters() {
 
-        List<AbstractExportViewFieldAdapter> adapterList = new ArrayList<>();
+        List<ExportViewFieldAdapter> adapterList = new ArrayList<>();
 
         adapterList.add(new UserEmailAdapter(infoClient));
         adapterList.add(new UsernameAdapter(infoClient));
         adapterList.add(new UserFirstAndLastNameAdapter(infoClient));
         adapterList.add(new TeamNameAdapter(infoClient));
         adapterList.add(new UnitNameAdapter(infoClient));
+
+
+        adapterList.add(new TopicNameAdapter(caseworkClient.getAllCaseTopics()));
 
         return adapterList.stream().collect(Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
 
