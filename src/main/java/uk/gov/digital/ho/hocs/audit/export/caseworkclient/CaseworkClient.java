@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicsResponse;
@@ -37,8 +38,8 @@ public class CaseworkClient {
             Set<GetTopicResponse> topics = response.getTopics();
             log.info("Got {} case topics", topics.size(), value(EVENT, CASEWORK_CLIENT_GET_TOPICS_SUCCESS));
             return topics;
-        } catch (Exception ex) {
-            log.error("Error retrieving topics: {}", ex.getMessage());
+        } catch (Exception e) {
+            log.error("Error retrieving case topics: reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CASEWORK_CLIENT_GET_TOPICS_FAILURE));
             return Collections.emptySet();
         }
     }

@@ -44,7 +44,6 @@ public class CustomExportService {
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
-        this.adapters = buildAdapters();
     }
 
     @Transactional(readOnly = true)
@@ -101,6 +100,8 @@ public class CustomExportService {
     }
 
     private List<String> convertCustomData(List<ExportViewFieldDto> fields, Object[] rawData) {
+        this.adapters = buildAdapters();
+
         List<String> results = new ArrayList<>();
         int index = 0;
         for (ExportViewFieldDto fieldDto : fields) {
