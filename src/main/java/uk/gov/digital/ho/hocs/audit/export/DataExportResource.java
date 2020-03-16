@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
@@ -91,6 +92,8 @@ public class DataExportResource {
             log.error("Error exporting CSV file for custom report {}: {}", code, ex.getMessage());
             if (ex instanceof HttpClientErrorException) {
                 response.setStatus(((HttpClientErrorException) ex).getRawStatusCode());
+            } else if (ex instanceof EntityPermissionException) {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
             } else {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
