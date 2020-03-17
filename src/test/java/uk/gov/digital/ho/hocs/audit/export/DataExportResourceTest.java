@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
+import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -212,6 +213,18 @@ public class DataExportResourceTest {
 
         verify(customExportService).customExport(response, customReportCode);
         verify(response).setStatus(418);
+        checkNoMoreInteractions();
+    }
+
+    @Test
+    public void getCustomDataExport_EntityPermissionException() throws IOException {
+        String customReportCode = "Code123";
+
+        doThrow(new EntityPermissionException("Test exception")).when(customExportService).customExport(response, customReportCode);
+        dataExportResource.getCustomDataExport(customReportCode, response);
+
+        verify(customExportService).customExport(response, customReportCode);
+        verify(response).setStatus(403);
         checkNoMoreInteractions();
     }
 
