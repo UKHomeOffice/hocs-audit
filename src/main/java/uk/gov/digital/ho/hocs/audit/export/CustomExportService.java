@@ -6,7 +6,10 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
+import uk.gov.digital.ho.hocs.audit.application.RequestData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.adapter.*;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
@@ -37,41 +40,50 @@ public class CustomExportService {
     private AuditRepository auditRepository;
     private InfoClient infoClient;
     private CaseworkClient caseworkClient;
+    private RequestData requestData;
 
     private Map<String, ExportViewFieldAdapter> adapters;
 
-    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CaseworkClient caseworkClient) {
+    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CaseworkClient caseworkClient, RequestData requestData) {
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
+        this.requestData = requestData;
     }
 
     @Transactional(readOnly = true)
     public void customExport(HttpServletResponse response, String code) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
-        response.setContentType("text/csv");
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + exportViewDto.getDisplayName() + ".csv");
+
+        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) && !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
+            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.userId(), exportViewDto.getRequiredPermission());
+            throw new EntityPermissionException("No permission to view %s", code);
+        } else {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=" + exportViewDto.getDisplayName() + ".csv");
 
 
-        OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+            OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
+            OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
 
-        List<String> headers = buildHeaders(exportViewDto);
-        List<Object[]> dataList = auditRepository.getResultsFromView(exportViewDto.getCode());
+            List<String> headers = buildHeaders(exportViewDto);
+            List<Object[]> dataList = auditRepository.getResultsFromView(exportViewDto.getCode());
 
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
 
-            dataList.forEach((dataRow) -> {
-                try {
-                    printer.printRecord(convertCustomData(exportViewDto.getFields(), dataRow));
-                    outputWriter.flush();
-                } catch (Exception e) {
-                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-            log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
+                dataList.forEach((dataRow) -> {
+                    try {
+                        printer.printRecord(convertCustomData(exportViewDto.getFields(), dataRow));
+                        outputWriter.flush();
+                    } catch (Exception e) {
+                        log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    }
+                });
+                log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
+            }
+
         }
 
     }
@@ -144,11 +156,11 @@ public class CustomExportService {
         adapterList.add(new UserEmailAdapter(infoClient));
         adapterList.add(new UsernameAdapter(infoClient));
         adapterList.add(new UserFirstAndLastNameAdapter(infoClient));
-        adapterList.add(new TeamNameAdapter(infoClient));
         adapterList.add(new UnitNameAdapter(infoClient));
 
 
         adapterList.add(new TopicNameAdapter(caseworkClient.getAllCaseTopics()));
+        adapterList.add(new TeamNameAdapter(infoClient.getTeams()));
 
         return adapterList.stream().collect(Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
 

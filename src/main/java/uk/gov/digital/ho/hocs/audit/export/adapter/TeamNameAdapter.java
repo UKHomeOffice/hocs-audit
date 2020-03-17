@@ -2,15 +2,20 @@ package uk.gov.digital.ho.hocs.audit.export.adapter;
 
 import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
-public class TeamNameAdapter extends AbstractExportViewFieldAdapter {
+public class TeamNameAdapter implements ExportViewFieldAdapter {
 
-    public TeamNameAdapter(InfoClient infoClient) {
-        super(infoClient);
+
+    private Map<String, TeamDto> teamMap;
+
+    public TeamNameAdapter(Set<TeamDto> teams) {
+        teamMap = teams.stream().collect(Collectors.toMap(teamDto -> teamDto.getUuid().toString(), teamDto -> teamDto));
     }
 
     @Override
@@ -21,7 +26,7 @@ public class TeamNameAdapter extends AbstractExportViewFieldAdapter {
     @Override
     public String convert(Object input) {
         if (input instanceof String && !StringUtils.isEmpty(input)) {
-            TeamDto teamDto = infoClient.getTeam((String) input);
+            TeamDto teamDto = teamMap.get(input);
             return teamDto != null ? teamDto.getDisplayName() : null;
         }
         return null;

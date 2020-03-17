@@ -170,6 +170,17 @@ public class InfoClientTest {
         verifyNoMoreInteractions(restHelper);
     }
 
+    @Test
+    public void getExportView_nullResult() {
+        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class))).thenReturn(null);
+        ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
+
+        assertThat(results).isNull();
+        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class));
+
+        verifyNoMoreInteractions(restHelper);
+    }
+
 
     private List<ExportViewDto> buildExportViews() {
         return new ArrayList<>(Arrays.asList(buildExportView1(), buildExportView2()));

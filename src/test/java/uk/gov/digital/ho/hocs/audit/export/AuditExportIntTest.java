@@ -1,4 +1,5 @@
 package uk.gov.digital.ho.hocs.audit.export;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.junit.Before;
@@ -16,10 +17,12 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
@@ -47,6 +50,10 @@ public class AuditExportIntTest {
 
     @Value("classpath:export/resources/info-schema-MIN.json")
     private Resource infoSchemaMIN;
+
+    @Value("classpath:export/resources/info-teams.json")
+    private Resource infoTeams;
+
     private HttpHeaders headers;
 
     @LocalServerPort
@@ -74,7 +81,7 @@ public class AuditExportIntTest {
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getHeaders().get(HttpHeaders.CONTENT_TYPE)).contains("text/csv");
-        assertThat(result.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION)).contains(String.format("attachment; filename=%s-%s.csv",caseType.toLowerCase(),ExportType.CASE_DATA.toString().toLowerCase()));
+        assertThat(result.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION)).contains(String.format("attachment; filename=%s-%s.csv", caseType.toLowerCase(), ExportType.CASE_DATA.toString().toLowerCase()));
         mockInfoService.verify();
     }
 
@@ -88,7 +95,7 @@ public class AuditExportIntTest {
 
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -109,7 +116,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -122,7 +129,7 @@ public class AuditExportIntTest {
         String dateTo = "2018/1/55";
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo, ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -136,7 +143,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  "BAD_TYPE")
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", caseType, dateFrom, dateTo, "BAD_TYPE")
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -149,7 +156,7 @@ public class AuditExportIntTest {
         String dateTo = LocalDate.of(2019, 6, 1).format(dateFormatter);
         HttpEntity httpEntity = new HttpEntity(headers);
         ResponseEntity<String> result = testRestTemplate.exchange(
-                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s",caseType, dateFrom, dateTo,  ExportType.CASE_DATA)
+                getBasePath() + String.format("/export/%s/?fromDate=%s&toDate=%s&exportType=%s", caseType, dateFrom, dateTo, ExportType.CASE_DATA)
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -168,6 +175,13 @@ public class AuditExportIntTest {
                 .expect(requestTo("http://localhost:8085/caseType"))
                 .andExpect(method(GET))
                 .andRespond(withSuccess(infoCaseTypes, MediaType.APPLICATION_JSON_UTF8));
+    }
+
+    private void setupInfoServiceTeamsMock() {
+        mockInfoService
+                .expect(requestTo("http://localhost:8085/team"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(infoTeams, MediaType.APPLICATION_JSON_UTF8));
     }
 
     private MockRestServiceServer buildMockService(RestTemplate restTemplate) {
