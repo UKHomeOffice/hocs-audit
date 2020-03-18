@@ -30,6 +30,7 @@ public class InfoClient {
         this.serviceBaseURL = infoService;
     }
 
+    @Cacheable(value = "getCaseTypes", unless = "#result == null")
     public Set<CaseTypeDto> getCaseTypes() {
         Set<CaseTypeDto> response = restHelper.get(serviceBaseURL, "/caseType", new ParameterizedTypeReference<Set<CaseTypeDto>>() {
         });
@@ -37,6 +38,7 @@ public class InfoClient {
         return response;
     }
 
+    @Cacheable(value = "getUsers", unless = "#result == null")
     public Set<UserDto> getUsers() {
         Set<UserDto> users = restHelper.get(serviceBaseURL, "/users", new ParameterizedTypeReference<Set<UserDto>>() {
         });
@@ -52,6 +54,7 @@ public class InfoClient {
         return result;
     }
 
+    @Cacheable(value = "getTopics", unless = "#result == null")
     public Set<TopicDto> getTopics() {
         Set<TopicDto> infoTopic = restHelper.get(serviceBaseURL, String.format("/topics"), new ParameterizedTypeReference<Set<TopicDto>>() {
         });
@@ -59,6 +62,7 @@ public class InfoClient {
         return infoTopic;
     }
 
+    @Cacheable(value = "getTeams", unless = "#result == null")
     public Set<TeamDto> getTeams() {
         Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team", new ParameterizedTypeReference<Set<TeamDto>>() {
         });
@@ -80,6 +84,14 @@ public class InfoClient {
         });
         log.info("Got teamDto for team uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_TEAM_SUCCESS));
         return result;
+    }
+
+    @Cacheable(value = "getUnits", unless = "#result == null")
+    public Set<UnitDto> getUnits() {
+        Set<UnitDto> units = restHelper.get(serviceBaseURL, "/unit", new ParameterizedTypeReference<Set<UnitDto>>() {
+        });
+        log.info("Got {} teams", units.size(), value(EVENT, INFO_CLIENT_GET_UNITS_SUCCESS));
+        return units;
     }
 
     public LinkedHashSet<String> getCaseExportFields(String caseType) {

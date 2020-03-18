@@ -6,15 +6,15 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.adapter.*;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewFieldAdapterDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewFieldDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
@@ -52,7 +52,7 @@ public class CustomExportDataConverter {
             List<Object[]> convertedData = new ArrayList<>();
 
             for (Object[] row : input) {
-                convertedData.add(convertCustomDataRow(fields, row));
+                convertedData.add(convertCustomDataRow(row, fields));
             }
 
             return convertedData;
@@ -63,7 +63,7 @@ public class CustomExportDataConverter {
 
     }
 
-    private Object[] convertCustomDataRow(List<ExportViewFieldDto> fields, Object[] rawData) {
+    private Object[] convertCustomDataRow(Object[] rawData, List<ExportViewFieldDto> fields) {
 
         List<String> results = new ArrayList<>();
         int index = 0;
@@ -112,17 +112,20 @@ public class CustomExportDataConverter {
     }
 
     private void initialiseAdapters() {
-
+        Set<UserDto> users = infoClient.getUsers();
+        Set<TeamDto> teams = infoClient.getTeams();
+        Set<UnitDto> units = infoClient.getUnits();
+        Set<GetTopicResponse> topics = caseworkClient.getAllCaseTopics();
         List<ExportViewFieldAdapter> adapterList = new ArrayList<>();
 
-        adapterList.add(new UserEmailAdapter(infoClient));
-        adapterList.add(new UsernameAdapter(infoClient));
-        adapterList.add(new UserFirstAndLastNameAdapter(infoClient));
-        adapterList.add(new UnitNameAdapter(infoClient));
+        adapterList.add(new UserEmailAdapter(users));
+        adapterList.add(new UsernameAdapter(users));
+        adapterList.add(new UserFirstAndLastNameAdapter(users));
+        adapterList.add(new UnitNameAdapter(teams, units));
 
 
-        adapterList.add(new TopicNameAdapter(caseworkClient.getAllCaseTopics()));
-        adapterList.add(new TeamNameAdapter(infoClient.getTeams()));
+        adapterList.add(new TopicNameAdapter(topics));
+        adapterList.add(new TeamNameAdapter(teams));
 
         adapters = adapterList.stream().collect(Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
 

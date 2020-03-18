@@ -20,4 +20,7 @@ public class TeamDto {
 
     @JsonProperty("active")
     private boolean active;
+
+    @JsonProperty("unitUUID")
+    private String unitUUID;
 }
