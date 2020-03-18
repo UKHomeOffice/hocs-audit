@@ -1,14 +1,15 @@
 package uk.gov.digital.ho.hocs.audit.export.adapter;
 
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+
+import java.util.Set;
 
 
 public class UsernameAdapter extends AbstractUserAdapter {
 
-    public UsernameAdapter(InfoClient infoClient) {
-        super(infoClient);
+    public UsernameAdapter(Set<UserDto> users) {
+        super(users);
     }
 
     @Override

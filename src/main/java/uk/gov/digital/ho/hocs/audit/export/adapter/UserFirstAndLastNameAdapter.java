@@ -1,14 +1,15 @@
 package uk.gov.digital.ho.hocs.audit.export.adapter;
 
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+
+import java.util.Set;
 
 
 public class UserFirstAndLastNameAdapter extends AbstractUserAdapter {
 
-    public UserFirstAndLastNameAdapter(InfoClient infoClient) {
-        super(infoClient);
+    public UserFirstAndLastNameAdapter(Set<UserDto> users) {
+        super(users);
     }
 
     @Override
@@ -18,7 +19,7 @@ public class UserFirstAndLastNameAdapter extends AbstractUserAdapter {
 
     @Override
     protected String getUserData(UserDto userDto) {
-        return String.format("%s, %s", userDto.getFirstName(), userDto.getLastName());
+        return String.format("%s %s", userDto.getFirstName(), userDto.getLastName());
     }
 
 }

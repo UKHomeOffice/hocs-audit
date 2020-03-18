@@ -239,8 +239,8 @@ public class AuditExportServiceTest {
         String[] expectedHeaders = new String[]{"teamUUID", "teamName"};
 
         LinkedHashSet<TeamDto> teams = new LinkedHashSet<TeamDto>(){{
-            add(new TeamDto("Team 1", UUID.randomUUID(), true));
-            add(new TeamDto("Team 2", UUID.randomUUID(), true));
+            add(new TeamDto("Team 1", UUID.randomUUID(), true, UUID.randomUUID().toString()));
+            add(new TeamDto("Team 2", UUID.randomUUID(), true, UUID.randomUUID().toString()));
         }};
 
         when(infoClient.getTeams()).thenReturn(teams);
