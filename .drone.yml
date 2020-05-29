@@ -70,13 +70,11 @@ pipeline:
   deploy-to-cs-dev-from-build-number:
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
-      - DOMAIN=cs
-      - KUBE_NAMESPACE=cs-dev
-      - ENVIRONMENT=dev
+      - ENVIRONMENT=cs-dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_audit_dev
+      - hocs_audit_cs_dev
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -87,13 +85,11 @@ pipeline:
   deploy-to-wcs-dev-from-build-number:
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
-      - DOMAIN=wcs
-      - KUBE_NAMESPACE=wcs-dev
-      - ENVIRONMENT=dev
+      - ENVIRONMENT=wcs-dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_audit_dev
+      - hocs_audit_wcs_dev
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
@@ -107,22 +103,24 @@ pipeline:
       - ENVIRONMENT=${DRONE_DEPLOY_TO}
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_audit_dev
-      - hocs_audit_demo
+      - hocs_audit_cs_dev
+      - hocs_audit_cs_demo
+      - hocs_audit_wcs_dev
+      - hocs_audit_wcs_demo
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
     when:
       event: deployment
-      environment: [dev, demo]
+      environment: [cs-dev, cs-demo, wcs-dev, wcs-demo]
 
-  deploy-to-qa:
+  deploy-to-cs-qa:
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
-      - ENVIRONMENT=qa
+      - ENVIRONMENT=cs-qa
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_audit_qa
+      - hocs_audit_cs_qa
     commands:
       - source version.txt
       - echo $VERSION
@@ -130,21 +128,51 @@ pipeline:
       - ./deploy.sh
     when:
       event: deployment
-      environment: qa
+      environment: cs-qa
 
-  deploy-to-prod:
+  deploy-to-wcs-qa:
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
-      - ENVIRONMENT=prod
+      - ENVIRONMENT=wcs-qa
+      - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
+    secrets:
+      - hocs_audit_wcs_qa
+    commands:
+      - source version.txt
+      - echo $VERSION
+      - cd kube-hocs-audit
+      - ./deploy.sh
+    when:
+      event: deployment
+      environment: wcs-qa
+
+  deploy-to-cs-prod:
+    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    environment:
+      - ENVIRONMENT=cs-prod
       - KUBE_SERVER=https://kube-api-prod.prod.acp.homeoffice.gov.uk
     secrets:
-      - hocs_audit_prod
+      - hocs_audit_cs_prod
     commands:
       - cd kube-hocs-audit
       - ./deploy.sh
     when:
       event: deployment
-      environment: prod
+      environment: cs-prod
+
+  deploy-to-wcs-prod:
+    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    environment:
+      - ENVIRONMENT=wcs-prod
+      - KUBE_SERVER=https://kube-api-prod.prod.acp.homeoffice.gov.uk
+    secrets:
+      - hocs_audit_wcs_prod
+    commands:
+      - cd kube-hocs-audit
+      - ./deploy.sh
+    when:
+      event: deployment
+      environment: wcs-prod
 
 services:
   postgres:
