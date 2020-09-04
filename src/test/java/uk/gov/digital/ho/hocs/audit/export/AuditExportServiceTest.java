@@ -44,6 +44,9 @@ public class AuditExportServiceTest {
     @Mock
     private InfoClient infoClient;
 
+    @Mock
+    private ExportDataConverter exportDataConverter;
+
     private ExportService exportService;
     private SpringConfiguration configuration = new SpringConfiguration();
     private ObjectMapper mapper;
@@ -84,7 +87,7 @@ public class AuditExportServiceTest {
     public void setup() {
         mapper = configuration.initialiseObjectMapper();
         when(infoClient.getCaseTypes()).thenReturn(caseTypes);
-        exportService = new ExportService(auditRepository, mapper, infoClient);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter);
     }
 
     @Test
@@ -95,7 +98,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false);
 
         List<CSVRecord> rows = getCSVRows(outputStream.toString());
         assertThat(rows.size()).isEqualTo(3);
@@ -124,7 +127,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -135,13 +138,27 @@ public class AuditExportServiceTest {
     public void caseDataExportShouldOnlyRequestCreateUpdateEventsAndCaseType() throws IOException {
 
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
-
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false);
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
+        verify(exportDataConverter, times(0)).convertData(any());
+    }
+
+    @Test
+    public void caseDataExportWhenConvertThenConvertDataInvokedOncePerCaseAuditData() throws IOException {
+
+        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
+        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+        when(exportDataConverter.convertData(any())).thenAnswer(a -> a.getArguments()[0]);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, true);
+
+        verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
+        verify(exportDataConverter, times(getCaseDataAuditData().size())).convertData(any());
     }
 
     @Test
@@ -151,7 +168,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -162,8 +179,9 @@ public class AuditExportServiceTest {
     public void caseTopicExportShouldOnlyRequestTopicEventsAndCaseType() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.TOPIC_EVENTS, "a1");
+        verify(exportDataConverter, times(0)).convertData(any());
     }
 
     @Test
@@ -176,7 +194,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -187,8 +205,9 @@ public class AuditExportServiceTest {
     public void caseCorrespondentExportShouldOnlyRequestCorrespondentEventsAndCaseType() throws IOException {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CORRESPONDENT_EVENTS, "a1");
+        verify(exportDataConverter, times(0)).convertData(any());
     }
 
     @Test
@@ -196,7 +215,7 @@ public class AuditExportServiceTest {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "allocatedTo", "deadline"};
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -207,8 +226,9 @@ public class AuditExportServiceTest {
     public void caseAllocationsExportShouldOnlyRequestCreateUpdateEventsAndCaseType() throws IOException {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.ALLOCATION_EVENTS, "a1");
+        verify(exportDataConverter, times(0)).convertData(any());
     }
 
 

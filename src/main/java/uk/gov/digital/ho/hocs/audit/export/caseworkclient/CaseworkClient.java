@@ -7,6 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlinesResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicsResponse;
 
@@ -28,6 +30,19 @@ public class CaseworkClient {
                       @Value("${hocs.case-service}") String caseworkService) {
         this.restHelper = restHelper;
         this.serviceBaseURL = caseworkService;
+    }
+
+    public Set<GetCorrespondentOutlineResponse> getAllActiveCorrespondents(){
+
+        try {
+            GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents", GetCorrespondentOutlinesResponse.class);
+            Set<GetCorrespondentOutlineResponse> correspondents = response.getCorrespondents();
+            log.info("Got {} all active correspondents", correspondents.size(), value(EVENT, CASEWORK_CLIENT_GET_CORRESPONDENTS_SUCCESS));
+            return correspondents;
+        } catch (Exception e) {
+            log.error("Error retrieving all active correspondents: reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CASEWORK_CLIENT_GET_CORRESPONDENTS_FAILURE));
+            return Collections.emptySet();
+        }
     }
 
     public Set<GetTopicResponse> getAllCaseTopics() {

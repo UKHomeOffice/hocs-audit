@@ -26,12 +26,13 @@ public class DataExportResource {
     public @ResponseBody
     void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
                        @PathVariable("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
+                       @RequestParam(name = "convert", defaultValue = "false") boolean convert,
                        HttpServletResponse response) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, exportType));
-            exportService.auditExport(fromDate, toDate, response.getOutputStream(), caseType, exportType);
+            exportService.auditExport(fromDate, toDate, response.getOutputStream(), caseType, exportType, convert);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for case type {} and export type {} for reason {}", caseType, exportType.toString(), ex.toString());
