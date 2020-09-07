@@ -46,14 +46,14 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, response);
+        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, response);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType);
+        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false);
 
         checkNoMoreInteractions();
     }
@@ -67,16 +67,16 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false);
 
-        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, response);
+        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, response);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType);
+        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false);
 
         checkNoMoreInteractions();
     }

@@ -37,25 +37,27 @@ public class ExportService {
     private ObjectMapper mapper;
     private AuditRepository auditRepository;
     private InfoClient infoClient;
+    private ExportDataConverter exportDataConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
-    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient) {
+    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
+        this.exportDataConverter = exportDataConverter;
     }
 
     @Transactional(readOnly = true)
-    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType) throws IOException {
+    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType, boolean convert) throws IOException {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
         switch (exportType) {
             case CASE_DATA:
-                caseDataExport(from, to, outputWriter, caseTypeCode, caseType);
+                caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert);
                 break;
             case TOPICS:
                 topicExport(from, to, outputWriter, caseTypeCode);
@@ -71,7 +73,7 @@ public class ExportService {
         }
     }
 
-    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType) throws IOException {
+    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert) throws IOException {
         log.info("Exporting CASE_DATA to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toList());
         LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
@@ -82,9 +84,14 @@ public class ExportService {
             Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_DATA_EVENTS, caseTypeCode);
+
             data.forEach((audit) -> {
                 try {
-                    printer.printRecord(parseCaseDataAuditPayload(audit, caseDataHeaders));
+                    String[] parsedAudit = parseCaseDataAuditPayload(audit, caseDataHeaders);
+                    if (convert){
+                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                    }
+                    printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
