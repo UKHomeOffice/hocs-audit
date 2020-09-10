@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ExportDataConverterTest {
 
+    private static final String CASE_ID = UUID.randomUUID().toString();
+    private static final String CASE_ID_NONE = UUID.randomUUID().toString();
     private static final String USER1_ID = UUID.randomUUID().toString();
     private static final String USER1_USERNAME = "user-Jim";
     private static final String USER1_FIRST_NAME = "Jim";
@@ -38,6 +41,8 @@ public class ExportDataConverterTest {
     private static final String TEAM1_DISPLAY_NAME = "Team 1";
     private static final String CORR1_ID = UUID.randomUUID().toString();
     private static final String CORR1_FULLNAME = "Bob Smith";
+    private static final String CASE_REF = "REF/1234567/890";
+    private static final String CASE_REF_NONE = "";
 
     @Mock
     private InfoClient infoClient;
@@ -55,9 +60,18 @@ public class ExportDataConverterTest {
             when(infoClient.getUnits()).thenReturn(buildUnits());
             when(caseworkClient.getAllCaseTopics()).thenReturn(buildTopics());
             when(caseworkClient.getAllActiveCorrespondents()).thenReturn(buildCorrespondents());
+            when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
+            when(caseworkClient.getCaseReference(CASE_ID_NONE)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), CASE_REF_NONE));
         }
 
         converter = new ExportDataConverter(infoClient, caseworkClient);
+    }
+
+    @Test
+    public void testUuidRegex() {
+        String uuid = UUID.randomUUID().toString();
+        assertThat(converter.isUUID(uuid)).isTrue();
+        assertThat(converter.isUUID(uuid.replace('-','1'))).isFalse();
     }
 
     @Test
@@ -173,6 +187,33 @@ public class ExportDataConverterTest {
         assertThat(testResult[2]).isEqualTo(TOPIC1_TEXT);
         assertThat(testResult[3]).isEqualTo(TEAM1_DISPLAY_NAME);
         assertThat(testResult[4]).isEqualTo(CORR1_FULLNAME);
+    }
+
+
+    @Test
+    public void convertCaseRefLookup() {
+
+        String[] testData = { CASE_ID };
+
+        String[] testResult = converter.convertData(testData);
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(1);
+        assertThat(testResult[0]).isEqualTo(CASE_REF);
+
+    }
+
+    @Test
+    public void convertCaseRefNonLookup() {
+
+        String[] testData = { CASE_ID_NONE };
+
+        String[] testResult = converter.convertData(testData);
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(1);
+        assertThat(testResult[0]).isEqualTo(CASE_ID_NONE); // leaves the data as is
+
     }
 
 

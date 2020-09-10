@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.export;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
@@ -15,6 +16,8 @@ import java.util.*;
 @Slf4j
 @Service
 public class ExportDataConverter {
+
+    private static String UUID_REGEX = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 
     private InfoClient infoClient;
     private CaseworkClient caseworkClient;
@@ -31,15 +34,32 @@ public class ExportDataConverter {
         }
 
         for (int i = 0; i < auditData.length; i++){
-            if (uuidToName.containsKey(auditData[i])){
-                auditData[i] = uuidToName.get(auditData[i]);
+            String uuidData = auditData[i];
+            if (!isUUID(uuidData)) {
+                continue;
+            }
+            if (uuidToName.containsKey(uuidData)){
+                auditData[i] = uuidToName.get(uuidData);
+            } else {
+                GetCaseReferenceResponse caseReferenceResponse = caseworkClient.getCaseReference(uuidData);
+                if (caseReferenceResponse.getReference() != null && !caseReferenceResponse.getReference().isEmpty()) {
+                    uuidToName.put(uuidData, caseReferenceResponse.getReference());
+                    auditData[i] = caseReferenceResponse.getReference();
+                }
             }
         }
         return auditData;
     }
 
+    boolean isUUID(String uuid) {
+        if (uuid == null || uuid.isEmpty()) {
+            return false;
+        }
+        return uuid.matches(UUID_REGEX);
+    }
+
     private void initialiseUuidToNameMap() {
-        uuidToName = new HashMap<String, String>();
+        uuidToName = new HashMap<>();
 
         Set<UserDto> users = infoClient.getUsers();
         users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
