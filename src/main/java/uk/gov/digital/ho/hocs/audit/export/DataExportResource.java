@@ -45,7 +45,7 @@ public class DataExportResource {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=topics.csv");
+                    "attachment; filename=" + getFilename("topics"));
             exportService.staticTopicExport(response.getOutputStream());
             response.setStatus(200);
         } catch (Exception ex) {
@@ -59,7 +59,7 @@ public class DataExportResource {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=teams.csv");
+                    "attachment; filename=" + getFilename("teams"));
             exportService.staticTeamExport(response.getOutputStream());
             response.setStatus(200);
         } catch (Exception ex) {
@@ -73,7 +73,7 @@ public class DataExportResource {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=users.csv");
+                    "attachment; filename=" + getFilename("users"));
             exportService.staticUserExport(response.getOutputStream());
             response.setStatus(200);
         } catch (Exception ex) {
@@ -103,6 +103,10 @@ public class DataExportResource {
     }
 
     private String getFileName(String caseType, ExportType exportType) {
-        return String.format("%s-%s.csv", caseType.toLowerCase(), exportType.toString().toLowerCase());
+        return String.format("%s-%s-%s.csv", caseType.toLowerCase(), exportType.toString().toLowerCase(), LocalDate.now().toString());
+    }
+
+    private String getFilename(String export) {
+        return String.format("%s-%s.csv", export, LocalDate.now().toString());
     }
 }

@@ -16,6 +16,7 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewFieldDto;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,7 +79,7 @@ public class CustomExportServiceTest {
 
         verify(servletResponse).setContentType("text/csv");
         verify(servletResponse).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + VIEW_DISPLAY_NAME_1 + ".csv");
+                "attachment; filename=" + VIEW_DISPLAY_NAME_1 + "-" + LocalDate.now().toString() + ".csv");
         verify(servletResponse).getOutputStream();
         verify(infoClient).getExportView(VIEW_CODE_1);
         verify(auditRepository).getResultsFromView(VIEW_CODE_1);
