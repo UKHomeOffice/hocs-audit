@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
@@ -51,7 +52,7 @@ public class CustomExportService {
         } else {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + exportViewDto.getDisplayName() + ".csv");
+                    "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
 
 
             OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
@@ -77,6 +78,9 @@ public class CustomExportService {
 
     }
 
+    private String getFilename(String displayName) {
+        return String.format("%s-%s.csv", displayName, LocalDate.now().toString());
+    }
 }
 
 
