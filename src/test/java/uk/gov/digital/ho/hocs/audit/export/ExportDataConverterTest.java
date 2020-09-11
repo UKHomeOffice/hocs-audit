@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -200,7 +201,7 @@ public class ExportDataConverterTest {
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(1);
         assertThat(testResult[0]).isEqualTo(CASE_REF);
-
+        verify(caseworkClient).getCaseReference(CASE_ID);
     }
 
     @Test
@@ -213,6 +214,7 @@ public class ExportDataConverterTest {
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(1);
         assertThat(testResult[0]).isEqualTo(CASE_ID_NONE); // leaves the data as is
+        verify(caseworkClient).getCaseReference(CASE_ID_NONE);
 
     }
 
