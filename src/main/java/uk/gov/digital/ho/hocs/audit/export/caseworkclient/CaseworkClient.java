@@ -3,17 +3,15 @@ package uk.gov.digital.ho.hocs.audit.export.caseworkclient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlinesResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicsResponse;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.*;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
@@ -56,6 +54,19 @@ public class CaseworkClient {
         } catch (Exception e) {
             log.error("Error retrieving case topics: reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CASEWORK_CLIENT_GET_TOPICS_FAILURE));
             return Collections.emptySet();
+        }
+    }
+
+    @Cacheable (value = "getCaseReference", unless = "#result == null")
+    public GetCaseReferenceResponse getCaseReference(String uuid) {
+
+        try {
+            GetCaseReferenceResponse caseReferenceResponse = restHelper.get(serviceBaseURL, String.format("/case/reference/%s", uuid), GetCaseReferenceResponse.class);
+            log.info("Got {} case reference for uuid {}", caseReferenceResponse.getReference(), caseReferenceResponse.getUuid(), value(EVENT, CASEWORK_CLIENT_GET_CASE_REFERENCE_SUCCESS));
+            return caseReferenceResponse;
+        } catch (Exception e) {
+            log.error("Error retrieving case reference: reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CASEWORK_CLIENT_GET_CASE_REFERENCE_FAILURE));
+            return new GetCaseReferenceResponse(UUID.fromString(uuid), "");
         }
     }
 }

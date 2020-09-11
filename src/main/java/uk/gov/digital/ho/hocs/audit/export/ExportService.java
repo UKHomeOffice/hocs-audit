@@ -63,10 +63,10 @@ public class ExportService {
                 topicExport(from, to, outputWriter, caseTypeCode);
                 break;
             case CORRESPONDENTS:
-                correspondentExport(from, to, outputWriter, caseTypeCode);
+                correspondentExport(from, to, outputWriter, caseTypeCode, convert);
                 break;
             case ALLOCATIONS:
-                allocationExport(from, to, outputWriter, caseTypeCode);
+                allocationExport(from, to, outputWriter, caseTypeCode, convert);
                 break;
             default:
                 throw new AuditExportException("Unknown export type requests");
@@ -153,7 +153,7 @@ public class ExportService {
         return data;
     }
 
-    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode) throws IOException {
+    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert) throws IOException {
         log.info("Exporting CORRESPONDENT to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid",
                 "correspondentUuid", "fullname", "address1", "address2",
@@ -168,7 +168,11 @@ public class ExportService {
 
             data.forEach((audit) -> {
                 try {
-                    printer.printRecord(parseCorrespondentAuditPayload(audit));
+                    String[] parsedAudit = parseCorrespondentAuditPayload(audit);
+                    if (convert){
+                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                    }
+                    printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -178,7 +182,7 @@ public class ExportService {
         }
     }
 
-    private List<String> parseCorrespondentAuditPayload(AuditData audit) throws IOException {
+    private String[] parseCorrespondentAuditPayload(AuditData audit) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Correspondent correspondentData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Correspondent.class);
         data.add(audit.getAuditTimestamp().toString());
@@ -202,10 +206,10 @@ public class ExportService {
         data.add(correspondentData.getEmail());
         data.add(correspondentData.getReference());
         data.add(correspondentData.getExternalKey());
-        return data;
+        return data.toArray(new String[data.size()]);
     }
 
-    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode) throws IOException {
+    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "stage", "allocatedTo", "deadline").collect(Collectors.toList());
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
@@ -214,7 +218,11 @@ public class ExportService {
                     ALLOCATION_EVENTS, caseTypeCode);
             data.forEach((audit) -> {
                 try {
-                    printer.printRecord(parseAllocationAuditPayload(audit));
+                    String[] parsedAudit = parseAllocationAuditPayload(audit);
+                    if (convert){
+                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                    }
+                    printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -224,7 +232,7 @@ public class ExportService {
         }
     }
 
-    private List<String> parseAllocationAuditPayload(AuditData audit) throws IOException {
+    private String[] parseAllocationAuditPayload(AuditData audit) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.StageAllocation allocationData = mapper.readValue(audit.getAuditPayload(), AuditPayload.StageAllocation.class);
         data.add(audit.getAuditTimestamp().toString());
@@ -234,7 +242,7 @@ public class ExportService {
         data.add(allocationData.getStage());
         data.add(Objects.toString(allocationData.getAllocatedToUUID(), ""));
         data.add(Objects.toString(allocationData.getDeadline(), ""));
-        return data;
+        return data.toArray(new String[data.size()]);
     }
 
     public void staticTopicExport(OutputStream output) throws IOException {
