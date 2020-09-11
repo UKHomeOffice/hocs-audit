@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.export.caseworkclient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
@@ -56,6 +57,7 @@ public class CaseworkClient {
         }
     }
 
+    @Cacheable (value = "getCaseReference", unless = "#result == null")
     public GetCaseReferenceResponse getCaseReference(String uuid) {
 
         try {
