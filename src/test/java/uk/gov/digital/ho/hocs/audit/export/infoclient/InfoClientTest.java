@@ -105,6 +105,18 @@ public class InfoClientTest {
         verifyNoMoreInteractions(restHelper);
     }
 
+    @Test
+    public void getTeamsForUnit() {
+        String unitUUID = UUID.randomUUID().toString();
+        Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
+        when(restHelper.get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+
+        Set<TeamDto> results = infoClient.getTeamsForUnit(unitUUID);
+
+        assertThat(results).isEqualTo(response);
+        verify(restHelper).get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"), any(ParameterizedTypeReference.class));
+        verifyNoMoreInteractions(restHelper);
+    }
 
     @Test
     public void getTeam() {

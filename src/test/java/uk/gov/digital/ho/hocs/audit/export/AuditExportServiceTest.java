@@ -21,10 +21,7 @@ import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.io.*;
 import java.util.stream.Collectors;
@@ -274,6 +271,34 @@ public class AuditExportServiceTest {
         assertThat(rows.size()).isEqualTo(2);
         assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
         assertThat(rows.get(0).get("teamName")).isEqualTo("Team 1");
+    }
+
+    @Test
+    public void staticUnitsForTeamsExportShouldReturnCSV() throws IOException {
+        String[] expectedHeaders = new String[]{"unitUUID", "unitName", "teamUUID", "teamName"};
+        String unitUUID = UUID.randomUUID().toString();
+        LinkedHashSet<UnitDto> units = new LinkedHashSet<UnitDto>(){{
+           add(new UnitDto("Unit 1", unitUUID, "1"));
+        }};
+        LinkedHashSet<TeamDto> teams = new LinkedHashSet<TeamDto>(){{
+            add(new TeamDto("Team 1", UUID.randomUUID(), true, UUID.randomUUID().toString()));
+            add(new TeamDto("Team 2", UUID.randomUUID(), true, UUID.randomUUID().toString()));
+        }};
+        when(infoClient.getUnits()).thenReturn(units);
+        when(infoClient.getTeamsForUnit(unitUUID)).thenReturn(teams);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticUnitsForTeamsExport(outputStream);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        List<CSVRecord> rows = getCSVRows(csvBody);
+        assertThat(rows.size()).isEqualTo(2);
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+        assertThat(rows.get(0).get("unitName")).isEqualTo("Unit 1");
+        assertThat(rows.get(0).get("teamName")).isEqualTo("Team 1");
+        assertThat(rows.get(1).get("unitName")).isEqualTo("Unit 1");
+        assertThat(rows.get(1).get("teamName")).isEqualTo("Team 2");
     }
 
     @Test

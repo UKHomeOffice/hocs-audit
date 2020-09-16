@@ -14,6 +14,7 @@ import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
 import java.io.BufferedOutputStream;
@@ -313,6 +314,42 @@ public class ExportService {
                 }
             });
             log.info("Export STATIC TEAM LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    public void staticUnitsForTeamsExport(OutputStream output) throws IOException {
+        log.info("Exporting STATIC UNITS and TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
+
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("unitUUID", "unitName", "teamUUID", "teamName").collect(Collectors.toList());
+
+        Set<UnitDto> units = infoClient.getUnits();
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+
+            units.forEach((unit) -> {
+                Set<TeamDto> teams = infoClient.getTeamsForUnit(unit.getUuid());
+
+                if (teams.size() == 0) {
+                    try {
+                        printer.printRecord(unit.getUuid(), unit.getDisplayName(), null, null);
+                        outputWriter.flush();
+                    } catch (IOException e) {
+                        log.error("Unable to parse record for static unit {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    }
+                } else {
+                    teams.forEach((team) -> {
+                        try {
+                            printer.printRecord(unit.getUuid(), unit.getDisplayName(), team.getUuid(), team.getDisplayName());
+                            outputWriter.flush();
+                        } catch (IOException e) {
+                            log.error("Unable to parse record for static unit and team {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                        }
+                    });
+                }
+            });
+            log.info("Export STATIC UNITS and TEAMS LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
         }
     }
 
