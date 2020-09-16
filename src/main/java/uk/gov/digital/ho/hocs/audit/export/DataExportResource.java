@@ -77,7 +77,7 @@ public class DataExportResource {
             exportService.staticUnitsForTeamsExport(response.getOutputStream());
             response.setStatus(200);
         } catch (Exception ex) {
-            log.error("Error exporting CSV file for static team list for reason {}", ex.toString());
+            log.error("Error exporting CSV file for static units for teams list for reason {}", ex.toString());
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
