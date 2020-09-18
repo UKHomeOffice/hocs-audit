@@ -68,6 +68,20 @@ public class DataExportResource {
         }
     }
 
+    @GetMapping("/export/units/teams")
+    public void getUnitsForTeams(HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=" + getFilename("units_teams"));
+            exportService.staticUnitsForTeamsExport(response.getOutputStream());
+            response.setStatus(200);
+        } catch (Exception ex) {
+            log.error("Error exporting CSV file for static units for teams list for reason {}", ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
     @GetMapping("/export/users")
     public void getUsers(HttpServletResponse response) {
         try {
