@@ -94,6 +94,18 @@ public class InfoClientTest {
     }
 
     @Test
+    public void getTopicsWithTeams() {
+        Set<TopicTeamDto> response = new HashSet<>(Collections.singletonList(new TopicTeamDto("Topic text", UUID.randomUUID(), null)));
+        when(restHelper.get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+
+        Set<TopicTeamDto> results = infoClient.getTopicsWithTeams("TEST");
+
+        assertThat(results).isEqualTo(response);
+        verify(restHelper).get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class));
+        verifyNoMoreInteractions(restHelper);
+    }
+
+    @Test
     public void getTeams() {
         Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
         when(restHelper.get(eq(BASE_URL), eq("/team"), any(ParameterizedTypeReference.class))).thenReturn(response);
