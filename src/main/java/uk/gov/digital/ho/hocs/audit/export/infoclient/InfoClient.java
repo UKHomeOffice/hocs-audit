@@ -62,6 +62,13 @@ public class InfoClient {
         return infoTopic;
     }
 
+    public Set<TopicTeamDto> getTopicsWithTeams(String caseType) {
+        Set<TopicTeamDto> topicTeams = restHelper.get(serviceBaseURL, String.format("/topics/%s/teams", caseType), new ParameterizedTypeReference<Set<TopicTeamDto>>() {
+        });
+        log.info("Got {} topics with teams", topicTeams.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
+        return topicTeams;
+    }
+
     @Cacheable(value = "getTeams", unless = "#result == null")
     public Set<TeamDto> getTeams() {
         Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team", new ParameterizedTypeReference<Set<TeamDto>>() {

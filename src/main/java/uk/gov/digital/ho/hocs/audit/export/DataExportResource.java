@@ -54,6 +54,21 @@ public class DataExportResource {
         }
     }
 
+    @GetMapping("/export/topics/{caseType}/teams")
+    public void getTopicsWithTeams(@PathVariable("caseType") String caseType,
+                          HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=" + getFileName(caseType, "topics_teams"));
+            exportService.staticTopicsWithTeamsExport(response.getOutputStream(), caseType);
+            response.setStatus(200);
+        } catch (Exception ex) {
+            log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
     @GetMapping("/export/teams")
     public void getTeams(HttpServletResponse response) {
         try {
@@ -118,6 +133,10 @@ public class DataExportResource {
 
     private String getFileName(String caseType, ExportType exportType) {
         return String.format("%s-%s-%s.csv", caseType.toLowerCase(), exportType.toString().toLowerCase(), LocalDate.now().toString());
+    }
+
+    private String getFileName(String caseType, String export) {
+        return String.format("%s-%s-%s.csv", caseType.toLowerCase(), export, LocalDate.now().toString());
     }
 
     private String getFilename(String export) {

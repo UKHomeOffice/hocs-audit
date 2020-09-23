@@ -12,10 +12,7 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -268,6 +265,31 @@ public class ExportService {
             log.info("Export STATIC TOPIC LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
         }
 
+    }
+
+    public void staticTopicsWithTeamsExport(OutputStream output,
+                                            String caseType) throws IOException {
+        log.info("Exporting STATIC TOPICS with TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("caseType", "topicUUID", "topicName", "teamUUID", "teamName").collect(Collectors.toList());
+
+        Set<TopicTeamDto> topicTeams = infoClient.getTopicsWithTeams(caseType);
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))){
+
+            topicTeams.forEach(topic -> {
+
+                topic.getTeams().forEach(team -> {
+                    try {
+                        printer.printRecord(caseType, topic.getUuid(), topic.getDisplayName(), team.getUuid(), team.getDisplayName());
+                        outputWriter.flush();
+                    } catch (IOException e) {
+                        log.error("Unable to parse record for static topic {} and team {} for reason {}", topic.getUuid(), team.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    }
+                });
+            });
+        }
     }
 
     public void staticUserExport(OutputStream output) throws IOException {
