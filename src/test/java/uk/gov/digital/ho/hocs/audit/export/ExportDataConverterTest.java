@@ -66,6 +66,7 @@ public class ExportDataConverterTest {
         }
 
         converter = new ExportDataConverter(infoClient, caseworkClient);
+        converter.initialise();
     }
 
     @Test

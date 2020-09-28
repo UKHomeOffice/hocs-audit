@@ -77,6 +77,9 @@ public class ExportService {
         LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
         headers.addAll(caseDataHeaders);
 
+        if (convert){
+            exportDataConverter.initialise();
+        }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
             Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(

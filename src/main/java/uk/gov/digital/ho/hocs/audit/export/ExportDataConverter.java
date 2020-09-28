@@ -31,11 +31,26 @@ public class ExportDataConverter {
         this.caseworkClient = caseworkClient;
     }
 
-    public String[] convertData(String[] auditData) {
-        if (uuidToName == null){
-            initialiseUuidToNameMap();
-        }
+    public void initialise() {
+        uuidToName = new HashMap<>();
 
+        Set<UserDto> users = infoClient.getUsers();
+        users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
+
+        Set<TeamDto> teams = infoClient.getTeams();
+        teams.forEach(team -> uuidToName.put(team.getUuid().toString(), team.getDisplayName()));
+
+        Set<UnitDto> units = infoClient.getUnits();
+        units.forEach(unit -> uuidToName.put(unit.getUuid(), unit.getDisplayName()));
+
+        Set<GetTopicResponse> topics = caseworkClient.getAllCaseTopics();
+        topics.forEach(topic -> uuidToName.put(topic.getUuid().toString(), topic.getTopicText()));
+
+        Set<GetCorrespondentOutlineResponse> correspondents = caseworkClient.getAllActiveCorrespondents();
+        correspondents.forEach(corr -> uuidToName.put(corr.getUuid().toString(), corr.getFullname()));
+    }
+
+    public String[] convertData(String[] auditData) {
         for (int i = 0; i < auditData.length; i++){
             String uuidData = auditData[i];
             if (!isUUID(uuidData)) {
@@ -59,24 +74,5 @@ public class ExportDataConverter {
             return uuid.matches(UUID_REGEX);
         }
         return false;
-    }
-
-    private void initialiseUuidToNameMap() {
-        uuidToName = new HashMap<>();
-
-        Set<UserDto> users = infoClient.getUsers();
-        users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
-
-        Set<TeamDto> teams = infoClient.getTeams();
-        teams.forEach(team -> uuidToName.put(team.getUuid().toString(), team.getDisplayName()));
-
-        Set<UnitDto> units = infoClient.getUnits();
-        units.forEach(unit -> uuidToName.put(unit.getUuid(), unit.getDisplayName()));
-
-        Set<GetTopicResponse> topics = caseworkClient.getAllCaseTopics();
-        topics.forEach(topic -> uuidToName.put(topic.getUuid().toString(), topic.getTopicText()));
-
-        Set<GetCorrespondentOutlineResponse> correspondents = caseworkClient.getAllActiveCorrespondents();
-        correspondents.forEach(corr -> uuidToName.put(corr.getUuid().toString(), corr.getFullname()));
     }
 }
