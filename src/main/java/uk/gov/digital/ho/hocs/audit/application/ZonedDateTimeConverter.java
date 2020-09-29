@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class ZonedDateTimeConverter {
 
-    private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS";
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
     private ZoneId specifiedTimeZoneId = ZoneId.of("Europe/London");
