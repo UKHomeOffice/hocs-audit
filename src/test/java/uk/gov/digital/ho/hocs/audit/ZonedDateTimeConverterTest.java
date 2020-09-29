@@ -21,7 +21,7 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of("GMT"))
                         .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
@@ -43,7 +43,7 @@ public class ZonedDateTimeConverterTest {
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
         assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12 00:00:00");
+        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
     @Test
@@ -53,13 +53,13 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of("GMT"))
                         .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
         assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12 00:00:00");
+        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -74,13 +74,13 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of("GMT"))
                         .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
         assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12 01:00:00");
+        assertThat(convertedDateTime).isEqualTo("2020-12-12T01:00:00.000000");
     }
 
     @Test
@@ -90,13 +90,13 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of("GMT"))
                         .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
         assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12 00:00:00");
+        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
     @Test
@@ -106,13 +106,13 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of("GMT"))
                         .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
         assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12 00:00:00");
+        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
     @Test(expected = ZoneRulesException.class)
