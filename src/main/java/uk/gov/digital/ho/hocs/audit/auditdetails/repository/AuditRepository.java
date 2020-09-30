@@ -40,7 +40,7 @@ public interface AuditRepository extends PagingAndSortingRepository<AuditData, S
     List<AuditData> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
     @QueryHints(value = @QueryHint(name = HINT_FETCH_SIZE, value = "50"))
-    @Query(value = "SELECT a.* FROM audit_data a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false", nativeQuery = true)
+    @Query(value = "SELECT a.* FROM audit_data a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false ORDER BY a.audit_timestamp ASC", nativeQuery = true)
     Stream<AuditData> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
 
     @QueryHints(value = @QueryHint(name = HINT_FETCH_SIZE, value = "50"))

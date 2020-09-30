@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
+import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
@@ -32,15 +33,15 @@ import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
 @Service
 public class ExportService {
 
-    private ObjectMapper mapper;
-    private AuditRepository auditRepository;
-    private InfoClient infoClient;
-    private ExportDataConverter exportDataConverter;
+    private final ObjectMapper mapper;
+    private final AuditRepository auditRepository;
+    private final InfoClient infoClient;
+    private final ExportDataConverter exportDataConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-
+    
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
@@ -49,29 +50,31 @@ public class ExportService {
     }
 
     @Transactional(readOnly = true)
-    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType, boolean convert) throws IOException {
+    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType, boolean convert, final String timestampFormat, final String timeZoneId) throws IOException {
+        final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
+
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
         switch (exportType) {
             case CASE_DATA:
-                caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert);
+                caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, zonedDateTimeConverter);
                 break;
             case TOPICS:
-                topicExport(from, to, outputWriter, caseTypeCode);
+                topicExport(from, to, outputWriter, caseTypeCode, zonedDateTimeConverter);
                 break;
             case CORRESPONDENTS:
-                correspondentExport(from, to, outputWriter, caseTypeCode, convert);
+                correspondentExport(from, to, outputWriter, caseTypeCode, convert, zonedDateTimeConverter);
                 break;
             case ALLOCATIONS:
-                allocationExport(from, to, outputWriter, caseTypeCode, convert);
+                allocationExport(from, to, outputWriter, caseTypeCode, convert, zonedDateTimeConverter);
                 break;
             default:
                 throw new AuditExportException("Unknown export type requests");
         }
     }
 
-    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert) throws IOException {
+    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CASE_DATA to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toList());
         LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
@@ -88,7 +91,7 @@ public class ExportService {
 
             data.forEach((audit) -> {
                 try {
-                    String[] parsedAudit = parseCaseDataAuditPayload(audit, caseDataHeaders);
+                    String[] parsedAudit = parseCaseDataAuditPayload(audit, caseDataHeaders, zonedDateTimeConverter);
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit);
                     }
@@ -102,10 +105,10 @@ public class ExportService {
         }
     }
 
-    private String[] parseCaseDataAuditPayload(AuditData audit, LinkedHashSet<String> caseDataHeaders) throws IOException {
+    private String[] parseCaseDataAuditPayload(AuditData audit, LinkedHashSet<String> caseDataHeaders, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.CaseData caseData = mapper.readValue(audit.getAuditPayload(), AuditPayload.CaseData.class);
-        data.add(audit.getAuditTimestamp().toString());
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID()));
@@ -123,7 +126,7 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode) throws IOException {
+    void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting TOPIC to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "topicUuid", "topic").collect(Collectors.toList());
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
@@ -132,7 +135,7 @@ public class ExportService {
                     TOPIC_EVENTS, caseTypeCode);
             data.forEach((audit) -> {
                 try {
-                    printer.printRecord(parseTopicAuditPayload(audit));
+                    printer.printRecord(parseTopicAuditPayload(audit, zonedDateTimeConverter));
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -142,10 +145,11 @@ public class ExportService {
         }
     }
 
-    private List<String> parseTopicAuditPayload(AuditData audit) throws IOException {
+    private List<String> parseTopicAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
+
         AuditPayload.Topic topicData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Topic.class);
-        data.add(audit.getAuditTimestamp().toString());
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID(), ""));
@@ -154,7 +158,7 @@ public class ExportService {
         return data;
     }
 
-    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert) throws IOException {
+    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CORRESPONDENT to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid",
                 "correspondentUuid", "fullname", "address1", "address2",
@@ -169,7 +173,7 @@ public class ExportService {
 
             data.forEach((audit) -> {
                 try {
-                    String[] parsedAudit = parseCorrespondentAuditPayload(audit);
+                    String[] parsedAudit = parseCorrespondentAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit);
                     }
@@ -183,10 +187,10 @@ public class ExportService {
         }
     }
 
-    private String[] parseCorrespondentAuditPayload(AuditData audit) throws IOException {
+    private String[] parseCorrespondentAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Correspondent correspondentData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Correspondent.class);
-        data.add(audit.getAuditTimestamp().toString());
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID(), ""));
@@ -210,7 +214,7 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert) throws IOException {
+    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "stage", "allocatedTo", "deadline").collect(Collectors.toList());
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
@@ -219,7 +223,7 @@ public class ExportService {
                     ALLOCATION_EVENTS, caseTypeCode);
             data.forEach((audit) -> {
                 try {
-                    String[] parsedAudit = parseAllocationAuditPayload(audit);
+                    String[] parsedAudit = parseAllocationAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit);
                     }
@@ -233,16 +237,18 @@ public class ExportService {
         }
     }
 
-    private String[] parseAllocationAuditPayload(AuditData audit) throws IOException {
+    private String[] parseAllocationAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
+
         AuditPayload.StageAllocation allocationData = mapper.readValue(audit.getAuditPayload(), AuditPayload.StageAllocation.class);
-        data.add(audit.getAuditTimestamp().toString());
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID(), ""));
         data.add(allocationData.getStage());
         data.add(Objects.toString(allocationData.getAllocatedToUUID(), ""));
         data.add(Objects.toString(allocationData.getDeadline(), ""));
+
         return data.toArray(new String[data.size()]);
     }
 
@@ -377,7 +383,6 @@ public class ExportService {
             log.info("Export STATIC UNITS and TEAMS LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
         }
     }
-
 }
 
 

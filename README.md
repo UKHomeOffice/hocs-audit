@@ -45,7 +45,7 @@ docker-compose down
 ### Running in an IDE
 
 If you are using an IDE, such as IntelliJ, this audit service can be started by running the ```HocsAuditApplication``` main class. 
-The service can then be accessed at ```http://localhost:8088```.
+The service can then be accessed at ```http://localhost:8087```.
 
 ### Building and running without an IDE
 
