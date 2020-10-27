@@ -229,7 +229,7 @@ public class ExportService {
                     }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
-                } catch (IOException e) {
+                } catch (IOException | NullPointerException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
             });
