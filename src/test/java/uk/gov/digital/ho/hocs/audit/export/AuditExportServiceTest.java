@@ -161,7 +161,6 @@ public class AuditExportServiceTest {
     @Test
     public void caseNotesExportShouldReturnCsvData() throws IOException {
 
-        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_NOTES_EVENTS), any())).thenReturn(getCaseNotesAuditData().stream());
         Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toSet());
         OutputStream outputStream = new ByteArrayOutputStream();
