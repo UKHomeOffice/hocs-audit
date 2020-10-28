@@ -100,6 +100,17 @@ public interface AuditPayload {
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
+    class CaseNote {
+
+        @JsonProperty("caseNoteType")
+        private String caseNoteType;
+
+        @JsonProperty("text")
+        private String text;
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
     class Correspondent {
 
         @JsonProperty("uuid")
