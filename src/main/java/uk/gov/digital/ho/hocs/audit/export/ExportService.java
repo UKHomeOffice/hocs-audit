@@ -38,6 +38,7 @@ public class ExportService {
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
+    public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
@@ -59,6 +60,9 @@ public class ExportService {
         switch (exportType) {
             case CASE_DATA:
                 caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, zonedDateTimeConverter);
+                break;
+            case CASE_NOTES:
+                caseNotesExport(from, to, outputWriter, caseTypeCode, zonedDateTimeConverter);
                 break;
             case TOPICS:
                 topicExport(from, to, outputWriter, caseTypeCode, zonedDateTimeConverter);
@@ -123,6 +127,39 @@ public class ExportService {
                 data.add(caseData.getData().getOrDefault(field, ""));
             }
         }
+        return data.toArray(new String[data.size()]);
+    }
+
+    void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting CASE_NOTES to CSV", value(EVENT, CSV_EXPORT_START));
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toList());
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                    CASE_NOTES_EVENTS, caseTypeCode);
+            data.forEach((audit) -> {
+                try {
+                    String[] parsedAudit = parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
+                    printer.printRecord(parsedAudit);
+                    outputWriter.flush();
+                } catch (Exception e) {
+                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export CASE_NOTES to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    private String[] parseCaseNotesAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        List<String> data = new ArrayList<>();
+        AuditPayload.CaseNote caseNote = mapper.readValue(audit.getAuditPayload(), AuditPayload.CaseNote.class);
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
+        data.add(audit.getType());
+        data.add(audit.getUserID());
+        data.add(Objects.toString(audit.getCaseUUID()));
+        data.add(Objects.toString(audit.getUuid()));
+        data.add(caseNote.getCaseNoteType());
+        data.add(caseNote.getText());
         return data.toArray(new String[data.size()]);
     }
 

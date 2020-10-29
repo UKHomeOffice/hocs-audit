@@ -159,6 +159,28 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void caseNotesExportShouldReturnCsvData() throws IOException {
+
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_NOTES_EVENTS), any())).thenReturn(getCaseNotesAuditData().stream());
+        Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toSet());
+        OutputStream outputStream = new ByteArrayOutputStream();
+
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, "MIN", ExportType.CASE_NOTES, false, null, null);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders.toArray(new String[expectedHeaders.size()]));
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(2);
+
+        CSVRecord row = rows.get(0);
+        assertThat(row.get("event")).isEqualTo("CASE_NOTE_CREATED");
+        assertThat(row.get("caseNoteType")).isEqualTo("Type1");
+        assertThat(row.get("text")).isEqualTo("Note 1");
+    }
+
+    @Test
     public void caseTopicExportShouldReturnRowHeaders() throws IOException {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId", "caseUuid", "topicUuid", "topic"};
 
@@ -341,6 +363,13 @@ public class AuditExportServiceTest {
              add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T09:18:26.446343\", \"reference\": \"MIN/0120091/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
              add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
 
+        }};
+    }
+
+    private LinkedHashSet<AuditData> getCaseNotesAuditData() {
+         return new LinkedHashSet<AuditData>(){{
+             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type1\", \"text\": \"Note 1\" }", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
+             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type2\", \"text\": \"Note 2\" }", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
