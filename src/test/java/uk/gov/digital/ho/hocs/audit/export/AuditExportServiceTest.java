@@ -8,17 +8,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
+import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -44,7 +44,14 @@ public class AuditExportServiceTest {
     @Mock
     private ExportDataConverter exportDataConverter;
 
+    @Mock
+    private HeaderConverter passThroughHeaderConverter;
+
+    @Mock
+    private HeaderConverter headerConverter;
+
     private ExportService exportService;
+    private ExportService exportServiceTestHeaders;
     private SpringConfiguration configuration = new SpringConfiguration();
     private ObjectMapper mapper;
     private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
@@ -54,6 +61,7 @@ public class AuditExportServiceTest {
     private LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
     private String caseType = "MIN";
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final ZonedDateTimeConverter defaultZonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
 
     private LinkedHashSet<String> fields = Stream.of(
             "CopyNumberTen",
@@ -84,7 +92,17 @@ public class AuditExportServiceTest {
     public void setup() {
         mapper = configuration.initialiseObjectMapper();
         when(infoClient.getCaseTypes()).thenReturn(caseTypes);
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter);
+        List<String> headerList = Stream.of("ID", "User", "Name", "Surname", "Email Address").collect(Collectors.toList());
+        when(headerConverter.substitute(anyList())).thenReturn(headerList);
+        when(passThroughHeaderConverter.substitute(anyList())).thenAnswer(new Answer<List<String>>() {
+            @Override
+            public List<String> answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (List<String>) args[0];
+            }
+        });
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter);
     }
 
     @Test
@@ -321,6 +339,89 @@ public class AuditExportServiceTest {
         assertThat(rows.size()).isEqualTo(2);
         assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
         assertThat(rows.get(0).get("username")).isEqualTo("User 1");
+    }
+
+    @Test
+    public void staticUserExportShouldReturnCSVWithSubstitutedHeaders() throws IOException {
+        String[] expectedHeaders = new String[]{"ID", "User", "Name", "Surname", "Email Address"};
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportServiceTestHeaders.staticUserExport(outputStream);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithCaseDataExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        OutputStream buffer = new BufferedOutputStream(outputStream);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        exportService.caseDataExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", "MIN", true, defaultZonedDateTimeConverter);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithAllocationsExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        OutputStream buffer = new BufferedOutputStream(outputStream);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        exportService.allocationExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithCorrespondentExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        OutputStream buffer = new BufferedOutputStream(outputStream);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        exportService.correspondentExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithTopicExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        OutputStream buffer = new BufferedOutputStream(outputStream);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        exportService.topicExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", defaultZonedDateTimeConverter);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithStaticTeamExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTeamExport(outputStream);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithStaticTopicExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTopicExport(outputStream);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithStaticTopicWithTeamExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTopicsWithTeamsExport(outputStream, "MIN");
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithStaticUnitsForTeamsExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticUnitsForTeamsExport(outputStream);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithStaticUserExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticUserExport(outputStream);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     private List<CSVRecord> getCSVRows(String csvBody) throws IOException {
