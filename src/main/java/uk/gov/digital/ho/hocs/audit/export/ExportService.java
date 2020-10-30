@@ -37,17 +37,20 @@ public class ExportService {
     private final AuditRepository auditRepository;
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
+    private final HeaderConverter headerConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
     
-    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter) {
+    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter,
+                         HeaderConverter headerConverter) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
         this.exportDataConverter = exportDataConverter;
+        this.headerConverter = headerConverter;
     }
 
     @Transactional(readOnly = true)
@@ -84,11 +87,12 @@ public class ExportService {
         LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
         headers.addAll(caseDataHeaders);
 
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
         if (convert){
             exportDataConverter.initialise();
         }
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_DATA_EVENTS, caseTypeCode);
@@ -166,7 +170,8 @@ public class ExportService {
     void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting TOPIC to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "topicUuid", "topic").collect(Collectors.toList());
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     TOPIC_EVENTS, caseTypeCode);
@@ -202,11 +207,12 @@ public class ExportService {
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey").collect(Collectors.toList());
 
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
         if (convert){
             exportDataConverter.initialise();
         }
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
@@ -259,11 +265,12 @@ public class ExportService {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "stage", "allocatedTo", "deadline").collect(Collectors.toList());
 
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
         if (convert){
             exportDataConverter.initialise();
         }
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     ALLOCATION_EVENTS, caseTypeCode);
@@ -304,10 +311,11 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("topicUUID", "topicName").collect(Collectors.toList());
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
         Set<TopicDto> topics = infoClient.getTopics();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
             topics.forEach((topic) -> {
                 try {
@@ -328,10 +336,11 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("caseType", "topicUUID", "topicName", "teamUUID", "teamName").collect(Collectors.toList());
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
         Set<TopicTeamDto> topicTeams = infoClient.getTopicsWithTeams(caseType);
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))){
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))){
 
             topicTeams.forEach(topic -> {
 
@@ -354,10 +363,11 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("userUUID", "username", "firstName", "lastName", "email").collect(Collectors.toList());
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
         Set<UserDto> users = infoClient.getUsers();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
             users.forEach((user) -> {
                 try {
@@ -377,10 +387,11 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("teamUUID", "teamName").collect(Collectors.toList());
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
         Set<TeamDto> teams = infoClient.getTeams();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
             teams.forEach((team) -> {
                 try {
@@ -400,10 +411,11 @@ public class ExportService {
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("unitUUID", "unitName", "teamUUID", "teamName").collect(Collectors.toList());
+        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
         Set<UnitDto> units = infoClient.getUnits();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
             units.forEach((unit) -> {
                 Set<TeamDto> teams = infoClient.getTeamsForUnit(unit.getUuid());
