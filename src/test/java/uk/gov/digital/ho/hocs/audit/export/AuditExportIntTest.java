@@ -106,7 +106,7 @@ public class AuditExportIntTest {
         CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.withFirstRecordAsHeader().withTrim());
 
         //check expected CSV row count
-        assertThat(csvParser.getRecords().size()).isEqualTo(3);
+        assertThat(csvParser.getRecords().size()).isEqualTo(4);
     }
 
 

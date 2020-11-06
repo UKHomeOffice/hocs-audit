@@ -38,7 +38,7 @@ public class ExportService {
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
     private final HeaderConverter headerConverter;
-    public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED"};
+    public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
