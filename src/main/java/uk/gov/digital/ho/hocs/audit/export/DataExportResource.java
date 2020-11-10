@@ -27,6 +27,7 @@ public class DataExportResource {
     void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
                        @PathVariable("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
                        @RequestParam(name = "convert", defaultValue = "false") boolean convert,
+                       @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader,
                        @RequestParam(name = "timestampFormat", required = false) String timestampFormat,
                        @RequestParam(name = "timeZoneId", required = false) String timeZoneId,
                        HttpServletResponse response) {
@@ -34,7 +35,7 @@ public class DataExportResource {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, exportType));
-            exportService.auditExport(fromDate, toDate, response.getOutputStream(), caseType, exportType, convert, timestampFormat, timeZoneId);
+            exportService.auditExport(fromDate, toDate, response.getOutputStream(), caseType, exportType, convert, convertHeader, timestampFormat, timeZoneId);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for case type {} and export type {} for reason {}", caseType, exportType.toString(), ex.toString());
@@ -43,12 +44,13 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/topics")
-    public void getTopics(HttpServletResponse response) {
+    public void getTopics(HttpServletResponse response,
+                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("topics"));
-            exportService.staticTopicExport(response.getOutputStream());
+            exportService.staticTopicExport(response.getOutputStream(), convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
@@ -57,13 +59,14 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/topics/{caseType}/teams")
-    public void getTopicsWithTeams(@PathVariable("caseType") String caseType,
-                          HttpServletResponse response) {
+    public void getTopicsWithTeams(@PathVariable ("caseType") String caseType,
+                                   HttpServletResponse response,
+                                   @RequestParam (name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, "topics_teams"));
-            exportService.staticTopicsWithTeamsExport(response.getOutputStream(), caseType);
+            exportService.staticTopicsWithTeamsExport(response.getOutputStream(), caseType, convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
@@ -72,12 +75,13 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/teams")
-    public void getTeams(HttpServletResponse response) {
+    public void getTeams(HttpServletResponse response,
+                         @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("teams"));
-            exportService.staticTeamExport(response.getOutputStream());
+            exportService.staticTeamExport(response.getOutputStream(), convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static team list for reason {}", ex.toString());
@@ -86,12 +90,13 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/units/teams")
-    public void getUnitsForTeams(HttpServletResponse response) {
+    public void getUnitsForTeams(HttpServletResponse response,
+                                 @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("units_teams"));
-            exportService.staticUnitsForTeamsExport(response.getOutputStream());
+            exportService.staticUnitsForTeamsExport(response.getOutputStream(), convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static units for teams list for reason {}", ex.toString());
@@ -100,12 +105,13 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/users")
-    public void getUsers(HttpServletResponse response) {
+    public void getUsers(HttpServletResponse response,
+                         @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("users"));
-            exportService.staticUserExport(response.getOutputStream());
+            exportService.staticUserExport(response.getOutputStream(), convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static user list for reason {}", ex.toString());
@@ -115,10 +121,11 @@ public class DataExportResource {
 
     @GetMapping(value = "/export/custom/{code}")
     public @ResponseBody
-    void getCustomDataExport(@PathVariable("code") String code, HttpServletResponse response) {
+    void getCustomDataExport(@PathVariable("code") String code, HttpServletResponse response,
+                             @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
 
         try {
-            customExportService.customExport(response, code);
+            customExportService.customExport(response, code, convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for custom report {}: {}", code, ex.getMessage());

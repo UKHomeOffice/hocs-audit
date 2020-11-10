@@ -54,7 +54,7 @@ public class ExportService {
     }
 
     @Transactional(readOnly = true)
-    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType, boolean convert, final String timestampFormat, final String timeZoneId) throws IOException {
+    public void auditExport(LocalDate from, LocalDate to, OutputStream output, String caseType, ExportType exportType, boolean convert, boolean convertHeader, final String timestampFormat, final String timeZoneId) throws IOException {
         final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
 
         OutputStream buffer = new BufferedOutputStream(output);
@@ -62,32 +62,35 @@ public class ExportService {
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
         switch (exportType) {
             case CASE_DATA:
-                caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, zonedDateTimeConverter);
+                caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, convertHeader, zonedDateTimeConverter);
                 break;
             case CASE_NOTES:
-                caseNotesExport(from, to, outputWriter, caseTypeCode, zonedDateTimeConverter);
+                caseNotesExport(from, to, outputWriter, caseTypeCode, convertHeader, zonedDateTimeConverter);
                 break;
             case TOPICS:
-                topicExport(from, to, outputWriter, caseTypeCode, zonedDateTimeConverter);
+                topicExport(from, to, outputWriter, caseTypeCode, convertHeader, zonedDateTimeConverter);
                 break;
             case CORRESPONDENTS:
-                correspondentExport(from, to, outputWriter, caseTypeCode, convert, zonedDateTimeConverter);
+                correspondentExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
                 break;
             case ALLOCATIONS:
-                allocationExport(from, to, outputWriter, caseTypeCode, convert, zonedDateTimeConverter);
+                allocationExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
                 break;
             default:
                 throw new AuditExportException("Unknown export type requests");
         }
     }
 
-    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CASE_DATA to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toList());
         LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
         headers.addAll(caseDataHeaders);
 
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         if (convert){
             exportDataConverter.initialise();
         }
@@ -134,10 +137,14 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CASE_NOTES to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toList());
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_NOTES_EVENTS, caseTypeCode);
@@ -167,10 +174,13 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting TOPIC to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "topicUuid", "topic").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
@@ -200,14 +210,17 @@ public class ExportService {
         return data;
     }
 
-    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CORRESPONDENT to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid",
                 "correspondentUuid", "fullname", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey").collect(Collectors.toList());
 
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         if (convert){
             exportDataConverter.initialise();
         }
@@ -261,11 +274,14 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "stage", "allocatedTo", "deadline").collect(Collectors.toList());
 
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         if (convert){
             exportDataConverter.initialise();
         }
@@ -305,14 +321,17 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    public void staticTopicExport(OutputStream output) throws IOException {
+    public void staticTopicExport(OutputStream output, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC TOPIC LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("topicUUID", "topicName").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         Set<TopicDto> topics = infoClient.getTopics();
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
@@ -331,13 +350,16 @@ public class ExportService {
     }
 
     public void staticTopicsWithTeamsExport(OutputStream output,
-                                            String caseType) throws IOException {
+                                            String caseType, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC TOPICS with TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("caseType", "topicUUID", "topicName", "teamUUID", "teamName").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         Set<TopicTeamDto> topicTeams = infoClient.getTopicsWithTeams(caseType);
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))){
@@ -356,15 +378,18 @@ public class ExportService {
         }
     }
 
-    public void staticUserExport(OutputStream output) throws IOException {
+    public void staticUserExport(OutputStream output, boolean convertHeader) throws IOException {
 
         log.info("Exporting STATIC USER LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("userUUID", "username", "firstName", "lastName", "email").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         Set<UserDto> users = infoClient.getUsers();
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
@@ -381,14 +406,17 @@ public class ExportService {
         }
     }
 
-    public void staticTeamExport(OutputStream output) throws IOException {
+    public void staticTeamExport(OutputStream output, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC TEAM LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("teamUUID", "teamName").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         Set<TeamDto> teams = infoClient.getTeams();
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
@@ -405,14 +433,17 @@ public class ExportService {
         }
     }
 
-    public void staticUnitsForTeamsExport(OutputStream output) throws IOException {
+    public void staticUnitsForTeamsExport(OutputStream output, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC UNITS and TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("unitUUID", "unitName", "teamUUID", "teamName").collect(Collectors.toList());
-        List<String> substitutedHeaders = headerConverter.substitute(headers);
 
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
         Set<UnitDto> units = infoClient.getUnits();
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
