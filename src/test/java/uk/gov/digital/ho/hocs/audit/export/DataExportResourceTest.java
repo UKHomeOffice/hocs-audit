@@ -44,7 +44,7 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, null, null, response);
+        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, true, null, null, response);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -52,7 +52,7 @@ public class DataExportResourceTest {
                         LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, null, null);
+        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, true, null, null);
 
         checkNoMoreInteractions();
     }
@@ -66,9 +66,9 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, null, null);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, true, null, null);
 
-        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, null, null, response);
+        dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, true, null, null, response);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -76,7 +76,7 @@ public class DataExportResourceTest {
                         LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, null, null);
+        verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, true, null, null);
 
         checkNoMoreInteractions();
     }
@@ -87,14 +87,14 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getTopics(response);
+        dataExportResource.getTopics(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).staticTopicExport(servletOutputStream);
+        verify(exportService).staticTopicExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -104,16 +104,16 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticTopicExport(servletOutputStream);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticTopicExport(servletOutputStream, true);
 
-        dataExportResource.getTopics(response);
+        dataExportResource.getTopics(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).staticTopicExport(servletOutputStream);
+        verify(exportService).staticTopicExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -124,14 +124,14 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getTeams(response);
+        dataExportResource.getTeams(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).staticTeamExport(servletOutputStream);
+        verify(exportService).staticTeamExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -141,16 +141,16 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticTeamExport(servletOutputStream);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticTeamExport(servletOutputStream, true);
 
-        dataExportResource.getTeams(response);
+        dataExportResource.getTeams(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).staticTeamExport(servletOutputStream);
+        verify(exportService).staticTeamExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -161,14 +161,14 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getUnitsForTeams(response);
+        dataExportResource.getUnitsForTeams(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).staticUnitsForTeamsExport(servletOutputStream);
+        verify(exportService).staticUnitsForTeamsExport(servletOutputStream, true);
         checkNoMoreInteractions();
     }
 
@@ -177,16 +177,16 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticUnitsForTeamsExport(servletOutputStream);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticUnitsForTeamsExport(servletOutputStream, true);
 
-        dataExportResource.getUnitsForTeams(response);
+        dataExportResource.getUnitsForTeams(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).staticUnitsForTeamsExport(servletOutputStream);
+        verify(exportService).staticUnitsForTeamsExport(servletOutputStream, true);
         checkNoMoreInteractions();
     }
 
@@ -196,14 +196,14 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getUsers(response);
+        dataExportResource.getUsers(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).staticUserExport(servletOutputStream);
+        verify(exportService).staticUserExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -213,16 +213,16 @@ public class DataExportResourceTest {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
-        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticUserExport(servletOutputStream);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).staticUserExport(servletOutputStream, true);
 
-        dataExportResource.getUsers(response);
+        dataExportResource.getUsers(response, true);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
-        verify(exportService).staticUserExport(servletOutputStream);
+        verify(exportService).staticUserExport(servletOutputStream, true);
 
         checkNoMoreInteractions();
     }
@@ -231,9 +231,9 @@ public class DataExportResourceTest {
     public void getCustomDataExport() throws IOException {
         String customReportCode = "Code123";
 
-        dataExportResource.getCustomDataExport(customReportCode, response);
+        dataExportResource.getCustomDataExport(customReportCode, response, true);
 
-        verify(customExportService).customExport(response, customReportCode);
+        verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(200);
         checkNoMoreInteractions();
     }
@@ -242,10 +242,10 @@ public class DataExportResourceTest {
     public void getCustomDataExport_HttpClientErrorException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT)).when(customExportService).customExport(response, customReportCode);
-        dataExportResource.getCustomDataExport(customReportCode, response);
+        doThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT)).when(customExportService).customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(customReportCode, response, true);
 
-        verify(customExportService).customExport(response, customReportCode);
+        verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(418);
         checkNoMoreInteractions();
     }
@@ -254,10 +254,10 @@ public class DataExportResourceTest {
     public void getCustomDataExport_EntityPermissionException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new EntityPermissionException("Test exception")).when(customExportService).customExport(response, customReportCode);
-        dataExportResource.getCustomDataExport(customReportCode, response);
+        doThrow(new EntityPermissionException("Test exception")).when(customExportService).customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(customReportCode, response, true);
 
-        verify(customExportService).customExport(response, customReportCode);
+        verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(403);
         checkNoMoreInteractions();
     }
@@ -266,10 +266,10 @@ public class DataExportResourceTest {
     public void getCustomDataExport_nonHttpClientErrorException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new IllegalArgumentException("Dummy exception")).when(customExportService).customExport(response, customReportCode);
-        dataExportResource.getCustomDataExport(customReportCode, response);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(customExportService).customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(customReportCode, response, true);
 
-        verify(customExportService).customExport(response, customReportCode);
+        verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(500);
         checkNoMoreInteractions();
     }

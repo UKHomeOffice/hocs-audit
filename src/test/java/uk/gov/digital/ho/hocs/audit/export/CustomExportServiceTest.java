@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
 import uk.gov.digital.ho.hocs.audit.application.RequestData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
@@ -43,12 +45,21 @@ public class CustomExportServiceTest {
     private RequestData requestData;
     @Mock
     private HttpServletResponse servletResponse;
+    @Mock
+    private HeaderConverter passThroughHeaderConverter;
 
     private CustomExportService customExportService;
 
     @Before
     public void before() {
-        customExportService = new CustomExportService(auditRepository, infoClient, customExportDataConverter, requestData);
+        when(passThroughHeaderConverter.substitute(anyList())).thenAnswer(new Answer<List<String>>() {
+            @Override
+            public List<String> answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (List<String>) args[0];
+            }
+        });
+        customExportService = new CustomExportService(auditRepository, infoClient, customExportDataConverter, passThroughHeaderConverter, requestData);
     }
 
     @Test(expected = EntityPermissionException.class)
@@ -57,7 +68,7 @@ public class CustomExportServiceTest {
         when(infoClient.getExportView(VIEW_CODE_1)).thenReturn(exportViewDto);
         when(requestData.roles()).thenReturn(new ArrayList<>());
 
-        customExportService.customExport(servletResponse, VIEW_CODE_1);
+        customExportService.customExport(servletResponse, VIEW_CODE_1, true);
 
         checkNoMoreInteractions();
     }
@@ -75,7 +86,7 @@ public class CustomExportServiceTest {
         when(customExportDataConverter.getHeaders(exportViewDto)).thenReturn(Arrays.asList("Header1", "Header2", "Header3"));
         when(customExportDataConverter.convertData(inputData, exportViewDto.getFields())).thenReturn(outputData);
 
-        customExportService.customExport(servletResponse, VIEW_CODE_1);
+        customExportService.customExport(servletResponse, VIEW_CODE_1, true);
 
         verify(servletResponse).setContentType("text/csv");
         verify(servletResponse).setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -86,6 +97,7 @@ public class CustomExportServiceTest {
         verify(requestData).roles();
         verify(customExportDataConverter).getHeaders(exportViewDto);
         verify(customExportDataConverter).convertData(inputData, exportViewDto.getFields());
+        verify(passThroughHeaderConverter).substitute(anyList());
 
         checkNoMoreInteractions();
     }

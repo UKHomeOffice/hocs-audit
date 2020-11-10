@@ -113,7 +113,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, false, null, null);
 
         List<CSVRecord> rows = getCSVRows(outputStream.toString());
         assertThat(rows.size()).isEqualTo(3);
@@ -142,7 +142,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, false, null, null);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -156,7 +156,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, false, null, null);
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
         verify(exportDataConverter, times(0)).convertData(any());
@@ -170,7 +170,7 @@ public class AuditExportServiceTest {
         when(exportDataConverter.convertData(any())).thenAnswer(a -> a.getArguments()[0]);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, true, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, true, false, null, null);
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
         verify(exportDataConverter, times(getCaseDataAuditData().size())).convertData(any());
@@ -183,7 +183,7 @@ public class AuditExportServiceTest {
         Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toSet());
         OutputStream outputStream = new ByteArrayOutputStream();
 
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, "MIN", ExportType.CASE_NOTES, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, "MIN", ExportType.CASE_NOTES, false, false, null, null);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -205,7 +205,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false, false, null, null);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -216,7 +216,7 @@ public class AuditExportServiceTest {
     public void caseTopicExportShouldOnlyRequestTopicEventsAndCaseType() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.TOPIC_EVENTS, "a1");
         verify(exportDataConverter, times(0)).convertData(any());
     }
@@ -231,7 +231,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false, false, null, null);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -242,7 +242,7 @@ public class AuditExportServiceTest {
     public void caseCorrespondentExportShouldOnlyRequestCorrespondentEventsAndCaseType() throws IOException {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getCorrespondentDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CORRESPONDENT_EVENTS, "a1");
         verify(exportDataConverter, times(0)).convertData(any());
     }
@@ -252,7 +252,7 @@ public class AuditExportServiceTest {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "allocatedTo", "deadline"};
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false, false, null, null);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -263,7 +263,7 @@ public class AuditExportServiceTest {
     public void caseAllocationsExportShouldOnlyRequestCreateUpdateEventsAndCaseType() throws IOException {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false, null, null);
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.ALLOCATION_EVENTS, "a1");
         verify(exportDataConverter, times(0)).convertData(any());
     }
@@ -281,7 +281,7 @@ public class AuditExportServiceTest {
         when(infoClient.getTopics()).thenReturn(topics);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTopicExport(outputStream);
+        exportService.staticTopicExport(outputStream, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -303,7 +303,7 @@ public class AuditExportServiceTest {
         when(infoClient.getTeams()).thenReturn(teams);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTeamExport(outputStream);
+        exportService.staticTeamExport(outputStream, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -328,7 +328,7 @@ public class AuditExportServiceTest {
         when(infoClient.getTeamsForUnit(unitUUID)).thenReturn(teams);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticUnitsForTeamsExport(outputStream);
+        exportService.staticUnitsForTeamsExport(outputStream, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -353,7 +353,7 @@ public class AuditExportServiceTest {
         when(infoClient.getUsers()).thenReturn(users);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticUserExport(outputStream);
+        exportService.staticUserExport(outputStream, false);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
@@ -364,14 +364,22 @@ public class AuditExportServiceTest {
     }
 
     @Test
-    public void staticUserExportShouldReturnCSVWithSubstitutedHeaders() throws IOException {
-        String[] expectedHeaders = new String[]{"ID", "User", "Name", "Surname", "Email Address"};
+    public void staticUserExportShouldReturnCSVWithSubstitutedHeadersOrNot() throws IOException {
+        String[] expectedHeaders = new String[]{"userUUID", "username", "firstName", "lastName", "email"};
+        String[] expectedSubstitutedHeaders = new String[]{"ID", "User", "Name", "Surname", "Email Address"};
+
+        OutputStream substitutedOutputStream = new ByteArrayOutputStream();
+        exportServiceTestHeaders.staticUserExport(substitutedOutputStream, true);
+
+        String csvBody = substitutedOutputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        assertThat(headers).containsExactlyInAnyOrder(expectedSubstitutedHeaders);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportServiceTestHeaders.staticUserExport(outputStream);
+        exportServiceTestHeaders.staticUserExport(outputStream, false);
 
-        String csvBody = outputStream.toString();
-        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        csvBody = outputStream.toString();
+        headers = getCSVHeaders(csvBody).keySet();
         assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
     }
 
@@ -380,7 +388,7 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        exportService.caseDataExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", "MIN", true, defaultZonedDateTimeConverter);
+        exportService.caseDataExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", "MIN", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
@@ -389,7 +397,7 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        exportService.allocationExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
+        exportService.allocationExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
@@ -398,7 +406,7 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        exportService.correspondentExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
+        exportService.correspondentExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
@@ -407,42 +415,42 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        exportService.topicExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", defaultZonedDateTimeConverter);
+        exportService.topicExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     @Test
     public void verifyHeadersAreSubstitutedWithStaticTeamExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTeamExport(outputStream);
+        exportService.staticTeamExport(outputStream, true);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     @Test
     public void verifyHeadersAreSubstitutedWithStaticTopicExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTopicExport(outputStream);
+        exportService.staticTopicExport(outputStream, true);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     @Test
     public void verifyHeadersAreSubstitutedWithStaticTopicWithTeamExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTopicsWithTeamsExport(outputStream, "MIN");
+        exportService.staticTopicsWithTeamsExport(outputStream, "MIN", true);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     @Test
     public void verifyHeadersAreSubstitutedWithStaticUnitsForTeamsExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticUnitsForTeamsExport(outputStream);
+        exportService.staticUnitsForTeamsExport(outputStream, true);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 
     @Test
     public void verifyHeadersAreSubstitutedWithStaticUserExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticUserExport(outputStream);
+        exportService.staticUserExport(outputStream, true);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
 

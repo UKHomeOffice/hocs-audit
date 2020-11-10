@@ -33,17 +33,19 @@ public class CustomExportService {
     private AuditRepository auditRepository;
     private InfoClient infoClient;
     private CustomExportDataConverter customExportDataConverter;
+    private final HeaderConverter headerConverter;
     private RequestData requestData;
 
-    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CustomExportDataConverter customExportDataConverter, RequestData requestData) {
+    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CustomExportDataConverter customExportDataConverter, HeaderConverter headerConverter, RequestData requestData) {
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
         this.customExportDataConverter = customExportDataConverter;
+        this.headerConverter = headerConverter;
         this.requestData = requestData;
     }
 
     @Transactional(readOnly = true)
-    public void customExport(HttpServletResponse response, String code) throws IOException {
+    public void customExport(HttpServletResponse response, String code, boolean convertHeader) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
         if (StringUtils.hasText(exportViewDto.getRequiredPermission()) && !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
@@ -59,9 +61,13 @@ public class CustomExportService {
             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
 
             List<String> headers = customExportDataConverter.getHeaders(exportViewDto);
+            List<String> substitutedHeaders = headers;
+            if (convertHeader) {
+                substitutedHeaders = headerConverter.substitute(headers);
+            }
             List<Object[]> dataList = customExportDataConverter.convertData(auditRepository.getResultsFromView(exportViewDto.getCode()), exportViewDto.getFields());
 
-            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
+            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
 
                 dataList.forEach((dataRow) -> {
                     try {
