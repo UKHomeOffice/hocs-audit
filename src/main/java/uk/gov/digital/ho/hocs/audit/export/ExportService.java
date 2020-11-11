@@ -65,7 +65,7 @@ public class ExportService {
                 caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, convertHeader, zonedDateTimeConverter);
                 break;
             case CASE_NOTES:
-                caseNotesExport(from, to, outputWriter, caseTypeCode, convertHeader, zonedDateTimeConverter);
+                caseNotesExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
                 break;
             case TOPICS:
                 topicExport(from, to, outputWriter, caseTypeCode, convertHeader, zonedDateTimeConverter);
@@ -137,12 +137,15 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CASE_NOTES to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toList());
         List<String> substitutedHeaders = headers;
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
+        }
+        if (convert){
+            exportDataConverter.initialise();
         }
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
@@ -151,6 +154,9 @@ public class ExportService {
             data.forEach((audit) -> {
                 try {
                     String[] parsedAudit = parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
+                    if (convert){
+                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                    }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
