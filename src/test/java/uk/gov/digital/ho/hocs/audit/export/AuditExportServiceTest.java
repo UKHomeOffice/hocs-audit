@@ -50,8 +50,12 @@ public class AuditExportServiceTest {
     @Mock
     private HeaderConverter headerConverter;
 
+    @Mock
+    private HeaderConverter caseNoteHeaderConverter;
+
     private ExportService exportService;
     private ExportService exportServiceTestHeaders;
+    private ExportService exportServiceCaseNotesHeaders;
     private SpringConfiguration configuration = new SpringConfiguration();
     private ObjectMapper mapper;
     private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
@@ -93,7 +97,9 @@ public class AuditExportServiceTest {
         mapper = configuration.initialiseObjectMapper();
         when(infoClient.getCaseTypes()).thenReturn(caseTypes);
         List<String> headerList = Stream.of("ID", "User", "Name", "Surname", "Email Address").collect(Collectors.toList());
+        List<String> caseNotesHeaderList = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "convertedCaseNoteType", "text").collect(Collectors.toList());
         when(headerConverter.substitute(anyList())).thenReturn(headerList);
+        when(caseNoteHeaderConverter.substitute(anyList())).thenReturn(caseNotesHeaderList);
         when(passThroughHeaderConverter.substitute(anyList())).thenAnswer(new Answer<List<String>>() {
             @Override
             public List<String> answer(InvocationOnMock invocation) throws Throwable {
@@ -103,6 +109,7 @@ public class AuditExportServiceTest {
         });
         exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter);
         exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter);
     }
 
     @Test
@@ -196,6 +203,31 @@ public class AuditExportServiceTest {
         assertThat(row.get("event")).isEqualTo("CASE_NOTE_CREATED");
         assertThat(row.get("caseNoteType")).isEqualTo("Type1");
         assertThat(row.get("text")).isEqualTo("Note 1");
+        verify(exportDataConverter, times(0)).convertData(any());
+    }
+
+    @Test
+    public void caseNotesExportShouldConvertHeadersAndData() throws IOException {
+
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_NOTES_EVENTS), any())).thenReturn(getCaseNotesAuditData().stream());
+        when(exportDataConverter.convertData(any())).thenAnswer(a -> a.getArguments()[0]);
+        Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "convertedCaseNoteType", "text").collect(Collectors.toSet());
+        OutputStream outputStream = new ByteArrayOutputStream();
+
+        exportServiceCaseNotesHeaders.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, "MIN", ExportType.CASE_NOTES, true, true, null, null);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders.toArray(new String[expectedHeaders.size()]));
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(2);
+
+        CSVRecord row = rows.get(0);
+        assertThat(row.get("event")).isEqualTo("CASE_NOTE_CREATED");
+        assertThat(row.get("convertedCaseNoteType")).isEqualTo("Type1");
+        assertThat(row.get("text")).isEqualTo("Note 1");
+        verify(exportDataConverter, times(2)).convertData(any());
     }
 
     @Test
