@@ -37,7 +37,7 @@ public class ExportDataConverter {
         Set<UserDto> users = infoClient.getUsers();
         users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
 
-        Set<TeamDto> teams = infoClient.getTeams();
+        Set<TeamDto> teams = infoClient.getAllTeams();
         teams.forEach(team -> uuidToName.put(team.getUuid().toString(), team.getDisplayName()));
 
         Set<UnitDto> units = infoClient.getUnits();

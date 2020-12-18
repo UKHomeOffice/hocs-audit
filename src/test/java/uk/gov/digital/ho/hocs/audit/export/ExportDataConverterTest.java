@@ -57,7 +57,7 @@ public class ExportDataConverterTest {
 
         if (converter == null) {
             when(infoClient.getUsers()).thenReturn(buildUsers());
-            when(infoClient.getTeams()).thenReturn(buildTeams());
+            when(infoClient.getAllTeams()).thenReturn(buildTeams());
             when(infoClient.getUnits()).thenReturn(buildUnits());
             when(caseworkClient.getAllCaseTopics()).thenReturn(buildTopics());
             when(caseworkClient.getAllActiveCorrespondents()).thenReturn(buildCorrespondents());

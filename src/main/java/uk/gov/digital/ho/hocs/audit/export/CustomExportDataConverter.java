@@ -113,7 +113,7 @@ public class CustomExportDataConverter {
 
     private void initialiseAdapters() {
         Set<UserDto> users = infoClient.getUsers();
-        Set<TeamDto> teams = infoClient.getTeams();
+        Set<TeamDto> teams = infoClient.getAllTeams();
         Set<UnitDto> units = infoClient.getUnits();
         Set<GetTopicResponse> topics = caseworkClient.getAllCaseTopics();
         List<ExportViewFieldAdapter> adapterList = new ArrayList<>();
