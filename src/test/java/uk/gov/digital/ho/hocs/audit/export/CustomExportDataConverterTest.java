@@ -108,7 +108,7 @@ public class CustomExportDataConverterTest {
         List<Object[]> input = buildInputData();
 
         when(infoClient.getUsers()).thenReturn(users);
-        when(infoClient.getTeams()).thenReturn(teams);
+        when(infoClient.getAllTeams()).thenReturn(teams);
         when(infoClient.getUnits()).thenReturn(units);
         when(caseworkClient.getAllCaseTopics()).thenReturn(topics);
 
@@ -137,7 +137,7 @@ public class CustomExportDataConverterTest {
         assertThat(results.get(1)[6]).isEqualTo("Data 2");
 
         verify(infoClient).getUsers();
-        verify(infoClient).getTeams();
+        verify(infoClient).getAllTeams();
         verify(infoClient).getUnits();
         verify(caseworkClient).getAllCaseTopics();
 

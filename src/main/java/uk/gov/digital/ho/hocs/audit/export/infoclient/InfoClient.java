@@ -77,6 +77,14 @@ public class InfoClient {
         return teams;
     }
 
+    @Cacheable(value = "getAllTeams", unless = "#result == null")
+    public Set<TeamDto> getAllTeams() {
+        Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team/all", new ParameterizedTypeReference<Set<TeamDto>>() {
+        });
+        log.info("Got {} all teams", teams.size(), value(EVENT, INFO_CLIENT_GET_ALL_TEAMS_SUCCESS));
+        return teams;
+    }
+
     @Cacheable(value = "getTeamsForUnit", unless = "#result == null")
     public Set<TeamDto> getTeamsForUnit(String unitUUID) {
         Set<TeamDto> teams = restHelper.get(serviceBaseURL, String.format("/unit/%s/teams", unitUUID), new ParameterizedTypeReference<Set<TeamDto>>() {
