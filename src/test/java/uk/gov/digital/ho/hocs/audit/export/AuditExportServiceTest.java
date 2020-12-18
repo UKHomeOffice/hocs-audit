@@ -234,7 +234,7 @@ public class AuditExportServiceTest {
     public void auditSomuExportShouldReturnCSVData() throws IOException {
         SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\"},{\"name\":\"field2\"}]}", true);
         when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
-        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
+        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", null, null);
