@@ -82,6 +82,28 @@ public class DataExportResourceTest {
     }
 
     @Test
+    public void getSomuExport() throws IOException {
+        LocalDate fromDate = LocalDate.now();
+        LocalDate toDate  = LocalDate.now().plusDays(10);
+        String caseType = "C1";
+        String somuType = "SomuType";
+
+        ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(servletOutputStream);
+
+        dataExportResource.getSomuExport(fromDate, toDate, caseType, somuType, null, null, response);
+
+        verify(response).setContentType("text/csv");
+        verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=" + caseType.toLowerCase() + "-" + somuType + "-" +
+                        LocalDate.now().toString() + ".csv");
+        verify(response).setStatus(200);
+        verify(response).getOutputStream();
+        verify(exportService).auditSomuExport(fromDate, toDate, servletOutputStream, caseType, somuType, null, null);
+        checkNoMoreInteractions();
+    }
+
+    @Test
     public void getTopics() throws IOException {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
