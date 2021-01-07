@@ -1,13 +1,14 @@
 package uk.gov.digital.ho.hocs.audit.export.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public interface AuditPayload {
@@ -28,7 +29,7 @@ public interface AuditPayload {
     @Getter
     class SomuItem {
         private UUID uuid;
-        private UUID somuTypeUUID;
+        private UUID somuTypeUuid;
         private Map<String, String> data;
     }
 
@@ -104,9 +105,6 @@ public interface AuditPayload {
         @JsonProperty("dateReceived")
         private LocalDate dateReceived;
 
-        @Setter
-        @JsonProperty("somuItems")
-        private Set<SomuItem> allSomuItems;
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)

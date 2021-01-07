@@ -91,7 +91,7 @@ public class DataExportResourceTest {
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
         when(response.getOutputStream()).thenReturn(servletOutputStream);
 
-        dataExportResource.getSomuExport(fromDate, toDate, caseType, somuType, null, null, response);
+        dataExportResource.getSomuExport(fromDate, toDate, caseType, somuType, false, null, null, response);
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -99,7 +99,7 @@ public class DataExportResourceTest {
                         LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
-        verify(exportService).auditSomuExport(fromDate, toDate, servletOutputStream, caseType, somuType, null, null);
+        verify(exportService).auditSomuExport(fromDate, toDate, servletOutputStream, caseType, somuType, false, null, null);
         checkNoMoreInteractions();
     }
 

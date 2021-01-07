@@ -2,6 +2,7 @@ package uk.gov.digital.ho.hocs.audit.export;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
@@ -38,9 +39,10 @@ public class ExportService {
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
     private final HeaderConverter headerConverter;
+    public static final String SOMU_TYPE_UUID = "somuTypeUuid";
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
-    public static final String[] SOMU_TYPE_EVENTS = {"CASE_UPDATED"};
+    public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED", "SOMU_ITEM_VIEWED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
@@ -182,14 +184,14 @@ public class ExportService {
     }
 
     @Transactional(readOnly = true)
-    public void auditSomuExport(LocalDate from, LocalDate to, OutputStream output, String caseType, String somuType, final String timestampFormat, final String timeZoneId) throws IOException {
+    public void auditSomuExport(LocalDate from, LocalDate to, OutputStream output, String caseType, String somuType, boolean convert, final String timestampFormat, final String timeZoneId) throws IOException {
         final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
 
         log.info("Exporting Case Data Somu to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType").collect(Collectors.toList());
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid").collect(Collectors.toList());
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
         LinkedHashSet<String> somuHeaders = new LinkedHashSet<>();
@@ -207,10 +209,15 @@ public class ExportService {
 
             data.forEach((audit) -> {
                 try {
-                    String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuTypeDto, somuHeaders, zonedDateTimeConverter);
-                    printer.printRecord(parsedAudit);
-                    outputWriter.flush();
-                } catch (Exception e) {
+                    if (filterSomuIType(audit, somuTypeDto)) {
+                        String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
+                        if (convert){
+                            parsedAudit = exportDataConverter.convertData(parsedAudit);
+                        }
+                        printer.printRecord(parsedAudit);
+                        outputWriter.flush();
+                    }
+               } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
             });
@@ -218,26 +225,33 @@ public class ExportService {
         }
     }
 
-    private String[] parseCaseDataSomuAuditPayload(AuditData audit, SomuTypeDto somuTypeDto, LinkedHashSet<String> caseDataHeaders, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<String> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
-        AuditPayload.CaseData caseData = mapper.readValue(audit.getAuditPayload(), AuditPayload.CaseData.class);
+        AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID()));
-        data.add(caseData.getReference());
-        data.add(caseData.getType());
+        data.add(somuData.getUuid().toString());
+        data.add(somuData.getSomuTypeUuid().toString());
 
-        if (caseData.getAllSomuItems() != null) {
-            for (AuditPayload.SomuItem allSomuItem : caseData.getAllSomuItems()) {
-                if (allSomuItem.getSomuTypeUUID().equals(somuTypeDto.getUuid())) {
-                    for (String field : caseDataHeaders) {
-                        data.add(allSomuItem.getData().getOrDefault(field, ""));
-                    }
-                }
-            }
+        for (String header : headers) {
+            data.add(getSomuDataValue(somuData.getData(), header));
         }
         return data.toArray(new String[data.size()]);
+    }
+
+    private boolean filterSomuIType(AuditData auditData, SomuTypeDto somuTypeDto) throws IOException {
+        AuditPayload.CaseData caseData = mapper.readValue(auditData.getAuditPayload(), AuditPayload.CaseData.class);
+        String somuTypeUuid = getSomuDataValue(caseData.getData(), SOMU_TYPE_UUID);
+        return StringUtils.equals(somuTypeUuid, somuTypeDto.getUuid().toString());
+    }
+
+    private String getSomuDataValue(Map<String,String> data, String key) {
+        if (data != null) {
+            return data.get(key);
+        }
+        return "";
     }
 
     void topicExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {

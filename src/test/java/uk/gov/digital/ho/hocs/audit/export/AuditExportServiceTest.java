@@ -237,7 +237,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", null, null);
+        exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", false, null, null);
 
         List<CSVRecord> rows = getCSVRows(outputStream.toString());
         assertThat(rows.size()).isEqualTo(1);
