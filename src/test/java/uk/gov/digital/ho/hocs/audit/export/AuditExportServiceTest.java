@@ -234,7 +234,7 @@ public class AuditExportServiceTest {
     public void auditSomuExportShouldReturnCSVData() throws IOException {
         SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\"},{\"name\":\"field2\"}]}", true);
         when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
-        when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", false, null, null);
@@ -533,7 +533,7 @@ public class AuditExportServiceTest {
 
     private Set<AuditData> getCaseDataWithSomuTypeAuditData() {
         return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"somuItems\":[{\"uuid\":\"09a89901-d2f1-4778-befe-ebab57659b90\",\"somuTypeUUID\":\"655ddfa7-5ccf-4d9b-86fd-8cef5f61a318\",\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}]}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"uuid\":\"09a89901-d2f1-4778-befe-ebab57659b90\",\"somuTypeUuid\":\"655ddfa7-5ccf-4d9b-86fd-8cef5f61a318\",\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
         }};
     }
 

@@ -39,10 +39,9 @@ public class ExportService {
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
     private final HeaderConverter headerConverter;
-    public static final String SOMU_TYPE_UUID = "somuTypeUuid";
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
-    public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED", "SOMU_ITEM_VIEWED"};
+    public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
@@ -191,7 +190,7 @@ public class ExportService {
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
 
         log.info("Exporting Case Data Somu to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid").collect(Collectors.toList());
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuTypeUuid", "somuItemUuid").collect(Collectors.toList());
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
         LinkedHashSet<String> somuHeaders = new LinkedHashSet<>();
@@ -200,24 +199,28 @@ public class ExportService {
         }
         headers.addAll(somuHeaders);
 
+        if (convert){
+            exportDataConverter.initialise();
+        }
+
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
-            Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(
+            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(
                     LocalDateTime.of(from, LocalTime.MIN),
                     LocalDateTime.of(to, LocalTime.MAX),
                     SOMU_TYPE_EVENTS,
                     caseTypeCode);
 
             data.forEach((audit) -> {
-                try {
+                try { 
                     if (filterSomuIType(audit, somuTypeDto)) {
                         String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
-                        if (convert){
+                        if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit);
                         }
                         printer.printRecord(parsedAudit);
                         outputWriter.flush();
                     }
-               } catch (Exception e) {
+                } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
             });
@@ -242,9 +245,8 @@ public class ExportService {
     }
 
     private boolean filterSomuIType(AuditData auditData, SomuTypeDto somuTypeDto) throws IOException {
-        AuditPayload.CaseData caseData = mapper.readValue(auditData.getAuditPayload(), AuditPayload.CaseData.class);
-        String somuTypeUuid = getSomuDataValue(caseData.getData(), SOMU_TYPE_UUID);
-        return StringUtils.equals(somuTypeUuid, somuTypeDto.getUuid().toString());
+        AuditPayload.SomuItem somuItem = mapper.readValue(auditData.getAuditPayload(), AuditPayload.SomuItem.class);
+        return StringUtils.equals(somuItem.getSomuTypeUuid().toString(), somuTypeDto.getUuid().toString());
     }
 
     private String getSomuDataValue(Map<String,String> data, String key) {
