@@ -231,6 +231,23 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void auditSomuExportShouldReturnCSVData() throws IOException {
+        SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\"},{\"name\":\"field2\"}]}", true);
+        when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", false, null, null);
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(1);
+
+        CSVRecord row = rows.get(0);
+        assertThat(row.get("field1")).isEqualTo("value1");
+        assertThat(row.get("field2")).isEqualTo("value2");
+    }
+
+    @Test
     public void caseTopicExportShouldReturnRowHeaders() throws IOException {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId", "caseUuid", "topicUuid", "topic"};
 
@@ -511,6 +528,12 @@ public class AuditExportServiceTest {
          return new LinkedHashSet<AuditData>(){{
              add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type1\", \"text\": \"Note 1\" }", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
              add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type2\", \"text\": \"Note 2\" }", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
+        }};
+    }
+
+    private Set<AuditData> getCaseDataWithSomuTypeAuditData() {
+        return new HashSet<AuditData>(){{
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"uuid\":\"09a89901-d2f1-4778-befe-ebab57659b90\",\"somuTypeUuid\":\"655ddfa7-5ccf-4d9b-86fd-8cef5f61a318\",\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
         }};
     }
 

@@ -43,6 +43,28 @@ public class DataExportResource {
         }
     }
 
+    @GetMapping(value = "/export/somu/{caseType}", params = {"fromDate", "toDate", "somuType"})
+    public @ResponseBody
+    void getSomuExport(@RequestParam("fromDate") LocalDate fromDate,
+                       @RequestParam("toDate") LocalDate toDate,
+                       @PathVariable("caseType") String caseType,
+                       @RequestParam("somuType") String somuType,
+                       @RequestParam(name = "convert", defaultValue = "false") boolean convert,
+                       @RequestParam(name = "timestampFormat", required = false) String timestampFormat,
+                       @RequestParam(name = "timeZoneId", required = false) String timeZoneId,
+                       HttpServletResponse response) {
+        try {
+            response.setContentType("text/csv");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=" + getFileName(caseType, somuType));
+            exportService.auditSomuExport(fromDate, toDate, response.getOutputStream(), caseType, somuType, convert, timestampFormat, timeZoneId);
+            response.setStatus(200);
+        } catch (Exception ex) {
+            log.error("Error exporting CSV file for case type {} and somu type {} for reason {}", caseType, somuType, ex.toString());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
     @GetMapping("/export/topics")
     public void getTopics(HttpServletResponse response,
                           @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {

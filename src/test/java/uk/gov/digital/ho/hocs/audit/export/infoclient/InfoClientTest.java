@@ -82,6 +82,18 @@ public class InfoClientTest {
     }
 
     @Test
+    public void getSomuType() {
+        SomuTypeDto response = new SomuTypeDto(UUID.randomUUID(), "caseType", "somuType", "{}", true);
+        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), any(ParameterizedTypeReference.class))).thenReturn(response);
+
+        SomuTypeDto result = infoClient.getSomuType("caseType", "somuType");
+
+        assertThat(result).isEqualTo(response);
+        verify(restHelper).get(eq(BASE_URL), eq("/somuType/caseType/somuType"), any(ParameterizedTypeReference.class));
+        verifyNoMoreInteractions(restHelper);
+    }
+
+    @Test
     public void getTopics() {
         Set<TopicDto> response = new HashSet<>(Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID())));
         when(restHelper.get(eq(BASE_URL), eq("/topics"), any(ParameterizedTypeReference.class))).thenReturn(response);

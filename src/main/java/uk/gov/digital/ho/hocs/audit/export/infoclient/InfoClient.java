@@ -54,6 +54,14 @@ public class InfoClient {
         return result;
     }
 
+    @Cacheable(value = "getSomuType", unless = "#result == null")
+    public SomuTypeDto getSomuType(String caseType, String somuType) {
+        SomuTypeDto somuTypeDto = restHelper.get(serviceBaseURL, String.format("/somuType/%s/%s", caseType, somuType), new ParameterizedTypeReference<SomuTypeDto>() {
+        });
+        log.info("Got SomuType {}", somuType, value(EVENT, INFO_CLIENT_GET_SOMUTYPE_SUCCESS));
+        return somuTypeDto;
+    }
+
     @Cacheable(value = "getTopics", unless = "#result == null")
     public Set<TopicDto> getTopics() {
         Set<TopicDto> infoTopic = restHelper.get(serviceBaseURL, String.format("/topics"), new ParameterizedTypeReference<Set<TopicDto>>() {
