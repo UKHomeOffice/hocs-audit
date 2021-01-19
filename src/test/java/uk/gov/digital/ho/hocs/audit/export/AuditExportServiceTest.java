@@ -320,11 +320,11 @@ public class AuditExportServiceTest {
 
     @Test
     public void staticTopicExportShouldReturnCSV() throws IOException {
-        String[] expectedHeaders = new String[]{"topicUUID", "topicName"};
+        String[] expectedHeaders = new String[]{"topicUUID", "topicName", "active"};
 
         LinkedHashSet<TopicDto> topics = new LinkedHashSet<TopicDto>(){{
-            add(new TopicDto("Topic 1", UUID.randomUUID()));
-            add(new TopicDto("Topic 2", UUID.randomUUID()));
+            add(new TopicDto("Topic 1", UUID.randomUUID(), true));
+            add(new TopicDto("Topic 2", UUID.randomUUID(), true));
         }};
 
         when(infoClient.getTopics()).thenReturn(topics);
