@@ -45,7 +45,7 @@ public class ExportService {
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-    
+
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter,
                          HeaderConverter headerConverter) {
         this.auditRepository = auditRepository;
@@ -211,7 +211,7 @@ public class ExportService {
                     caseTypeCode);
 
             data.forEach((audit) -> {
-                try { 
+                try {
                     if (filterSomuIType(audit, somuTypeDto)) {
                         String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
                         if (convert) {
