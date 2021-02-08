@@ -1,5 +1,8 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
+import java.util.HashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -8,6 +11,7 @@ import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceRe
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
@@ -20,11 +24,14 @@ import java.util.Set;
 @Service
 public class ExportDataConverter {
 
-    private static String UUID_REGEX = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+    private static final String UUID_REGEX = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+    private static final String[] MPAM_CODE_MAPPING_LISTS = { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" };
+    private static final Set<String> MPAM_SHORT_CODES = Stream.of("b5", "b6").collect(Collectors.toCollection(HashSet::new));
 
     private InfoClient infoClient;
     private CaseworkClient caseworkClient;
     private Map<String, String> uuidToName;
+    private Map<String, String> mpamCodeToName;
 
     public ExportDataConverter(InfoClient infoClient, CaseworkClient caseworkClient) {
         this.infoClient = infoClient;
@@ -48,21 +55,35 @@ public class ExportDataConverter {
 
         Set<GetCorrespondentOutlineResponse> correspondents = caseworkClient.getAllActiveCorrespondents();
         correspondents.forEach(corr -> uuidToName.put(corr.getUuid().toString(), corr.getFullname()));
+
+        mpamCodeToName = new HashMap<>();
+
+        for (String listName : MPAM_CODE_MAPPING_LISTS) {
+            Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
+            entities.forEach(e -> mpamCodeToName.put(e.getSimpleName(), e.getData().getTitle()));
+        }
     }
 
-    public String[] convertData(String[] auditData) {
+    public String[] convertData(String[] auditData, String caseShortCode) {
         for (int i = 0; i < auditData.length; i++){
-            String uuidData = auditData[i];
-            if (!isUUID(uuidData)) {
-                continue;
-            }
-            if (uuidToName.containsKey(uuidData)){
-                auditData[i] = uuidToName.get(uuidData);
+            String fieldData = auditData[i];
+            if (isUUID(fieldData)) {
+                if (uuidToName.containsKey(fieldData)) {
+                    auditData[i] = uuidToName.get(fieldData);
+                } else {
+                    GetCaseReferenceResponse caseReferenceResponse = caseworkClient.getCaseReference(fieldData);
+                    if (StringUtils.hasText(caseReferenceResponse.getReference())) {
+                        uuidToName.put(fieldData, caseReferenceResponse.getReference());
+                        auditData[i] = caseReferenceResponse.getReference();
+                    }
+                }
             } else {
-                GetCaseReferenceResponse caseReferenceResponse = caseworkClient.getCaseReference(uuidData);
-                if (StringUtils.hasText(caseReferenceResponse.getReference())) {
-                    uuidToName.put(uuidData, caseReferenceResponse.getReference());
-                    auditData[i] = caseReferenceResponse.getReference();
+                if (MPAM_SHORT_CODES.contains(caseShortCode)) {
+                    if (mpamCodeToName.containsKey(fieldData)) {
+                        String displayValue = mpamCodeToName.get(fieldData);
+                        String sanitizedDisplayValue = sanitiseForCsv(displayValue);
+                        auditData[i] = sanitizedDisplayValue;
+                    }
                 }
             }
         }
@@ -74,5 +95,9 @@ public class ExportDataConverter {
             return uuid.matches(UUID_REGEX);
         }
         return false;
+    }
+
+    private String sanitiseForCsv(String value) {
+        return value.replace(",", "");
     }
 }

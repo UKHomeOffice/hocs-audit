@@ -10,6 +10,8 @@ import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceRe
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDataDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
@@ -44,6 +46,11 @@ public class ExportDataConverterTest {
     private static final String CORR1_FULLNAME = "Bob Smith";
     private static final String CASE_REF = "REF/1234567/890";
     private static final String CASE_REF_NONE = "";
+    private static final String CASE_TYPE_SHORT_CODE = "x1";
+    private static final String ENTITY_1_SIMPLE_NAME = "aaaa_bbbb_cccc";
+    private static final String ENTITY_1_TITLE = "aaaa bbbb / (cccc)";
+    private static final String ENTITY_2_SIMPLE_NAME = "dddd_eeee_ffff";
+    private static final String ENTITY_2_TITLE_WITH_COMMAS = "dddd, eeee, (ffff)";
 
     @Mock
     private InfoClient infoClient;
@@ -59,6 +66,7 @@ public class ExportDataConverterTest {
             when(infoClient.getUsers()).thenReturn(buildUsers());
             when(infoClient.getAllTeams()).thenReturn(buildTeams());
             when(infoClient.getUnits()).thenReturn(buildUnits());
+            when(infoClient.getEntitiesForList("MPAM_ENQUIRY_SUBJECTS")).thenReturn(buildMpamEnquirySubjects());
             when(caseworkClient.getAllCaseTopics()).thenReturn(buildTopics());
             when(caseworkClient.getAllActiveCorrespondents()).thenReturn(buildCorrespondents());
             when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
@@ -79,7 +87,7 @@ public class ExportDataConverterTest {
     @Test
     public void convertDataHandlesEmptyArray() {
 
-        String[] testResult = converter.convertData(new String[] {});
+        String[] testResult = converter.convertData(new String[] {}, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(0);
@@ -90,7 +98,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { "a", "b", "c", "d" };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -105,7 +113,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { USER1_ID, "b", "c", "d" };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -120,7 +128,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { "a", UNIT1_ID, "c", "d" };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -135,7 +143,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { "a", "b", TOPIC1_ID, "d" };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -150,7 +158,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { "a", "b", "c", TEAM1_ID };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -165,7 +173,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { "a", CORR1_ID, "c", "d" };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(4);
@@ -180,7 +188,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { USER1_ID, UNIT1_ID, TOPIC1_ID, TEAM1_ID, CORR1_ID };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(5);
@@ -197,7 +205,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { CASE_ID };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(1);
@@ -210,7 +218,7 @@ public class ExportDataConverterTest {
 
         String[] testData = { CASE_ID_NONE };
 
-        String[] testResult = converter.convertData(testData);
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
         assertThat(testResult.length).isEqualTo(1);
@@ -219,6 +227,66 @@ public class ExportDataConverterTest {
 
     }
 
+    @Test
+    public void convertMpamEntityCode() {
+
+        String[] testData = { ENTITY_1_SIMPLE_NAME, "b", "c", "d" };
+
+        String[] testResult = converter.convertData(testData, "b5");
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(4);
+        assertThat(testResult[0]).isEqualTo("aaaa bbbb / (cccc)");
+        assertThat(testResult[1]).isEqualTo(testData[1]);
+        assertThat(testResult[2]).isEqualTo(testData[2]);
+        assertThat(testResult[3]).isEqualTo(testData[3]);
+    }
+
+    @Test
+    public void convertMpamEntityCodeWhenTitleContainsCommasThenTitleIsSanitised() {
+
+        String[] testData = { ENTITY_2_SIMPLE_NAME, "b", "c", "d" };
+
+        String[] testResult = converter.convertData(testData, "b5");
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(4);
+        assertThat(testResult[0]).isEqualTo("dddd eeee (ffff)");
+        assertThat(testResult[1]).isEqualTo(testData[1]);
+        assertThat(testResult[2]).isEqualTo(testData[2]);
+        assertThat(testResult[3]).isEqualTo(testData[3]);
+    }
+
+    @Test
+    public void convertMpamEntityCodeWhenNotMpamThenNoConversion() {
+
+        String[] testData = { ENTITY_1_SIMPLE_NAME, "b", "c", "d" };
+
+        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(4);
+        assertThat(testResult[0]).isEqualTo(ENTITY_1_SIMPLE_NAME);
+        assertThat(testResult[1]).isEqualTo(testData[1]);
+        assertThat(testResult[2]).isEqualTo(testData[2]);
+        assertThat(testResult[3]).isEqualTo(testData[3]);
+    }
+
+    @Test
+    public void convertMpamEntityCodeWhenCodeNotFoundThenNoConversion() {
+
+        String invalidCode = "simple_name2";
+        String[] testData = { invalidCode, "b", "c", "d" };
+
+        String[] testResult = converter.convertData(testData, "b5");
+
+        assertThat(testResult).isNotNull();
+        assertThat(testResult.length).isEqualTo(4);
+        assertThat(testResult[0]).isEqualTo(invalidCode);
+        assertThat(testResult[1]).isEqualTo(testData[1]);
+        assertThat(testResult[2]).isEqualTo(testData[2]);
+        assertThat(testResult[3]).isEqualTo(testData[3]);
+    }
 
     private Set<UserDto> buildUsers() {
         Set<UserDto> users = new HashSet<>();
@@ -248,5 +316,12 @@ public class ExportDataConverterTest {
         Set<GetCorrespondentOutlineResponse> correspondents = new HashSet<>();
         correspondents.add(new GetCorrespondentOutlineResponse(UUID.fromString(CORR1_ID), CORR1_FULLNAME));
         return correspondents;
+    }
+
+    private Set<EntityDto> buildMpamEnquirySubjects() {
+        Set<EntityDto> entitySet = new HashSet<>();
+        entitySet.add(new EntityDto(1l, UUID.randomUUID(), ENTITY_1_SIMPLE_NAME, new EntityDataDto(ENTITY_1_TITLE), UUID.randomUUID(), true));
+        entitySet.add(new EntityDto(1l, UUID.randomUUID(), ENTITY_2_SIMPLE_NAME, new EntityDataDto(ENTITY_2_TITLE_WITH_COMMAS), UUID.randomUUID(), true));
+        return entitySet;
     }
 }
