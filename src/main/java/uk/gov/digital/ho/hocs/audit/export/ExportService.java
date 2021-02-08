@@ -45,7 +45,7 @@ public class ExportService {
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-    
+
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter,
                          HeaderConverter headerConverter) {
         this.auditRepository = auditRepository;
@@ -211,7 +211,7 @@ public class ExportService {
                     caseTypeCode);
 
             data.forEach((audit) -> {
-                try { 
+                try {
                     if (filterSomuIType(audit, somuTypeDto)) {
                         String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
                         if (convert) {
@@ -408,7 +408,7 @@ public class ExportService {
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        List<String> headers = Stream.of("topicUUID", "topicName").collect(Collectors.toList());
+        List<String> headers = Stream.of("topicUUID", "topicName", "active").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
         if (convertHeader) {
@@ -420,7 +420,7 @@ public class ExportService {
 
             topics.forEach((topic) -> {
                 try {
-                    printer.printRecord(topic.getValue(), topic.getLabel());
+                    printer.printRecord(topic.getValue(), topic.getLabel(), topic.isActive());
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for static topic {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));

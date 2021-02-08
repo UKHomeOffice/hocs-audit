@@ -95,7 +95,7 @@ public class InfoClientTest {
 
     @Test
     public void getTopics() {
-        Set<TopicDto> response = new HashSet<>(Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID())));
+        Set<TopicDto> response = new HashSet<>(Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID(), true)));
         when(restHelper.get(eq(BASE_URL), eq("/topics"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<TopicDto> results = infoClient.getTopics();
 

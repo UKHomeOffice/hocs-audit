@@ -16,4 +16,7 @@ public class TopicDto {
     @JsonProperty("value")
     private UUID value;
 
+    @JsonProperty("active")
+    private boolean active;
+
 }
