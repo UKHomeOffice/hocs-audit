@@ -46,7 +46,9 @@ public class ZonedDateTimeConverter {
                 localDateTime
                         .atZone(ZoneId.systemDefault())
                         .withZoneSameInstant(specifiedTimeZoneId);
-        log.info("Timestamp after convert: {}", zonedDateTime.toLocalDateTime().format(dateTimeFormatter));
+        log.info("Timestamp after time zone: {}", zonedDateTime);
+        log.info("Timestamp after toLocalDateTime(): {}", zonedDateTime.toLocalDateTime());
+        log.info("Timestamp after formatting: {}", zonedDateTime.toLocalDateTime().format(dateTimeFormatter));
         return zonedDateTime.toLocalDateTime().format(dateTimeFormatter);
     }
 
