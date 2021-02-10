@@ -2,13 +2,12 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.repository;
 
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 @Repository
 public interface AuditRepositoryCustom {
 
-    List<Object[]> getResultsFromView(String viewName);
-
+    Stream<Object[]> getResultsFromView(String viewName);
 
 }
 

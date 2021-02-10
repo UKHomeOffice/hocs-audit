@@ -13,6 +13,8 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -20,7 +22,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomExportDataConverterTest {
-
     private static final String PERMISSION_1 = "permission_name1";
     private static final String VIEW_CODE_1 = "view_name1";
     private static final String VIEW_DISPLAY_NAME_1 = "display_name1";
@@ -31,7 +32,6 @@ public class CustomExportDataConverterTest {
     private static final String FIELD_NAME_E = "FieldE";
     private static final String FIELD_NAME_F = "FieldF";
     private static final String FIELD_NAME_G = "FieldG";
-
 
     private static final String USER1_ID = UUID.randomUUID().toString();
     private static final String USER1_USERNAME = "user-Bob";
@@ -65,55 +65,52 @@ public class CustomExportDataConverterTest {
 
     private CustomExportDataConverter converter;
 
-
     @Before
     public void before() {
-        converter = new CustomExportDataConverter(infoClient, caseworkClient);
-    }
-
-    @Test
-    public void getHeaders() {
-        ExportViewDto exportViewDto = buildExportView1();
-
-
-        List<String> results = converter.getHeaders(exportViewDto);
-
-        assertThat(results).isNotNull();
-        assertThat(results.size()).isEqualTo(2);
-        assertThat(results).contains(FIELD_NAME_A, FIELD_NAME_B);
-
-    }
-
-    @Test
-    public void getHeaders_Hidden() {
-        ExportViewDto exportViewDto = buildExportView2();
-
-
-        List<String> results = converter.getHeaders(exportViewDto);
-
-        assertThat(results).isNotNull();
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results).contains(FIELD_NAME_A);
-
-    }
-
-    @Test
-    public void convertData() {
-        ExportViewDto exportViewDto = buildExportView3();
-
         Set<UserDto> users = buildUsers();
         Set<TeamDto> teams = buildTeams();
         Set<UnitDto> units = buildUnits();
         Set<GetTopicResponse> topics = buildTopics();
-        List<Object[]> input = buildInputData();
 
         when(infoClient.getUsers()).thenReturn(users);
         when(infoClient.getAllTeams()).thenReturn(teams);
         when(infoClient.getUnits()).thenReturn(units);
         when(caseworkClient.getAllCaseTopics()).thenReturn(topics);
 
+        converter = new CustomExportDataConverter(infoClient, caseworkClient);
+        converter.initialiseAdapters();
+    }
 
-        List<Object[]> results = converter.convertData(input, exportViewDto.getFields());
+    @Test
+    public void getHeaders() {
+        ExportViewDto exportViewDto = buildExportView1();
+
+        List<String> results = converter.getHeaders(exportViewDto);
+
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isEqualTo(2);
+        assertThat(results).contains(FIELD_NAME_A, FIELD_NAME_B);
+    }
+
+    @Test
+    public void getHeaders_Hidden() {
+        ExportViewDto exportViewDto = buildExportView2();
+
+        List<String> results = converter.getHeaders(exportViewDto);
+
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results).contains(FIELD_NAME_A);
+    }
+
+    @Test
+    public void convertData() {
+        ExportViewDto exportViewDto = buildExportView3();
+        Stream<Object[]> input = buildInputData();
+
+        List<Object[]> results = input
+                .map(result -> converter.convertData(result, exportViewDto.getFields()))
+                .collect(Collectors.toList());
 
         assertThat(results).isNotNull();
         assertThat(results.size()).isEqualTo(2);
@@ -161,7 +158,6 @@ public class CustomExportDataConverterTest {
     }
 
     private ExportViewDto buildExportView3() {
-
         ExportViewFieldAdapterDto userEmailAdapter = new ExportViewFieldAdapterDto(null, null, null, ExportViewConstants.FIELD_ADAPTER_USER_EMAIL);
         ExportViewFieldAdapterDto usernameAdapter = new ExportViewFieldAdapterDto(null, null, null, ExportViewConstants.FIELD_ADAPTER_USERNAME);
         ExportViewFieldAdapterDto userFirstAndLastName = new ExportViewFieldAdapterDto(null, null, null, ExportViewConstants.FIELD_ADAPTER_FIRST_AND_LAST_NAME);
@@ -210,7 +206,7 @@ public class CustomExportDataConverterTest {
     }
 
 
-    private List<Object[]> buildInputData() {
+    private Stream<Object[]> buildInputData() {
         List<Object[]> inputData = new ArrayList<>();
         Object[] row1 = new Object[7];
         Object[] row2 = new Object[7];
@@ -233,6 +229,6 @@ public class CustomExportDataConverterTest {
         inputData.add(row1);
         inputData.add(row2);
 
-        return inputData;
+        return inputData.stream();
     }
 }

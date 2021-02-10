@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -22,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
@@ -44,18 +46,16 @@ public class CustomExportService {
         this.requestData = requestData;
     }
 
-    @Transactional(readOnly = true)
     public void customExport(HttpServletResponse response, String code, boolean convertHeader) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
-        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) && !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
+        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
+                !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
             log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.userId(), exportViewDto.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", code);
         } else {
-            response.setContentType("text/csv");
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
-
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
 
             OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
@@ -65,23 +65,36 @@ public class CustomExportService {
             if (convertHeader) {
                 substitutedHeaders = headerConverter.substitute(headers);
             }
-            List<Object[]> dataList = customExportDataConverter.convertData(auditRepository.getResultsFromView(exportViewDto.getCode()), exportViewDto.getFields());
+
+            customExportDataConverter.initialiseAdapters();
 
             try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+                retrieveAuditData(exportViewDto.getCode())
+                        .forEach(data -> {
+                            Object[] converted = customExportDataConverter.convertData(data, exportViewDto.getFields());
 
-                dataList.forEach((dataRow) -> {
-                    try {
-                        printer.printRecord(dataRow);
-                        outputWriter.flush();
-                    } catch (Exception e) {
-                        log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                    }
-                });
-                log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
+                            if (converted == null) {
+                                log.warn("No data to print after converting data {}", data);
+                                return;
+                            }
+
+                            try {
+                                printer.printRecord(converted);
+                                outputWriter.flush();
+                            } catch (IOException e) {
+                                log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                            }
+                        });
             }
 
+            log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
         }
+    }
 
+    @Transactional(readOnly = true, timeout = 300)
+    Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode) {
+        return auditRepository
+                .getResultsFromView(exportViewCode);
     }
 
     private String getFilename(String displayName) {
