@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -45,7 +46,6 @@ public class CustomExportService {
         this.requestData = requestData;
     }
 
-    @Transactional(readOnly = true)
     public void customExport(HttpServletResponse response, String code, boolean convertHeader) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
@@ -66,30 +66,33 @@ public class CustomExportService {
                 substitutedHeaders = headerConverter.substitute(headers);
             }
 
-            Stream<Object[]> dataList = auditRepository
-                    .getResultsFromView(exportViewDto.getCode())
-                    .map(data ->
-                        customExportDataConverter.convertData(data, exportViewDto.getFields())
-                    );
-            createCSV(outputWriter, substitutedHeaders, dataList);
+            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+                retrieveAuditData(exportViewDto.getCode())
+                        .forEach(data -> {
+                            Object[] converted = customExportDataConverter.convertData(data, exportViewDto.getFields());
+
+                            if (converted == null) {
+                                log.warn("No data to print after converting data {}", data);
+                                return;
+                            }
+
+                            try {
+                                printer.printRecord(converted);
+                                outputWriter.flush();
+                            } catch (IOException e) {
+                                log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                            }
+                        });
+            }
+
             log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
         }
     }
 
-    public void createCSV(OutputStreamWriter outputStreamWriter, List<String> substitutedHeaders, Stream<Object[]> data) {
-        try (CSVPrinter printer = new CSVPrinter(outputStreamWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            data.forEach((dataRow) -> {
-                try {
-                    printer.printRecord(dataRow);
-                    outputStreamWriter.flush();
-                } catch (Exception e) {
-                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-        } catch (IOException e) {
-            log.warn(e.toString());
-        }
-
+    @Transactional(readOnly = true, timeout = 300)
+    Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode) {
+        return auditRepository
+                .getResultsFromView(exportViewCode);
     }
 
     private String getFilename(String displayName) {

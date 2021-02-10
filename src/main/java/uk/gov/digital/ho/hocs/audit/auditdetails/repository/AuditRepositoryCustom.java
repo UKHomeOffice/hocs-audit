@@ -2,7 +2,6 @@ package uk.gov.digital.ho.hocs.audit.auditdetails.repository;
 
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Repository
