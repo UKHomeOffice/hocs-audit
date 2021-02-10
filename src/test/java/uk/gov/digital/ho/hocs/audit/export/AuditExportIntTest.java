@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
-import static org.springframework.test.web.client.MockRestServiceServer.bindTo;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -38,12 +37,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @Sql(scripts = "classpath:export/afterTest.sql", config = @SqlConfig(transactionMode = ISOLATED), executionPhase = AFTER_TEST_METHOD)
 public class AuditExportIntTest {
 
-    private MockRestServiceServer mockInfoService;
-    private TestRestTemplate testRestTemplate = new TestRestTemplate();
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    @Autowired
+    private TestRestTemplate testRestTemplate;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate mockRestTemplate;
 
     @Value("classpath:export/resources/info-case-types.json")
     private Resource infoCaseTypes;
@@ -51,18 +49,19 @@ public class AuditExportIntTest {
     @Value("classpath:export/resources/info-schema-MIN.json")
     private Resource infoSchemaMIN;
 
-    @Value("classpath:export/resources/info-teams.json")
-    private Resource infoTeams;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private MockRestServiceServer mockInfoService;
 
     private HttpHeaders headers;
 
     @LocalServerPort
-    int port;
+    private int port;
 
     @Before
     public void setup() {
         headers = new HttpHeaders();
-        mockInfoService = buildMockService(restTemplate);
+        mockInfoService = buildMockService();
         setupInfoServiceCaseTypesMock();
     }
 
@@ -178,17 +177,10 @@ public class AuditExportIntTest {
                 .andRespond(withSuccess(infoCaseTypes, MediaType.APPLICATION_JSON_UTF8));
     }
 
-    private void setupInfoServiceTeamsMock() {
-        mockInfoService
-                .expect(requestTo("http://localhost:8085/team"))
-                .andExpect(method(GET))
-                .andRespond(withSuccess(infoTeams, MediaType.APPLICATION_JSON_UTF8));
-    }
-
-    private MockRestServiceServer buildMockService(RestTemplate restTemplate) {
-        MockRestServiceServer.MockRestServiceServerBuilder infoBuilder = bindTo(restTemplate);
-        infoBuilder.ignoreExpectOrder(true);
-        return infoBuilder.build();
+    private MockRestServiceServer buildMockService() {
+        return MockRestServiceServer.bindTo(mockRestTemplate)
+                .ignoreExpectOrder(true)
+                .build();
     }
 
     private String getBasePath() {
