@@ -2,7 +2,6 @@ package uk.gov.digital.ho.hocs.audit.export;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.export.adapter.*;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
@@ -24,13 +23,15 @@ import static uk.gov.digital.ho.hocs.audit.application.LogEvent.CSV_CUSTOM_CONVE
 @Service
 public class CustomExportDataConverter {
 
-    private InfoClient infoClient;
-    private CaseworkClient caseworkClient;
+    private final InfoClient infoClient;
+    private final CaseworkClient caseworkClient;
     private Map<String, ExportViewFieldAdapter> adapters;
 
     public CustomExportDataConverter(InfoClient infoClient, CaseworkClient caseworkClient) {
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
+
+        initialiseAdapters();
     }
 
     public List<String> getHeaders(ExportViewDto exportViewDto) {
@@ -45,26 +46,17 @@ public class CustomExportDataConverter {
         return headers;
     }
 
-    public List<Object[]> convertData(List<Object[]> input, List<ExportViewFieldDto> fields) {
+    public Object[] convertData(Object[] input, List<ExportViewFieldDto> fields) {
+        Object[] convertedData = null;
 
-        if (!CollectionUtils.isEmpty(input)) {
-            initialiseAdapters();
-            List<Object[]> convertedData = new ArrayList<>();
-
-            for (Object[] row : input) {
-                convertedData.add(convertCustomDataRow(row, fields));
-            }
-
-            return convertedData;
-
+        if (input != null) {
+            convertedData = convertCustomDataRow(input, fields);
         }
 
-        return new ArrayList<>();
-
+        return convertedData;
     }
 
     private Object[] convertCustomDataRow(Object[] rawData, List<ExportViewFieldDto> fields) {
-
         List<String> results = new ArrayList<>();
         int index = 0;
         for (ExportViewFieldDto fieldDto : fields) {
@@ -74,14 +66,12 @@ public class CustomExportDataConverter {
             index++;
         }
 
-
         return results.toArray();
     }
 
     private String applyAdapters(Object data, List<ExportViewFieldAdapterDto> adaptersDtos) {
-
-
         Object result = data;
+
         for (ExportViewFieldAdapterDto adapterDto : adaptersDtos) {
             ExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
 
@@ -97,11 +87,9 @@ public class CustomExportDataConverter {
         }
 
         return result == null ? null : String.valueOf(result);
-
     }
 
     private boolean shouldHide(ExportViewFieldDto viewFieldDto) {
-
         for (ExportViewFieldAdapterDto adapterDto : viewFieldDto.getAdapters()) {
             if (ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(adapterDto.getType())) {
                 return true;
@@ -123,11 +111,9 @@ public class CustomExportDataConverter {
         adapterList.add(new UserFirstAndLastNameAdapter(users));
         adapterList.add(new UnitNameAdapter(teams, units));
 
-
         adapterList.add(new TopicNameAdapter(topics));
         adapterList.add(new TeamNameAdapter(teams));
 
         adapters = adapterList.stream().collect(Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
-
     }
 }

@@ -1,8 +1,10 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
@@ -141,11 +143,11 @@ public class DataExportResource {
         }
     }
 
-    @GetMapping(value = "/export/custom/{code}")
+    @GetMapping(value = "/export/custom/{code}", produces = "text/csv;charset=UTF-8")
     public @ResponseBody
-    void getCustomDataExport(@PathVariable("code") String code, HttpServletResponse response,
+    void getCustomDataExport(HttpServletResponse response,
+                             @PathVariable("code") String code,
                              @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
-
         try {
             customExportService.customExport(response, code, convertHeader);
             response.setStatus(200);

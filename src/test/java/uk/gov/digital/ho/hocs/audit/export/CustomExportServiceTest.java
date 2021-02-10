@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
@@ -76,7 +77,7 @@ public class CustomExportServiceTest {
 
     @Test()
     public void customExport() throws IOException {
-        List<Object[]> inputData = buildInputData();
+        Stream<Object[]> inputData = buildInputData();
         List<Object[]> outputData = buildOutputData();
         ExportViewDto exportViewDto = buildExportView1();
         when(infoClient.getExportView(VIEW_CODE_1)).thenReturn(exportViewDto);
@@ -84,25 +85,24 @@ public class CustomExportServiceTest {
         when(auditRepository.getResultsFromView(VIEW_CODE_1)).thenReturn(inputData);
         when(servletResponse.getOutputStream()).thenReturn(mock(ServletOutputStream.class));
         when(customExportDataConverter.getHeaders(exportViewDto)).thenReturn(Arrays.asList("Header1", "Header2", "Header3"));
-        when(customExportDataConverter.convertData(inputData, exportViewDto.getFields())).thenReturn(outputData);
 
         customExportService.customExport(servletResponse, VIEW_CODE_1, true);
 
-        verify(servletResponse).setContentType("text/csv");
+        verify(servletResponse).setContentType("text/csv;charset=UTF-8");
         verify(servletResponse).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + VIEW_DISPLAY_NAME_1 + "-" + LocalDate.now().toString() + ".csv");
         verify(servletResponse).getOutputStream();
         verify(infoClient).getExportView(VIEW_CODE_1);
         verify(auditRepository).getResultsFromView(VIEW_CODE_1);
+        verify(customExportDataConverter, times(2)).convertData(any(), any());
         verify(requestData).roles();
         verify(customExportDataConverter).getHeaders(exportViewDto);
-        verify(customExportDataConverter).convertData(inputData, exportViewDto.getFields());
         verify(passThroughHeaderConverter).substitute(anyList());
 
         checkNoMoreInteractions();
     }
 
-    private List<Object[]> buildInputData() {
+    private Stream<Object[]> buildInputData() {
         List<Object[]> inputData = new ArrayList<>();
         Object[] row1 = new Object[3];
         Object[] row2 = new Object[3];
@@ -114,7 +114,7 @@ public class CustomExportServiceTest {
         row2[2] = "Row2Col3";
         inputData.add(row1);
         inputData.add(row2);
-        return inputData;
+        return inputData.stream();
     }
 
     private List<Object[]> buildOutputData() {

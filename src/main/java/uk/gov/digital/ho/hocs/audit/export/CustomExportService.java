@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
@@ -48,14 +49,13 @@ public class CustomExportService {
     public void customExport(HttpServletResponse response, String code, boolean convertHeader) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
-        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) && !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
+        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
+                !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
             log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.userId(), exportViewDto.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", code);
         } else {
-            response.setContentType("text/csv");
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
-
+            response.setContentType("text/csv;charset=UTF-8");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
 
             OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
@@ -65,21 +65,29 @@ public class CustomExportService {
             if (convertHeader) {
                 substitutedHeaders = headerConverter.substitute(headers);
             }
-            List<Object[]> dataList = customExportDataConverter.convertData(auditRepository.getResultsFromView(exportViewDto.getCode()), exportViewDto.getFields());
 
-            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+            Stream<Object[]> dataList = auditRepository
+                    .getResultsFromView(exportViewDto.getCode())
+                    .map(data ->
+                        customExportDataConverter.convertData(data, exportViewDto.getFields())
+                    );
+            createCSV(outputWriter, substitutedHeaders, dataList);
+            log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
 
-                dataList.forEach((dataRow) -> {
-                    try {
-                        printer.printRecord(dataRow);
-                        outputWriter.flush();
-                    } catch (Exception e) {
-                        log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                    }
-                });
-                log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
-            }
-
+    public void createCSV(OutputStreamWriter outputStreamWriter, List<String> substitutedHeaders, Stream<Object[]> data) {
+        try (CSVPrinter printer = new CSVPrinter(outputStreamWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+            data.forEach((dataRow) -> {
+                try {
+                    printer.printRecord(dataRow);
+                    outputStreamWriter.flush();
+                } catch (Exception e) {
+                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+        } catch (IOException e) {
+            log.warn(e.toString());
         }
 
     }

@@ -30,7 +30,7 @@ public class DataExportResourceTest {
     private DataExportResource dataExportResource;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         dataExportResource = new DataExportResource(exportService, customExportService);
     }
 
@@ -253,31 +253,38 @@ public class DataExportResourceTest {
     public void getCustomDataExport() throws IOException {
         String customReportCode = "Code123";
 
-        dataExportResource.getCustomDataExport(customReportCode, response, true);
+        dataExportResource.getCustomDataExport(response, customReportCode, true);
 
         verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(200);
+
         checkNoMoreInteractions();
     }
+
 
     @Test
     public void getCustomDataExport_HttpClientErrorException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT)).when(customExportService).customExport(response, customReportCode, true);
-        dataExportResource.getCustomDataExport(customReportCode, response, true);
+        doThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT))
+                .when(customExportService)
+                .customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(response, customReportCode, true);
 
-        verify(customExportService).customExport(response, customReportCode, true);
+        verify(customExportService, atLeastOnce()).customExport(response, customReportCode, true);
         verify(response).setStatus(418);
         checkNoMoreInteractions();
     }
+
 
     @Test
     public void getCustomDataExport_EntityPermissionException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new EntityPermissionException("Test exception")).when(customExportService).customExport(response, customReportCode, true);
-        dataExportResource.getCustomDataExport(customReportCode, response, true);
+        doThrow(new EntityPermissionException("Test exception"))
+                .when(customExportService)
+                .customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(response, customReportCode, true);
 
         verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(403);
@@ -288,8 +295,10 @@ public class DataExportResourceTest {
     public void getCustomDataExport_nonHttpClientErrorException() throws IOException {
         String customReportCode = "Code123";
 
-        doThrow(new IllegalArgumentException("Dummy exception")).when(customExportService).customExport(response, customReportCode, true);
-        dataExportResource.getCustomDataExport(customReportCode, response, true);
+        doThrow(new IllegalArgumentException("Dummy exception"))
+                .when(customExportService)
+                .customExport(response, customReportCode, true);
+        dataExportResource.getCustomDataExport(response, customReportCode, true);
 
         verify(customExportService).customExport(response, customReportCode, true);
         verify(response).setStatus(500);

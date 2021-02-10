@@ -13,6 +13,8 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -68,6 +70,16 @@ public class CustomExportDataConverterTest {
 
     @Before
     public void before() {
+        Set<UserDto> users = buildUsers();
+        Set<TeamDto> teams = buildTeams();
+        Set<UnitDto> units = buildUnits();
+        Set<GetTopicResponse> topics = buildTopics();
+
+        when(infoClient.getUsers()).thenReturn(users);
+        when(infoClient.getAllTeams()).thenReturn(teams);
+        when(infoClient.getUnits()).thenReturn(units);
+        when(caseworkClient.getAllCaseTopics()).thenReturn(topics);
+
         converter = new CustomExportDataConverter(infoClient, caseworkClient);
     }
 
@@ -100,20 +112,11 @@ public class CustomExportDataConverterTest {
     @Test
     public void convertData() {
         ExportViewDto exportViewDto = buildExportView3();
+        Stream<Object[]> input = buildInputData();
 
-        Set<UserDto> users = buildUsers();
-        Set<TeamDto> teams = buildTeams();
-        Set<UnitDto> units = buildUnits();
-        Set<GetTopicResponse> topics = buildTopics();
-        List<Object[]> input = buildInputData();
-
-        when(infoClient.getUsers()).thenReturn(users);
-        when(infoClient.getAllTeams()).thenReturn(teams);
-        when(infoClient.getUnits()).thenReturn(units);
-        when(caseworkClient.getAllCaseTopics()).thenReturn(topics);
-
-
-        List<Object[]> results = converter.convertData(input, exportViewDto.getFields());
+        List<Object[]> results = input
+                .map(result -> converter.convertData(result, exportViewDto.getFields()))
+                .collect(Collectors.toList());
 
         assertThat(results).isNotNull();
         assertThat(results.size()).isEqualTo(2);
@@ -210,7 +213,7 @@ public class CustomExportDataConverterTest {
     }
 
 
-    private List<Object[]> buildInputData() {
+    private Stream<Object[]> buildInputData() {
         List<Object[]> inputData = new ArrayList<>();
         Object[] row1 = new Object[7];
         Object[] row2 = new Object[7];
@@ -233,6 +236,6 @@ public class CustomExportDataConverterTest {
         inputData.add(row1);
         inputData.add(row2);
 
-        return inputData;
+        return inputData.stream();
     }
 }
