@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.CSV_CUSTOM_CONVERTER_FAILURE;
@@ -31,7 +32,7 @@ public class CustomExportDataConverter {
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
 
-        initialiseAdapters();
+        adapters = new HashMap<>();
     }
 
     public List<String> getHeaders(ExportViewDto exportViewDto) {
@@ -99,7 +100,7 @@ public class CustomExportDataConverter {
         return false;
     }
 
-    private void initialiseAdapters() {
+    public void initialiseAdapters() {
         Set<UserDto> users = infoClient.getUsers();
         Set<TeamDto> teams = infoClient.getAllTeams();
         Set<UnitDto> units = infoClient.getUnits();

@@ -66,6 +66,8 @@ public class CustomExportService {
                 substitutedHeaders = headerConverter.substitute(headers);
             }
 
+            customExportDataConverter.initialiseAdapters();
+
             try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
                 retrieveAuditData(exportViewDto.getCode())
                         .forEach(data -> {

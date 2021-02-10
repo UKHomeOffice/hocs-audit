@@ -74,7 +74,6 @@ public class CustomExportServiceTest {
         checkNoMoreInteractions();
     }
 
-
     @Test()
     public void customExport() throws IOException {
         Stream<Object[]> inputData = buildInputData();
@@ -95,6 +94,7 @@ public class CustomExportServiceTest {
         verify(infoClient).getExportView(VIEW_CODE_1);
         verify(auditRepository).getResultsFromView(VIEW_CODE_1);
         verify(customExportDataConverter, times(2)).convertData(any(), any());
+        verify(customExportDataConverter).initialiseAdapters();
         verify(requestData).roles();
         verify(customExportDataConverter).getHeaders(exportViewDto);
         verify(passThroughHeaderConverter).substitute(anyList());
