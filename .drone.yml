@@ -26,7 +26,6 @@ pipeline:
     commands:
       - docker build -t hocs-audit .
     when:
-      branch: [master, refs/tags/*]
       event: [push, tag]
 
   install-docker-image:
