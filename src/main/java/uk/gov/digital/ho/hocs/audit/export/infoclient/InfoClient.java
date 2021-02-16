@@ -151,5 +151,12 @@ public class InfoClient {
         return null;
     }
 
+    @Cacheable(value = "getEntitiesForList", unless = "#result == null")
+    public Set<EntityDto> getEntitiesForList(String simpleName) {
+        Set<EntityDto> entities = restHelper.get(serviceBaseURL, String.format("/entity/list/%s", simpleName), new ParameterizedTypeReference<Set<EntityDto>>() {
+        });
+        log.info("Got {} entities for list", entities.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
+        return entities;
+    }
 
 }

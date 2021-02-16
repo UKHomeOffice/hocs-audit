@@ -106,7 +106,7 @@ public class ExportService {
                 try {
                     String[] parsedAudit = parseCaseDataAuditPayload(audit, caseDataHeaders, zonedDateTimeConverter);
                     if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
@@ -157,7 +157,7 @@ public class ExportService {
                 try {
                     String[] parsedAudit = parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
@@ -215,7 +215,7 @@ public class ExportService {
                     if (filterSomuIType(audit, somuTypeDto)) {
                         String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
                         if (convert) {
-                            parsedAudit = exportDataConverter.convertData(parsedAudit);
+                            parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
                         printer.printRecord(parsedAudit);
                         outputWriter.flush();
@@ -317,7 +317,7 @@ public class ExportService {
                 try {
                     String[] parsedAudit = parseCorrespondentAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
@@ -376,7 +376,7 @@ public class ExportService {
                 try {
                     String[] parsedAudit = parseAllocationAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit);
+                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();

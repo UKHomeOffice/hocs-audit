@@ -166,7 +166,7 @@ public class AuditExportServiceTest {
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, false, false, null, null);
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
-        verify(exportDataConverter, times(0)).convertData(any());
+        verify(exportDataConverter, times(0)).convertData(any(), any());
     }
 
     @Test
@@ -174,13 +174,13 @@ public class AuditExportServiceTest {
 
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
-        when(exportDataConverter.convertData(any())).thenAnswer(a -> a.getArguments()[0]);
+        when(exportDataConverter.convertData(any(), any())).thenAnswer(a -> a.getArguments()[0]);
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CASE_DATA, true, false, null, null);
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
-        verify(exportDataConverter, times(getCaseDataAuditData().size())).convertData(any());
+        verify(exportDataConverter, times(getCaseDataAuditData().size())).convertData(any(), any());
     }
 
     @Test
@@ -203,14 +203,14 @@ public class AuditExportServiceTest {
         assertThat(row.get("event")).isEqualTo("CASE_NOTE_CREATED");
         assertThat(row.get("caseNoteType")).isEqualTo("Type1");
         assertThat(row.get("text")).isEqualTo("Note 1");
-        verify(exportDataConverter, times(0)).convertData(any());
+        verify(exportDataConverter, times(0)).convertData(any(), any());
     }
 
     @Test
     public void caseNotesExportShouldConvertHeadersAndData() throws IOException {
 
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_NOTES_EVENTS), any())).thenReturn(getCaseNotesAuditData().stream());
-        when(exportDataConverter.convertData(any())).thenAnswer(a -> a.getArguments()[0]);
+        when(exportDataConverter.convertData(any(), any())).thenAnswer(a -> a.getArguments()[0]);
         Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "convertedCaseNoteType", "text").collect(Collectors.toSet());
         OutputStream outputStream = new ByteArrayOutputStream();
 
@@ -227,7 +227,7 @@ public class AuditExportServiceTest {
         assertThat(row.get("event")).isEqualTo("CASE_NOTE_CREATED");
         assertThat(row.get("convertedCaseNoteType")).isEqualTo("Type1");
         assertThat(row.get("text")).isEqualTo("Note 1");
-        verify(exportDataConverter, times(2)).convertData(any());
+        verify(exportDataConverter, times(2)).convertData(any(), any());
     }
 
     @Test
@@ -267,7 +267,7 @@ public class AuditExportServiceTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getTopicDataAuditData().stream());
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.TOPICS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.TOPIC_EVENTS, "a1");
-        verify(exportDataConverter, times(0)).convertData(any());
+        verify(exportDataConverter, times(0)).convertData(any(), any());
     }
 
     @Test
@@ -293,7 +293,7 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.CORRESPONDENTS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.CORRESPONDENT_EVENTS, "a1");
-        verify(exportDataConverter, times(0)).convertData(any());
+        verify(exportDataConverter, times(0)).convertData(any(), any());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class AuditExportServiceTest {
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.ALLOCATIONS, false, false, null, null);
         verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.ALLOCATION_EVENTS, "a1");
-        verify(exportDataConverter, times(0)).convertData(any());
+        verify(exportDataConverter, times(0)).convertData(any(), any());
     }
 
 
