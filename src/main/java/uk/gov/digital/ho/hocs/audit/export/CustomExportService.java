@@ -46,6 +46,7 @@ public class CustomExportService {
         this.requestData = requestData;
     }
 
+    @Transactional(readOnly = true, timeout = 300)
     public void customExport(HttpServletResponse response, String code, boolean convertHeader) throws IOException {
         ExportViewDto exportViewDto = infoClient.getExportView(code);
 
@@ -91,7 +92,6 @@ public class CustomExportService {
         }
     }
 
-    @Transactional(readOnly = true, timeout = 300)
     Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode) {
         return auditRepository
                 .getResultsFromView(exportViewCode);
