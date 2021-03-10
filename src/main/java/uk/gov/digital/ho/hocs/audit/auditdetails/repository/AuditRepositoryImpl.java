@@ -15,7 +15,7 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
     @Override
     public Stream<Object[]> getResultsFromView(@NonNull final String viewName) {
         return em.createNativeQuery(String.format("SELECT * FROM %s", viewName))
-                .setHint(QueryHints.HINT_FETCH_SIZE, 50 )
+                .setHint(QueryHints.HINT_FETCH_SIZE, 20 )
                 .unwrap(Query.class)
                 .stream();
     }
