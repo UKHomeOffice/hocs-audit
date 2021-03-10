@@ -69,7 +69,11 @@ public class CustomExportService {
 
             customExportDataConverter.initialiseAdapters();
 
-            try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+            try (CSVPrinter printer =
+                         new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+                // Immediately flush the output writer so the file starts downloading immediately.
+                outputWriter.flush();
+
                 retrieveAuditData(exportViewDto.getCode())
                         .forEach(data -> {
                             Object[] converted = customExportDataConverter.convertData(data, exportViewDto.getFields());
