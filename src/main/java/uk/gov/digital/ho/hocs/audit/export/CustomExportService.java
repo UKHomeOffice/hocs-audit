@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -67,22 +68,26 @@ public class CustomExportService {
                 substitutedHeaders = headerConverter.substitute(headers);
             }
 
-            customExportDataConverter.initialiseAdapters();
-
             try (CSVPrinter printer =
                          new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
                 // Immediately flush the output writer so the file starts downloading immediately.
                 outputWriter.flush();
 
+                customExportDataConverter.initialiseAdapters();
+
                 retrieveAuditData(exportViewDto.getCode())
-                        .forEach(data -> {
+                        .parallel()
+                        .map(data -> {
                             Object[] converted = customExportDataConverter.convertData(data, exportViewDto.getFields());
 
                             if (converted == null) {
                                 log.warn("No data to print after converting data {}", data);
-                                return;
+                                return new Object[0];
                             }
 
+                            return converted;
+                        })
+                        .forEachOrdered(converted -> {
                             try {
                                 printer.printRecord(converted);
                                 outputWriter.flush();
