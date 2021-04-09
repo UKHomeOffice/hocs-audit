@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
 @RunWith(SpringRunner.class)
@@ -76,5 +77,21 @@ public class AuditRepositoryTest {
             add(deleted);
         }};
     }
+
+    @Test
+    public void shouldAllowValuesInAllowList() {
+        // no exception expected
+        repository.checkViewNameIsAllowed("allow1");
+        repository.checkViewNameIsAllowed("Allow1");
+        repository.checkViewNameIsAllowed("ALLOW2");
+    }
+
+    @Test
+    public void shouldThrowErrorWhenValuesNotInAllowList() {
+        assertThatThrownBy(() -> {
+            repository.checkViewNameIsAllowed("not allowed");
+        }).isInstanceOf(SecurityException.class);
+    }
+
 
 }
