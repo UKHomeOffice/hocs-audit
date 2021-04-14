@@ -84,6 +84,7 @@ public class CustomExportServiceTest {
         when(auditRepository.getResultsFromView(VIEW_CODE_1)).thenReturn(inputData);
         when(servletResponse.getOutputStream()).thenReturn(mock(ServletOutputStream.class));
         when(customExportDataConverter.getHeaders(exportViewDto)).thenReturn(Arrays.asList("Header1", "Header2", "Header3"));
+        when(customExportService.getViewLastRefreshedDate(VIEW_CODE_1)).thenReturn(LocalDate.now());
 
         customExportService.customExport(servletResponse, VIEW_CODE_1, true);
 
@@ -93,6 +94,7 @@ public class CustomExportServiceTest {
         verify(servletResponse).getOutputStream();
         verify(infoClient).getExportView(VIEW_CODE_1);
         verify(auditRepository).getResultsFromView(VIEW_CODE_1);
+        verify(auditRepository).getViewLastRefreshedDate(VIEW_CODE_1);
         verify(customExportDataConverter, times(2)).convertData(any(), any());
         verify(customExportDataConverter).initialiseAdapters();
         verify(requestData).roles();

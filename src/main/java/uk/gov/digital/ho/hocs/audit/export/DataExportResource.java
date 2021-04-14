@@ -1,15 +1,14 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.protocol.HTTP;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
 
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Slf4j
@@ -162,6 +161,17 @@ public class DataExportResource {
             }
         }
 
+    }
+
+    @PostMapping(value = "/export/custom/{viewName}/refresh")
+    public @ResponseBody void refreshMaterialisedView(HttpServletResponse response, @PathVariable("viewName") final String viewName) {
+        try {
+            customExportService.refreshMaterialisedView(viewName);
+            response.setStatus(200);
+        } catch (Exception ex) {
+            log.error("Error refreshing materialised view {}: {}", viewName, ex.getMessage());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     private String getFileName(String caseType, ExportType exportType) {

@@ -7,6 +7,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import javax.persistence.QueryHint;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +50,6 @@ public interface AuditRepository extends PagingAndSortingRepository<AuditData, S
 
     @Query(value = "SELECT a.* FROM audit_data a WHERE a.case_uuid = ?1", nativeQuery = true)
     List<AuditData> findAuditDataByCaseUUID(UUID caseUUID);
-
 }
 
 

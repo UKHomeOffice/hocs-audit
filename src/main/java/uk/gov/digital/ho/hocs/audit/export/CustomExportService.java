@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -57,7 +57,7 @@ public class CustomExportService {
             throw new EntityPermissionException("No permission to view %s", code);
         } else {
             response.setContentType("text/csv;charset=UTF-8");
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(exportViewDto.getDisplayName()));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(exportViewDto.getDisplayName(), code));
 
             OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
@@ -106,8 +106,19 @@ public class CustomExportService {
                 .getResultsFromView(exportViewCode);
     }
 
-    private String getFilename(String displayName) {
-        return String.format("%s-%s.csv", displayName, LocalDate.now().toString());
+    @Transactional
+    public int refreshMaterialisedView(final String viewName) {
+        log.info("Refreshing materialise view '{}', event {}", viewName, value(EVENT, REFRESH_MATERIALISED_VIEW));
+        return auditRepository.refreshMaterialisedView(viewName);
+    }
+
+    @Transactional
+    public LocalDate getViewLastRefreshedDate(final String viewName) {
+        return auditRepository.getViewLastRefreshedDate(viewName);
+    }
+
+    public String getFilename(String displayName, String viewName) {
+        return String.format("%s-%s.csv", displayName, getViewLastRefreshedDate(viewName).toString());
     }
 }
 
