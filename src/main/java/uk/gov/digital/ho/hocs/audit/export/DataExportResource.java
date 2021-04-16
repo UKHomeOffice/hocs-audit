@@ -160,14 +160,13 @@ public class DataExportResource {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }
-
     }
 
-    @PostMapping(value = "/export/custom/{viewName}/refresh")
+    @PostMapping(value = "/admin/export/custom/{viewName}/refresh")
     public @ResponseBody void refreshMaterialisedView(HttpServletResponse response, @PathVariable("viewName") final String viewName) {
         try {
             customExportService.refreshMaterialisedView(viewName);
-            response.setStatus(200);
+            response.setStatus(HttpStatus.OK.value());
         } catch (Exception ex) {
             log.error("Error refreshing materialised view {}: {}", viewName, ex.getMessage());
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
