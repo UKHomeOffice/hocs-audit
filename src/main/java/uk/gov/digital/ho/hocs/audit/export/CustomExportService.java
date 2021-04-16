@@ -39,8 +39,6 @@ public class CustomExportService {
     private final HeaderConverter headerConverter;
     private RequestData requestData;
 
-    private final String REFRESH_MATERIALISED_VIEW_ROLE = "REFRESH_MATERIALISED_VIEW_USER";
-
     public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CustomExportDataConverter customExportDataConverter, HeaderConverter headerConverter, RequestData requestData) {
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
@@ -111,13 +109,8 @@ public class CustomExportService {
 
     @Transactional
     public int refreshMaterialisedView(final String viewName) {
-        if (!requestData.roles().contains(REFRESH_MATERIALISED_VIEW_ROLE)) {
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission REFRESH_MATERIALISED_VIEW_USER", requestData.userId(), REFRESH_MATERIALISED_VIEW_ROLE);
-            throw new EntityPermissionException("No permission to refresh materialised view");
-        } else {
-            log.info("Refreshing materialise view '{}', event {}", viewName, value(EVENT, REFRESH_MATERIALISED_VIEW));
-            return auditRepository.refreshMaterialisedView(viewName);
-        }
+        log.info("Refreshing materialise view '{}', event {}", viewName, value(EVENT, REFRESH_MATERIALISED_VIEW));
+        return auditRepository.refreshMaterialisedView(viewName);
     }
 
     @Transactional
