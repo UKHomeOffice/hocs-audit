@@ -119,6 +119,15 @@ public class CustomExportServiceTest {
         return inputData.stream();
     }
 
+    @Test(expected = EntityPermissionException.class)
+    public void refreshMaterialisedView_NoPermission() {
+        when(requestData.roles()).thenReturn(new ArrayList<>());
+
+        customExportService.refreshMaterialisedView(VIEW_CODE_1);
+
+        checkNoMoreInteractions();
+    }
+
     private List<Object[]> buildOutputData() {
         List<Object[]> inputData = new ArrayList<>();
         Object[] row1 = new Object[3];
