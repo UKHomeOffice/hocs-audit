@@ -48,6 +48,9 @@ public class AuditExportServiceTest {
     private HeaderConverter passThroughHeaderConverter;
 
     @Mock
+    private MalformedDateConverter malformedDateConverter;
+
+    @Mock
     private HeaderConverter headerConverter;
 
     @Mock
@@ -107,9 +110,9 @@ public class AuditExportServiceTest {
                 return (List<String>) args[0];
             }
         });
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter);
-        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter);
-        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter, malformedDateConverter);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter, malformedDateConverter);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter, malformedDateConverter);
     }
 
     @Test
