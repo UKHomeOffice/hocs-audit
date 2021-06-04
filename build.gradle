@@ -3,9 +3,11 @@ buildscript {
         springBootVersion = '2.1.4.RELEASE'
         camelVersion = '2.23.4'
     }
+
     repositories {
         mavenCentral()
     }
+
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     }
