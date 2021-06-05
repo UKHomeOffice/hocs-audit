@@ -1,13 +1,11 @@
 buildscript {
     ext {
-        springBootVersion = '2.1.4.RELEASE'
-        camelVersion = '2.23.4'
+        springBootVersion = '2.0.5.RELEASE'
+        camelVersion = '2.22.0'
     }
-
     repositories {
         mavenCentral()
     }
-
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     }
@@ -30,44 +28,42 @@ build.dependsOn(copyLombok)
 
 group = 'uk.gov.digital.ho.hocs'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
-targetCompatibility = '11'
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-web') {
-        exclude(module: 'spring-boot-starter-tomcat')
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
     }
 
-    implementation('org.springframework.boot:spring-boot-starter-undertow')
-    implementation('net.logstash.logback:logstash-logback-encoder:5.1')
-    implementation('org.springframework.boot:spring-boot-starter-json')
-    implementation('org.springframework.boot:spring-boot-starter-actuator')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-undertow')
+    compile('net.logstash.logback:logstash-logback-encoder:5.1')
+    compile('org.springframework.boot:spring-boot-starter-json')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
 
     implementation('com.github.ben-manes.caffeine:caffeine')
+    compile group: 'org.apache.camel', name: 'camel-spring-boot', version: camelVersion
+    compile group: 'org.apache.camel', name: 'camel-jackson', version: camelVersion
+    compile group: 'org.apache.camel', name: 'camel-aws', version: camelVersion
+    compile group: 'org.apache.camel', name: 'camel-http4', version: camelVersion
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.6'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.380'
 
-    implementation group: 'org.apache.camel', name: 'camel-spring-boot', version: camelVersion
-    implementation group: 'org.apache.camel', name: 'camel-jackson', version: camelVersion
-    implementation group: 'org.apache.camel', name: 'camel-aws', version: camelVersion
-    implementation group: 'org.apache.camel', name: 'camel-http4', version: camelVersion
-    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.6'
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.380'
+    compile('org.flywaydb:flyway-core')
+    compile('org.apache.commons:commons-csv:1.5')
 
-    implementation('org.flywaydb:flyway-core')
-    implementation('org.apache.commons:commons-csv:1.5')
-
-    runtimeOnly('org.postgresql:postgresql')
+    runtime('org.postgresql:postgresql')
 
     compileOnly('org.projectlombok:lombok')
-    annotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation group: 'org.apache.camel', name: 'camel-test-spring', version: camelVersion
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation('org.assertj:assertj-core')
+    testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: camelVersion
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.assertj:assertj-core')
 
-    implementation "com.google.code.gson:gson:2.8.5"
+    compile "com.google.code.gson:gson:2.8.5"
+    
 }

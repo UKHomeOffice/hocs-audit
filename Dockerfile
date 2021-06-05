@@ -1,4 +1,5 @@
-FROM quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
+FROM quay.io/ukhomeofficedigital/openjdk8
+
 
 ENV USER user_hocs_audit
 ENV USER_ID 1000
