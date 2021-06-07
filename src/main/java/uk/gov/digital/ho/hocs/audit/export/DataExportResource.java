@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Slf4j
-@RestController()
+@RestController
 public class DataExportResource {
 
     private ExportService exportService;
