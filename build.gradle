@@ -62,8 +62,8 @@ dependencies {
 
     runtimeOnly('org.postgresql:postgresql')
 
-    compileOnly('org.projectlombok:lombok')
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.6'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.6'
 
     testImplementation group: 'org.apache.camel', name: 'camel-test-spring', version: camelVersion
     testImplementation('org.springframework.boot:spring-boot-starter-test')
