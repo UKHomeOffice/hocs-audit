@@ -26,7 +26,7 @@ public class DataExportResource {
     @GetMapping(value = "/export/{caseType}", params = {"fromDate", "toDate", "exportType"})
     public @ResponseBody
     void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
-                       @PathVariable("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
+                       @PathVariable String caseType, @RequestParam("exportType") ExportType exportType,
                        @RequestParam(name = "convert", defaultValue = "false") boolean convert,
                        @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader,
                        @RequestParam(name = "timestampFormat", required = false) String timestampFormat,
