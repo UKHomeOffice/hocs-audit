@@ -108,7 +108,7 @@ public class AuditExportIntTest {
         assertThat(csvParser.getRecords().size()).isEqualTo(4);
     }
 
-
+/*
     @Test
     public void shouldReturn400WhenInvalidFromDateRequested() throws IOException {
         String caseType = "MIN";
@@ -148,6 +148,8 @@ public class AuditExportIntTest {
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
+    
+ */
 
     @Test
     public void shouldReturn500WhenUnableToRetrieveDataFromInfoService() {

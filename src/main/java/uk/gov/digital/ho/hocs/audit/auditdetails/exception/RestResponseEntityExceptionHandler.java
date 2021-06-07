@@ -31,13 +31,11 @@ public class RestResponseEntityExceptionHandler {
         log.error("AuditExportException", value(EVENT, CSV_EXPORT_FAILURE), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
-
-
-
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity handle(Exception e) {
-//        log.error("Exception", value(EVENT, UNCAUGHT_EXCEPTION), value(EXCEPTION, e));
-//        return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
-//    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity handle(Exception e) {
+        log.error("Exception", value(EVENT, UNCAUGHT_EXCEPTION), value(EXCEPTION, e));
+        return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
+    }
 
 }
