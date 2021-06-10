@@ -20,12 +20,8 @@ steps:
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     environment:
       DB_HOST: "postgres"
+      SPRING_PROFILES_ACTIVE: "development, local, test"
     commands:
-      - SPRING_PROFILES_ACTIVE='development, local, test'
-      - SERVER_PORT='8080'
-      - AUDIT_QUEUE_NAME='audit-queue'
-      - AUDIT_QUEUE_DLQ_NAME='audit-queue-dlq'
-      - AWS_LOCAL_HOST="localstack"
       - ./gradlew check --no-daemon
     depends_on:
       - build project
