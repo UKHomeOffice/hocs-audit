@@ -33,6 +33,7 @@ public class DataExportResource {
                        @RequestParam(name = "timeZoneId", required = false) String timeZoneId,
                        HttpServletResponse response) {
         try {
+            log.info("export {}", caseType);
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, exportType));
@@ -70,6 +71,7 @@ public class DataExportResource {
     public void getTopics(HttpServletResponse response,
                           @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
+            log.info("export topics");
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("topics"));
