@@ -108,7 +108,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
-                    printer.printRecord(parsedAudit);
+                    printer.printRecord((Object[]) parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -159,7 +159,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
-                    printer.printRecord(parsedAudit);
+                    printer.printRecord((Object[]) parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -217,7 +217,7 @@ public class ExportService {
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
-                        printer.printRecord(parsedAudit);
+                        printer.printRecord((Object[]) parsedAudit);
                         outputWriter.flush();
                     }
                 } catch (Exception e) {
@@ -319,7 +319,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
-                    printer.printRecord(parsedAudit);
+                    printer.printRecord((Object[]) parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
@@ -378,7 +378,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
-                    printer.printRecord(parsedAudit);
+                    printer.printRecord((Object[]) parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
