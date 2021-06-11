@@ -34,7 +34,6 @@ public class DataExportResource {
                        HttpServletResponse response) {
         try {
             log.info("export {}", caseType);
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, exportType));
             exportService.auditExport(fromDate, toDate, response.getOutputStream(), caseType, exportType, convert, convertHeader, timestampFormat, timeZoneId);
@@ -56,7 +55,6 @@ public class DataExportResource {
                        @RequestParam(name = "timeZoneId", required = false) String timeZoneId,
                        HttpServletResponse response) {
         try {
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, somuType));
             exportService.auditSomuExport(fromDate, toDate, response.getOutputStream(), caseType, somuType, convert, timestampFormat, timeZoneId);
@@ -72,7 +70,6 @@ public class DataExportResource {
                           @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
             log.info("export topics");
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("topics"));
             exportService.staticTopicExport(response.getOutputStream(), convertHeader);
@@ -88,7 +85,6 @@ public class DataExportResource {
                                    HttpServletResponse response,
                                    @RequestParam (name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFileName(caseType, "topics_teams"));
             exportService.staticTopicsWithTeamsExport(response.getOutputStream(), caseType, convertHeader);
@@ -103,7 +99,6 @@ public class DataExportResource {
     public void getTeams(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("teams"));
             exportService.staticTeamExport(response.getOutputStream(), convertHeader);
@@ -118,7 +113,6 @@ public class DataExportResource {
     public void getUnitsForTeams(HttpServletResponse response,
                                  @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("units_teams"));
             exportService.staticUnitsForTeamsExport(response.getOutputStream(), convertHeader);
@@ -133,7 +127,6 @@ public class DataExportResource {
     public void getUsers(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("users"));
             exportService.staticUserExport(response.getOutputStream(), convertHeader);
