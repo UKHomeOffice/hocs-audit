@@ -46,7 +46,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, true, null, null, response);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + "-" +
                         LocalDate.now().toString() + ".csv");
@@ -70,7 +70,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getDataExport(fromDate, toDate, caseType, exportType, false, true, null, null, response);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + "-" +
                         LocalDate.now().toString() + ".csv");
@@ -93,7 +93,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getSomuExport(fromDate, toDate, caseType, somuType, false, null, null, response);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + somuType + "-" +
                         LocalDate.now().toString() + ".csv");
@@ -111,7 +111,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getTopics(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
@@ -130,7 +130,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getTopics(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -148,7 +148,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getTeams(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
@@ -167,7 +167,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getTeams(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -185,7 +185,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getUnitsForTeams(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
@@ -203,7 +203,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getUnitsForTeams(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -220,7 +220,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getUsers(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(200);
@@ -239,7 +239,7 @@ public class DataExportResourceTest {
 
         dataExportResource.getUsers(response, true);
 
-        verify(response).setContentType("text/csv");
+        
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

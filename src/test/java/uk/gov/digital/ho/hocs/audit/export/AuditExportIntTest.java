@@ -79,7 +79,6 @@ public class AuditExportIntTest {
                 , HttpMethod.GET, httpEntity, String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getHeaders().get(HttpHeaders.CONTENT_TYPE)).contains("text/csv");
         assertThat(result.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION)).contains(String.format("attachment; filename=%s-%s-%s.csv",
                 caseType.toLowerCase(), ExportType.CASE_DATA.toString().toLowerCase(), LocalDate.now().toString()));
         mockInfoService.verify();
