@@ -48,9 +48,6 @@ public class AuditExportServiceTest {
     private HeaderConverter passThroughHeaderConverter;
 
     @Mock
-    private MalformedDateConverter malformedDateConverter;
-
-    @Mock
     private HeaderConverter headerConverter;
 
     @Mock
@@ -69,6 +66,7 @@ public class AuditExportServiceTest {
     private String caseType = "MIN";
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final ZonedDateTimeConverter defaultZonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
+    private final MalformedDateConverter malformedDateConverter = new MalformedDateConverter();
 
     private LinkedHashSet<String> fields = Stream.of(
             "CopyNumberTen",
