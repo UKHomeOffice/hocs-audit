@@ -12,12 +12,12 @@ services:
 
 steps:
   - name: build project
-    image: quay.io/ukhomeofficedigital/openjdk8
+    image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     commands:
       - ./gradlew assemble --no-daemon
 
   - name: test project
-    image: quay.io/ukhomeofficedigital/openjdk8
+    image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     environment:
       DB_HOST: "postgres"
     commands:
