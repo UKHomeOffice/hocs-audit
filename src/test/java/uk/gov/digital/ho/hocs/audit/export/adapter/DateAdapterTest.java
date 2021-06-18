@@ -5,8 +5,8 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.*;
 import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.DATE_SECTION.*;
+import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.MALFORMED_DATE_REGEX;
 
 @RunWith (SpringRunner.class)
 public class DateAdapterTest {
@@ -24,7 +24,7 @@ public class DateAdapterTest {
         assertThat(TEXT_DATA.matches(MALFORMED_DATE_REGEX)).isFalse();
         assertThat(SIMILAR_DATE.matches(MALFORMED_DATE_REGEX)).isFalse();
         assertThat(VALID_DATE.matches(MALFORMED_DATE_REGEX)).isTrue();
-        
+
         assertThat(MALFORMED_DATE_D.matches(MALFORMED_DATE_REGEX)).isTrue();
         assertThat(MALFORMED_DATE_M.matches(MALFORMED_DATE_REGEX)).isTrue();
         assertThat(MALFORMED_DATE_Y.matches(MALFORMED_DATE_REGEX)).isTrue();
@@ -53,6 +53,32 @@ public class DateAdapterTest {
         assertThat(dateAdapter.convert(MALFORMED_DATE_M)).isEqualTo("2022-02-23");
         assertThat(dateAdapter.convert(MALFORMED_DATE_D)).isEqualTo("2023-03-24");
         assertThat(dateAdapter.convert(MALFORMED_DATE_YMD)).isEqualTo("2024-04-25");
+    }
+
+    @Test
+    public void shouldDoAllCombinations() {
+        DateAdapter dateAdapter = new DateAdapter();
+        String yearString, monthString, dayString, zeroYear, zeroMonth, zeroDay;
+        for (int year = 1900 ; year <= 2050 ; year++) {
+            for (int month = 1 ; month <= 12 ; month++) {
+                for (int day = 1 ; day <= 31 ; day++) {
+                    yearString = Integer.toString(year);
+                    monthString = month < 10 ? "0" + month : Integer.toString(month);
+                    dayString = day < 10 ? "0" + day : Integer.toString(day);
+                    zeroYear = "0" + yearString;
+                    zeroMonth = "0" + monthString;
+                    zeroDay = "0" + dayString;
+                    assertThat(dateAdapter.convert(zeroYear + "-" + zeroMonth + "-" + zeroDay)).isEqualTo(
+                    yearString + "-" + monthString + "-" + dayString);
+                    assertThat(dateAdapter.convert(yearString + "-" + zeroMonth + "-" + zeroDay)).isEqualTo(
+                    yearString + "-" + monthString + "-" + dayString);
+                    assertThat(dateAdapter.convert(yearString + "-" + monthString + "-" + zeroDay)).isEqualTo(
+                    yearString + "-" + monthString + "-" + dayString);
+                    assertThat(dateAdapter.convert(yearString + "-" + monthString + "-" + dayString)).isEqualTo(
+                    yearString + "-" + monthString + "-" + dayString);
+                }
+            }
+        }
     }
 
 }

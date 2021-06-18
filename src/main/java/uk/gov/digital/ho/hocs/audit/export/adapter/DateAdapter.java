@@ -17,6 +17,14 @@ public class DateAdapter implements ExportViewFieldAdapter {
         return FIELD_ADAPTER_DATE;
     }
 
+    /**
+     * The aim of this function is to identify dates that are malformed by having a zero in front of the
+     * year, month or day (0yyyy-0mm-0dd). The REGEX used will identify any combination of the zero leading digits.
+     * Once identified, this function converts the date to a format without the leading zero (yyyy-mm-dd).
+     *
+     * @param input The ExportViewFieldAdapter interface supports any kind of object but the calling code only ever passes a string.
+     * @return A string value of the converted (corrected) date or the original value if it is not a date.
+     */
     @Override
     public String convert(Object input) {
         if (input instanceof String) {
