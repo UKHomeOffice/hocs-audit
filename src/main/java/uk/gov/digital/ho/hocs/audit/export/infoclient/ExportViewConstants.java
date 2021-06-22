@@ -7,6 +7,7 @@ public interface ExportViewConstants {
         int MONTH_DIGITS = 2;
         int DAY_DIGITS = 2;
 
+        // identifies dates that have the format [0]YYYY-[0]MM-[0]DD
         String MALFORMED_DATE_REGEX = "^\\d{4,5}\\-0*(?:[1-9]|1[0-2])\\-0*(?:[1-9]|[12][0-9]|3[01])$";
         String EXTRACT_YEAR_REGEX = "^\\d+?(?=\\-)";
         String EXTRACT_MONTH_REGEX = "(?<=\\-)\\d+(?=\\-)";
