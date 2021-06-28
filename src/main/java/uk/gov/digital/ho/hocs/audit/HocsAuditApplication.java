@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import javax.annotation.PreDestroy;
+
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.AUDIT_STARTUP_FAILURE;
 import static uk.gov.digital.ho.hocs.audit.application.LogEvent.EVENT;
@@ -22,6 +24,11 @@ public class HocsAuditApplication {
 			log.error("Error starting application {}", e.getMessage(), value(EVENT, AUDIT_STARTUP_FAILURE));
 			throw e;
 		}
+	}
+	
+	@PreDestroy
+	public void stop() {
+		log.info("hocs-audit stopping gracefully");
 	}
 
 }
