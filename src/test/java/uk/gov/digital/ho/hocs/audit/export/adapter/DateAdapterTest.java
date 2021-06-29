@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.DATE_SECTION.*;
 import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.MALFORMED_DATE_REGEX;
 
 @RunWith (SpringRunner.class)
@@ -29,18 +28,6 @@ public class DateAdapterTest {
         assertThat(MALFORMED_DATE_M.matches(MALFORMED_DATE_REGEX)).isTrue();
         assertThat(MALFORMED_DATE_Y.matches(MALFORMED_DATE_REGEX)).isTrue();
         assertThat(MALFORMED_DATE_YMD.matches(MALFORMED_DATE_REGEX)).isTrue();
-    }
-
-    @Test
-    public void shouldExtractPartsOfDate() {
-        DateAdapter dateAdapter = new DateAdapter();
-        assertThat(dateAdapter.retrieveSection(YEAR, MALFORMED_DATE_Y)).isEqualTo("02021");
-        assertThat(dateAdapter.retrieveSection(MONTH, MALFORMED_DATE_M)).isEqualTo("002");
-        assertThat(dateAdapter.retrieveSection(DAY, MALFORMED_DATE_D)).isEqualTo("024");
-
-        assertThat(dateAdapter.retrieveSection(DAY, MALFORMED_DATE_Y)).isEqualTo("22");
-        assertThat(dateAdapter.retrieveSection(YEAR, MALFORMED_DATE_M)).isEqualTo("2022");
-        assertThat(dateAdapter.retrieveSection(MONTH, MALFORMED_DATE_D)).isEqualTo("03");
     }
 
     @Test

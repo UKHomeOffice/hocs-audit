@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.*;
-import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.DATE_SECTION.*;
 
 
 @Slf4j
@@ -30,38 +29,20 @@ public class DateAdapter implements ExportViewFieldAdapter {
         if (input instanceof String) {
             String date = (String)input;
             if (date.matches(MALFORMED_DATE_REGEX)) {
-                String year = retrieveSection(YEAR, date);
-                String month = retrieveSection(MONTH, date);
-                String day = retrieveSection(DAY, date);
-                if (year != null && month != null && day != null) {
-                    return year.substring(year.length() - YEAR_DIGITS) + "-" +
-                           month.substring(month.length() - MONTH_DIGITS) + "-" +
-                           day.substring(day.length() - DAY_DIGITS);
+                Pattern pat = Pattern.compile(GROUPED_DATE_REGEX);
+                Matcher matcher = pat.matcher(date);
+                if (matcher.find()) {
+                    String year = matcher.group(1);
+                    String month = matcher.group(2);
+                    String day = matcher.group(3);
+                    if (year != null && month != null && day != null) {
+                        return year + "-" + month + "-" + day;
+                    }
                 }
             }
             return date;
         }
-        return null;
+        return input != null ? input.toString() : null;
     }
 
-    protected String retrieveSection(DATE_SECTION section, String date) {
-        switch (section) {
-        case DAY:
-            return extract(date, EXTRACT_DAY_REGEX);
-        case MONTH:
-            return extract(date, EXTRACT_MONTH_REGEX);
-        case YEAR:
-            return extract(date, EXTRACT_YEAR_REGEX);
-        }
-        return null;
-    }
-
-    private String extract(String date, String pattern) {
-        Pattern pat = Pattern.compile(pattern);
-        Matcher matcher = pat.matcher(date);
-        if (matcher.find()) {
-            return matcher.group(pattern.equals(EXTRACT_DAY_REGEX) ? 1 : 0);
-        }
-        return null;
-    }
 }
