@@ -3,7 +3,7 @@ package uk.gov.digital.ho.hocs.audit.export.infoclient;
 public interface ExportViewConstants {
 
     // identifies malformed dates with groups for extraction
-    String GROUPED_DATE_REGEX = "^0*(\\d{4})\\-0*(0[0-9]|1[0-2])\\-0*(0[1-9]|[12][0-9]|3[01])$";
+    String GROUPED_DATE_REGEX = "^0*(\\d{4})\\-0*(0[1-9]|1[0-2])\\-0*(0[1-9]|[12][0-9]|3[01])$";
 
     String FIELD_ADAPTER_HIDDEN = "hidden";
     String FIELD_ADAPTER_USER_EMAIL = "userEmailAdapter";
