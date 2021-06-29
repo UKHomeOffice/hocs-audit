@@ -11,6 +11,8 @@ import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants
 @Slf4j
 public class DateAdapter implements ExportViewFieldAdapter {
 
+    private static Pattern DATE_PATTERN = Pattern.compile(GROUPED_DATE_REGEX);
+
     @Override
     public String getAdapterType() {
         return FIELD_ADAPTER_DATE;
@@ -28,17 +30,12 @@ public class DateAdapter implements ExportViewFieldAdapter {
     public String convert(Object input) {
         if (input instanceof String) {
             String date = (String)input;
-            if (date.matches(MALFORMED_DATE_REGEX)) {
-                Pattern pat = Pattern.compile(GROUPED_DATE_REGEX);
-                Matcher matcher = pat.matcher(date);
-                if (matcher.find()) {
-                    String year = matcher.group(1);
-                    String month = matcher.group(2);
-                    String day = matcher.group(3);
-                    if (year != null && month != null && day != null) {
-                        return year + "-" + month + "-" + day;
-                    }
-                }
+            Matcher matcher = DATE_PATTERN.matcher(date);
+            if (matcher.find()) {
+                String year = matcher.group(1);
+                String month = matcher.group(2);
+                String day = matcher.group(3);
+                return year + "-" + month + "-" + day;
             }
             return date;
         }

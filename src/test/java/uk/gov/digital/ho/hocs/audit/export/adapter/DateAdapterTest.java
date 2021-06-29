@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.MALFORMED_DATE_REGEX;
+import static uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants.GROUPED_DATE_REGEX;
 
 @RunWith (SpringRunner.class)
 public class DateAdapterTest {
@@ -20,14 +20,14 @@ public class DateAdapterTest {
 
     @Test
     public void shouldFindMalformedDatesButNotNonDates() {
-        assertThat(TEXT_DATA.matches(MALFORMED_DATE_REGEX)).isFalse();
-        assertThat(SIMILAR_DATE.matches(MALFORMED_DATE_REGEX)).isFalse();
-        assertThat(VALID_DATE.matches(MALFORMED_DATE_REGEX)).isTrue();
+        assertThat(TEXT_DATA.matches(GROUPED_DATE_REGEX)).isFalse();
+        assertThat(SIMILAR_DATE.matches(GROUPED_DATE_REGEX)).isFalse();
+        assertThat(VALID_DATE.matches(GROUPED_DATE_REGEX)).isTrue();
 
-        assertThat(MALFORMED_DATE_D.matches(MALFORMED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_M.matches(MALFORMED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_Y.matches(MALFORMED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_YMD.matches(MALFORMED_DATE_REGEX)).isTrue();
+        assertThat(MALFORMED_DATE_D.matches(GROUPED_DATE_REGEX)).isTrue();
+        assertThat(MALFORMED_DATE_M.matches(GROUPED_DATE_REGEX)).isTrue();
+        assertThat(MALFORMED_DATE_Y.matches(GROUPED_DATE_REGEX)).isTrue();
+        assertThat(MALFORMED_DATE_YMD.matches(GROUPED_DATE_REGEX)).isTrue();
     }
 
     @Test

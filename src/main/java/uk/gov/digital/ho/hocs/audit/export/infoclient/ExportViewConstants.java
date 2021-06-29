@@ -2,9 +2,7 @@ package uk.gov.digital.ho.hocs.audit.export.infoclient;
 
 public interface ExportViewConstants {
 
-    // identifies dates that have the format [0]YYYY-[0]MM-[0]DD
-    String MALFORMED_DATE_REGEX = "^0*\\d{4}\\-0*(?:[1-9]|1[0-2])\\-0*(?:[1-9]|[12][0-9]|3[01])$";
-    // identifies groups within the malformed dates for extraction
+    // identifies malformed dates with groups for extraction
     String GROUPED_DATE_REGEX = "^0*(\\d{4})\\-0*(0[0-9]|1[0-2])\\-0*(0[1-9]|[12][0-9]|3[01])$";
 
     String FIELD_ADAPTER_HIDDEN = "hidden";
