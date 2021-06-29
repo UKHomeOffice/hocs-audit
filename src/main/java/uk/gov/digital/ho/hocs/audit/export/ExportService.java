@@ -39,6 +39,7 @@ public class ExportService {
     private final InfoClient infoClient;
     private final ExportDataConverter exportDataConverter;
     private final HeaderConverter headerConverter;
+    private final MalformedDateConverter malformedDateConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
     public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED"};
@@ -47,12 +48,13 @@ public class ExportService {
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter,
-                         HeaderConverter headerConverter) {
+                         HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
         this.exportDataConverter = exportDataConverter;
         this.headerConverter = headerConverter;
+        this.malformedDateConverter = malformedDateConverter;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +110,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
+                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
@@ -159,6 +162,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
+                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (Exception e) {
@@ -217,6 +221,7 @@ public class ExportService {
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
+                        parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
                         printer.printRecord(parsedAudit);
                         outputWriter.flush();
                     }
@@ -319,6 +324,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
+                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {
@@ -378,6 +384,7 @@ public class ExportService {
                     if (convert){
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
+                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
                     printer.printRecord(parsedAudit);
                     outputWriter.flush();
                 } catch (IOException e) {

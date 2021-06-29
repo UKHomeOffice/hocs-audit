@@ -66,6 +66,7 @@ public class AuditExportServiceTest {
     private String caseType = "MIN";
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final ZonedDateTimeConverter defaultZonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
+    private final MalformedDateConverter malformedDateConverter = new MalformedDateConverter();
 
     private LinkedHashSet<String> fields = Stream.of(
             "CopyNumberTen",
@@ -107,9 +108,9 @@ public class AuditExportServiceTest {
                 return (List<String>) args[0];
             }
         });
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter);
-        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter);
-        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter, malformedDateConverter);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter, malformedDateConverter);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter, malformedDateConverter);
     }
 
     @Test
