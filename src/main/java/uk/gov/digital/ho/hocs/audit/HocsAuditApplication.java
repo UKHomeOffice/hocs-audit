@@ -28,7 +28,7 @@ public class HocsAuditApplication {
 	
 	@PreDestroy
 	public void stop() {
-		log.info("hocs-audit stopping gracefully");
+		log.info("Stopping gracefully");
 	}
 
 }
