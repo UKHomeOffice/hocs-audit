@@ -28,19 +28,20 @@ public class ExportDataConverter {
     private static final String[] MPAM_CODE_MAPPING_LISTS = { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" };
     private static final Set<String> MPAM_SHORT_CODES = Stream.of("b5", "b6").collect(Collectors.toCollection(HashSet::new));
 
-    private InfoClient infoClient;
-    private CaseworkClient caseworkClient;
-    private Map<String, String> uuidToName;
-    private Map<String, String> mpamCodeToName;
+    private final InfoClient infoClient;
+    private final CaseworkClient caseworkClient;
+    private final Map<String, String> uuidToName;
+    private final Map<String, String> mpamCodeToName;
 
     public ExportDataConverter(InfoClient infoClient, CaseworkClient caseworkClient) {
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
+
+        uuidToName = new HashMap<>();
+        mpamCodeToName = new HashMap<>();
     }
 
     public void initialise() {
-        uuidToName = new HashMap<>();
-
         Set<UserDto> users = infoClient.getUsers();
         users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
 
@@ -55,8 +56,6 @@ public class ExportDataConverter {
 
         Set<GetCorrespondentOutlineResponse> correspondents = caseworkClient.getAllActiveCorrespondents();
         correspondents.forEach(corr -> uuidToName.put(corr.getUuid().toString(), corr.getFullname()));
-
-        mpamCodeToName = new HashMap<>();
 
         for (String listName : MPAM_CODE_MAPPING_LISTS) {
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
