@@ -46,13 +46,6 @@ public class InfoClient {
         return users;
     }
 
-    public UserDto getUser(String uuid) {
-        UserDto result = restHelper.get(serviceBaseURL, String.format("/user/%s", uuid), new ParameterizedTypeReference<>() {
-        });
-        log.info("Got userDto for user uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_USER_SUCCESS));
-        return result;
-    }
-
     @Cacheable(value = "getSomuType", unless = "#result == null")
     public SomuTypeDto getSomuType(String caseType, String somuType) {
         SomuTypeDto somuTypeDto = restHelper.get(serviceBaseURL, String.format("/somuType/%s/%s", caseType, somuType), new ParameterizedTypeReference<>() {

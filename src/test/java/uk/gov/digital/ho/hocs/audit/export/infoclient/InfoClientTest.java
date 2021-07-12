@@ -69,19 +69,6 @@ public class InfoClientTest {
     }
 
     @Test
-    public void getUser() {
-        String userUUID = UUID.randomUUID().toString();
-        UserDto response = new UserDto("1", "user1", "Bill", "Smith", "bill.smith@email.com");
-        when(restHelper.get(eq(BASE_URL), eq("/user/" + userUUID), any(ParameterizedTypeReference.class))).thenReturn(response);
-        UserDto result = infoClient.getUser(userUUID);
-
-        assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/user/" + userUUID), any(ParameterizedTypeReference.class));
-
-        verifyNoMoreInteractions(restHelper);
-    }
-
-    @Test
     public void getSomuType() {
         SomuTypeDto response = new SomuTypeDto(UUID.randomUUID(), "caseType", "somuType", "{}", true);
         when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), any(ParameterizedTypeReference.class))).thenReturn(response);
