@@ -32,115 +32,100 @@ public class InfoClient {
 
     @Cacheable(value = "getCaseTypes", unless = "#result == null")
     public Set<CaseTypeDto> getCaseTypes() {
-        Set<CaseTypeDto> response = restHelper.get(serviceBaseURL, "/caseType", new ParameterizedTypeReference<Set<CaseTypeDto>>() {
+        Set<CaseTypeDto> response = restHelper.get(serviceBaseURL, "/caseType",
+                new ParameterizedTypeReference<>() {
         });
         log.info("Got {} case types", response.size(), value(EVENT, INFO_CLIENT_GET_CASE_TYPES_SUCCESS));
         return response;
     }
 
-    @Cacheable(value = "getUsers", unless = "#result == null")
     public Set<UserDto> getUsers() {
-        Set<UserDto> users = restHelper.get(serviceBaseURL, "/users", new ParameterizedTypeReference<Set<UserDto>>() {
+        Set<UserDto> users = restHelper.get(serviceBaseURL, "/users", new ParameterizedTypeReference<>() {
         });
         log.info("Got Users {}", value(EVENT, INFO_CLIENT_GET_USERS_SUCCESS));
         return users;
     }
 
-    @Cacheable(value = "getUser", unless = "#result == null")
-    public UserDto getUser(String uuid) {
-        UserDto result = restHelper.get(serviceBaseURL, String.format("/user/%s", uuid), new ParameterizedTypeReference<UserDto>() {
-        });
-        log.info("Got userDto for user uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_USER_SUCCESS));
-        return result;
-    }
-
     @Cacheable(value = "getSomuType", unless = "#result == null")
     public SomuTypeDto getSomuType(String caseType, String somuType) {
-        SomuTypeDto somuTypeDto = restHelper.get(serviceBaseURL, String.format("/somuType/%s/%s", caseType, somuType), new ParameterizedTypeReference<SomuTypeDto>() {
+        SomuTypeDto somuTypeDto = restHelper.get(serviceBaseURL, String.format("/somuType/%s/%s", caseType, somuType), new ParameterizedTypeReference<>() {
         });
         log.info("Got SomuType {}", somuType, value(EVENT, INFO_CLIENT_GET_SOMUTYPE_SUCCESS));
         return somuTypeDto;
     }
 
-    @Cacheable(value = "getTopics", unless = "#result == null")
     public Set<TopicDto> getTopics() {
-        Set<TopicDto> infoTopic = restHelper.get(serviceBaseURL, String.format("/topics"), new ParameterizedTypeReference<Set<TopicDto>>() {
+        Set<TopicDto> infoTopic = restHelper.get(serviceBaseURL, String.format("/topics"), new ParameterizedTypeReference<>() {
         });
         log.info("Got Topics", value(EVENT, INFO_CLIENT_GET_TOPIC_SUCCESS));
         return infoTopic;
     }
 
     public Set<TopicTeamDto> getTopicsWithTeams(String caseType) {
-        Set<TopicTeamDto> topicTeams = restHelper.get(serviceBaseURL, String.format("/topics/%s/teams", caseType), new ParameterizedTypeReference<Set<TopicTeamDto>>() {
+        Set<TopicTeamDto> topicTeams = restHelper.get(serviceBaseURL, String.format("/topics/%s/teams", caseType), new ParameterizedTypeReference<>() {
         });
         log.info("Got {} topics with teams", topicTeams.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
         return topicTeams;
     }
 
-    @Cacheable(value = "getTeams", unless = "#result == null")
     public Set<TeamDto> getTeams() {
-        Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team", new ParameterizedTypeReference<Set<TeamDto>>() {
+        Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team", new ParameterizedTypeReference<>() {
         });
         log.info("Got {} teams", teams.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
         return teams;
     }
 
-    @Cacheable(value = "getAllTeams", unless = "#result == null")
     public Set<TeamDto> getAllTeams() {
-        Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team/all", new ParameterizedTypeReference<Set<TeamDto>>() {
+        Set<TeamDto> teams = restHelper.get(serviceBaseURL, "/team/all", new ParameterizedTypeReference<>() {
         });
         log.info("Got {} all teams", teams.size(), value(EVENT, INFO_CLIENT_GET_ALL_TEAMS_SUCCESS));
         return teams;
     }
 
-    @Cacheable(value = "getTeamsForUnit", unless = "#result == null")
     public Set<TeamDto> getTeamsForUnit(String unitUUID) {
-        Set<TeamDto> teams = restHelper.get(serviceBaseURL, String.format("/unit/%s/teams", unitUUID), new ParameterizedTypeReference<Set<TeamDto>>() {
+        Set<TeamDto> teams = restHelper.get(serviceBaseURL, String.format("/unit/%s/teams", unitUUID), new ParameterizedTypeReference<>() {
         });
         log.info("Got {} teams for unit", teams.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
         return teams;
     }
 
-    @Cacheable(value = "getTeam", unless = "#result == null")
     public TeamDto getTeam(String uuid) {
-        TeamDto result = restHelper.get(serviceBaseURL, String.format("/team/%s", uuid), new ParameterizedTypeReference<TeamDto>() {
+        TeamDto result = restHelper.get(serviceBaseURL, String.format("/team/%s", uuid), new ParameterizedTypeReference<>() {
         });
         log.info("Got teamDto for team uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_TEAM_SUCCESS));
         return result;
     }
 
-    @Cacheable(value = "getUnitByTeam", unless = "#result == null")
     public UnitDto getUnitByTeam(String uuid) {
-        UnitDto result = restHelper.get(serviceBaseURL, String.format("/team/%s/unit", uuid), new ParameterizedTypeReference<UnitDto>() {
+        UnitDto result = restHelper.get(serviceBaseURL, String.format("/team/%s/unit", uuid), new ParameterizedTypeReference<>() {
         });
         log.info("Got teamDto for team uuid {}, event {}", uuid, value(EVENT, INFO_CLIENT_GET_TEAM_SUCCESS));
         return result;
     }
 
-    @Cacheable(value = "getUnits", unless = "#result == null")
     public Set<UnitDto> getUnits() {
-        Set<UnitDto> units = restHelper.get(serviceBaseURL, "/unit", new ParameterizedTypeReference<Set<UnitDto>>() {
+        Set<UnitDto> units = restHelper.get(serviceBaseURL, "/unit", new ParameterizedTypeReference<>() {
         });
         log.info("Got {} teams", units.size(), value(EVENT, INFO_CLIENT_GET_UNITS_SUCCESS));
         return units;
     }
 
     public LinkedHashSet<String> getCaseExportFields(String caseType) {
-        LinkedHashSet<String> response = restHelper.get(serviceBaseURL, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<LinkedHashSet<String>>() {
+        LinkedHashSet<String> response = restHelper.get(serviceBaseURL, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<>() {
         });
         log.info("Got {} case reporting fields for CaseType {}", response.size(), caseType, value(EVENT, INFO_CLIENT_GET_EXPORT_FIELDS_SUCCESS));
         return response;
     }
 
     public List<ExportViewDto> getExportViews() {
-        List<ExportViewDto> views = restHelper.get(serviceBaseURL, "/export", new ParameterizedTypeReference<List<ExportViewDto>>() {
+        List<ExportViewDto> views = restHelper.get(serviceBaseURL, "/export", new ParameterizedTypeReference<>() {
         });
         log.info("Got {} export views, event: {}", views.size(), value(EVENT, INFO_CLIENT_GET_EXPORT_VIEWS_SUCCESS));
         return views;
     }
 
     public ExportViewDto getExportView(String code) {
-        ExportViewDto view = restHelper.get(serviceBaseURL, String.format("/export/%s", code), new ParameterizedTypeReference<ExportViewDto>() {
+        ExportViewDto view = restHelper.get(serviceBaseURL, String.format("/export/%s", code), new ParameterizedTypeReference<>() {
         });
 
         if (view != null) {
@@ -153,7 +138,7 @@ public class InfoClient {
 
     @Cacheable(value = "getEntitiesForList", unless = "#result == null")
     public Set<EntityDto> getEntitiesForList(String simpleName) {
-        Set<EntityDto> entities = restHelper.get(serviceBaseURL, String.format("/entity/list/%s", simpleName), new ParameterizedTypeReference<Set<EntityDto>>() {
+        Set<EntityDto> entities = restHelper.get(serviceBaseURL, String.format("/entity/list/%s", simpleName), new ParameterizedTypeReference<>() {
         });
         log.info("Got {} entities for list", entities.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
         return entities;

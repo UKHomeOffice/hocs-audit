@@ -1,8 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
-import java.util.HashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,7 +14,6 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,21 +23,22 @@ public class ExportDataConverter {
 
     private static final String UUID_REGEX = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
     private static final String[] MPAM_CODE_MAPPING_LISTS = { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" };
-    private static final Set<String> MPAM_SHORT_CODES = Stream.of("b5", "b6").collect(Collectors.toCollection(HashSet::new));
+    private static final Set<String> MPAM_SHORT_CODES = Set.of("b5", "b6");
 
-    private InfoClient infoClient;
-    private CaseworkClient caseworkClient;
-    private Map<String, String> uuidToName;
-    private Map<String, String> mpamCodeToName;
+    private final InfoClient infoClient;
+    private final CaseworkClient caseworkClient;
+    private final Map<String, String> uuidToName;
+    private final Map<String, String> mpamCodeToName;
 
     public ExportDataConverter(InfoClient infoClient, CaseworkClient caseworkClient) {
         this.infoClient = infoClient;
         this.caseworkClient = caseworkClient;
+
+        uuidToName = new ConcurrentHashMap<>();
+        mpamCodeToName = new ConcurrentHashMap<>();
     }
 
     public void initialise() {
-        uuidToName = new HashMap<>();
-
         Set<UserDto> users = infoClient.getUsers();
         users.forEach(user -> uuidToName.put(user.getId(), user.getUsername()));
 
@@ -55,8 +53,6 @@ public class ExportDataConverter {
 
         Set<GetCorrespondentOutlineResponse> correspondents = caseworkClient.getAllActiveCorrespondents();
         correspondents.forEach(corr -> uuidToName.put(corr.getUuid().toString(), corr.getFullname()));
-
-        mpamCodeToName = new HashMap<>();
 
         for (String listName : MPAM_CODE_MAPPING_LISTS) {
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
