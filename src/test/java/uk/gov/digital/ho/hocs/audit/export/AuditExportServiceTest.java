@@ -15,6 +15,8 @@ import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
+import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
@@ -43,6 +45,9 @@ public class AuditExportServiceTest {
 
     @Mock
     private ExportDataConverter exportDataConverter;
+
+    @Mock
+    private ExportDataConverterFactory exportDataConverterFactory;
 
     @Mock
     private HeaderConverter passThroughHeaderConverter;
@@ -108,9 +113,9 @@ public class AuditExportServiceTest {
                 return (List<String>) args[0];
             }
         });
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, passThroughHeaderConverter, malformedDateConverter);
-        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, headerConverter, malformedDateConverter);
-        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverter, caseNoteHeaderConverter, malformedDateConverter);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, headerConverter, malformedDateConverter);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, caseNoteHeaderConverter, malformedDateConverter);
     }
 
     @Test
@@ -172,9 +177,9 @@ public class AuditExportServiceTest {
 
     @Test
     public void caseDataExportWhenConvertThenConvertDataInvokedOncePerCaseAuditData() throws IOException {
-
         when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
         when(auditRepository.findLastAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+        when(exportDataConverterFactory.getInstance()).thenReturn(exportDataConverter);
         when(exportDataConverter.convertData(any(), any())).thenAnswer(a -> a.getArguments()[0]);
 
         OutputStream outputStream = new ByteArrayOutputStream();
@@ -211,6 +216,7 @@ public class AuditExportServiceTest {
     public void caseNotesExportShouldConvertHeadersAndData() throws IOException {
 
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.CASE_NOTES_EVENTS), any())).thenReturn(getCaseNotesAuditData().stream());
+        when(exportDataConverterFactory.getInstance()).thenReturn(exportDataConverter);
         when(exportDataConverter.convertData(any(), any())).thenAnswer(a -> a.getArguments()[0]);
         Set<String> expectedHeaders = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "convertedCaseNoteType", "text").collect(Collectors.toSet());
         OutputStream outputStream = new ByteArrayOutputStream();
