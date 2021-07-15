@@ -1,4 +1,4 @@
-package uk.gov.digital.ho.hocs.audit.export;
+package uk.gov.digital.ho.hocs.audit.export.converter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,19 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDataDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -32,12 +21,8 @@ public class ExportDataConverterTest {
     private static final String CASE_ID_NONE = UUID.randomUUID().toString();
     private static final String USER1_ID = UUID.randomUUID().toString();
     private static final String USER1_USERNAME = "user-Jim";
-    private static final String USER1_FIRST_NAME = "Jim";
-    private static final String USER1_LAST_NAME = "Smith";
-    private static final String USER1_EMAIL = USER1_FIRST_NAME + "." + USER1_LAST_NAME + "@mail.com";
     private static final String UNIT1_ID = UUID.randomUUID().toString();
     private static final String UNIT1_DISPLAY_NAME = "Unit 1";
-    private static final String UNIT1_SHORT_CODE = "U1";
     private static final String TOPIC1_ID = UUID.randomUUID().toString();
     private static final String TOPIC1_TEXT = "Topic 1";
     private static final String TEAM1_ID = UUID.randomUUID().toString();
@@ -52,8 +37,9 @@ public class ExportDataConverterTest {
     private static final String ENTITY_2_SIMPLE_NAME = "dddd_eeee_ffff";
     private static final String ENTITY_2_TITLE_WITH_COMMAS = "dddd, eeee, (ffff)";
 
-    @Mock
-    private InfoClient infoClient;
+    private static final Map<String, String> UUID_TO_NAME = buildUuidToNameMap();
+    private static final Map<String, String> MPAM_CODE_TO_NAME = buildMpamCodeToNameMap();
+
     @Mock
     private CaseworkClient caseworkClient;
 
@@ -61,27 +47,10 @@ public class ExportDataConverterTest {
 
     @Before
     public void before() {
+        when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
+        when(caseworkClient.getCaseReference(CASE_ID_NONE)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), CASE_REF_NONE));
 
-        if (converter == null) {
-            when(infoClient.getUsers()).thenReturn(buildUsers());
-            when(infoClient.getAllTeams()).thenReturn(buildTeams());
-            when(infoClient.getUnits()).thenReturn(buildUnits());
-            when(infoClient.getEntitiesForList("MPAM_ENQUIRY_SUBJECTS")).thenReturn(buildMpamEnquirySubjects());
-            when(caseworkClient.getAllCaseTopics()).thenReturn(buildTopics());
-            when(caseworkClient.getAllActiveCorrespondents()).thenReturn(buildCorrespondents());
-            when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
-            when(caseworkClient.getCaseReference(CASE_ID_NONE)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), CASE_REF_NONE));
-        }
-
-        converter = new ExportDataConverter(infoClient, caseworkClient);
-        converter.initialise();
-    }
-
-    @Test
-    public void testUuidRegex() {
-        String uuid = UUID.randomUUID().toString();
-        assertThat(converter.isUUID(uuid)).isTrue();
-        assertThat(converter.isUUID(uuid.replace('-','1'))).isFalse();
+        converter = new ExportDataConverter(UUID_TO_NAME, MPAM_CODE_TO_NAME, caseworkClient);
     }
 
     @Test
@@ -288,40 +257,42 @@ public class ExportDataConverterTest {
         assertThat(testResult[3]).isEqualTo(testData[3]);
     }
 
-    private Set<UserDto> buildUsers() {
-        Set<UserDto> users = new HashSet<>();
-        users.add(new UserDto(USER1_ID, USER1_USERNAME, USER1_FIRST_NAME, USER1_LAST_NAME, USER1_EMAIL));
-        return users;
+    @Test
+    public void isUuid_TrueWithValidUuid() {
+        String uuid = UUID.randomUUID().toString();
+        assertThat(converter.isUUID(uuid)).isTrue();
     }
 
-    private Set<TeamDto> buildTeams() {
-        Set<TeamDto> teams = new HashSet<>();
-        teams.add(new TeamDto(TEAM1_DISPLAY_NAME, UUID.fromString(TEAM1_ID), true, UNIT1_ID));
-        return teams;
+    @Test
+    public void isUuid_FalseWithInvalidUuidText() {
+        assertThat(converter.isUUID("Test")).isFalse();
     }
 
-    private Set<UnitDto> buildUnits() {
-        Set<UnitDto> units = new HashSet<>();
-        units.add(new UnitDto(UNIT1_DISPLAY_NAME, UNIT1_ID, UNIT1_SHORT_CODE));
-        return units;
+    @Test
+    public void isUuid_FalseWithNull() {
+        assertThat(converter.isUUID(null)).isFalse();
     }
 
-    private Set<GetTopicResponse> buildTopics() {
-        Set<GetTopicResponse> topics = new HashSet<>();
-        topics.add(new GetTopicResponse(UUID.fromString(TOPIC1_ID), LocalDateTime.now(), UUID.randomUUID(), TOPIC1_TEXT, UUID.randomUUID()));
-        return topics;
+    @Test
+    public void isUuid_FalseWithEmpty() {
+        assertThat(converter.isUUID("")).isFalse();
     }
 
-    private Set<GetCorrespondentOutlineResponse> buildCorrespondents() {
-        Set<GetCorrespondentOutlineResponse> correspondents = new HashSet<>();
-        correspondents.add(new GetCorrespondentOutlineResponse(UUID.fromString(CORR1_ID), CORR1_FULLNAME));
-        return correspondents;
+    private static Map<String, String> buildUuidToNameMap() {
+        return new HashMap<>(
+                Map.ofEntries(
+                    new AbstractMap.SimpleEntry<>(USER1_ID, USER1_USERNAME),
+                    new AbstractMap.SimpleEntry<>(TEAM1_ID, TEAM1_DISPLAY_NAME),
+                    new AbstractMap.SimpleEntry<>(UNIT1_ID, UNIT1_DISPLAY_NAME),
+                    new AbstractMap.SimpleEntry<>(TOPIC1_ID, TOPIC1_TEXT),
+                    new AbstractMap.SimpleEntry<>(CORR1_ID, CORR1_FULLNAME))
+        );
     }
 
-    private Set<EntityDto> buildMpamEnquirySubjects() {
-        Set<EntityDto> entitySet = new HashSet<>();
-        entitySet.add(new EntityDto(1l, UUID.randomUUID(), ENTITY_1_SIMPLE_NAME, new EntityDataDto(ENTITY_1_TITLE), UUID.randomUUID(), true));
-        entitySet.add(new EntityDto(1l, UUID.randomUUID(), ENTITY_2_SIMPLE_NAME, new EntityDataDto(ENTITY_2_TITLE_WITH_COMMAS), UUID.randomUUID(), true));
-        return entitySet;
+    private static Map<String, String> buildMpamCodeToNameMap() {
+        return new HashMap<>(Map.ofEntries(
+                new AbstractMap.SimpleEntry<>(ENTITY_1_SIMPLE_NAME, ENTITY_1_TITLE),
+                new AbstractMap.SimpleEntry<>(ENTITY_2_SIMPLE_NAME, ENTITY_2_TITLE_WITH_COMMAS))
+        );
     }
 }

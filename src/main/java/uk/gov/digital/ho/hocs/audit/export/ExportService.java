@@ -12,6 +12,8 @@ import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
+import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
@@ -37,7 +39,7 @@ public class ExportService {
     private final ObjectMapper mapper;
     private final AuditRepository auditRepository;
     private final InfoClient infoClient;
-    private final ExportDataConverter exportDataConverter;
+    private final ExportDataConverterFactory exportDataConverterFactory;
     private final HeaderConverter headerConverter;
     private final MalformedDateConverter malformedDateConverter;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
@@ -47,12 +49,12 @@ public class ExportService {
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
-    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverter exportDataConverter,
+    public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
-        this.exportDataConverter = exportDataConverter;
+        this.exportDataConverterFactory = exportDataConverterFactory;
         this.headerConverter = headerConverter;
         this.malformedDateConverter = malformedDateConverter;
     }
@@ -95,14 +97,13 @@ public class ExportService {
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
-        if (convert){
-            exportDataConverter.initialise();
-        }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_DATA_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
 
             data.forEach((audit) -> {
                 try {
@@ -149,13 +150,14 @@ public class ExportService {
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
-        if (convert){
-            exportDataConverter.initialise();
-        }
+
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CASE_NOTES_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
+
             data.forEach((audit) -> {
                 try {
                     String[] parsedAudit = parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
@@ -203,16 +205,14 @@ public class ExportService {
         }
         headers.addAll(somuHeaders);
 
-        if (convert){
-            exportDataConverter.initialise();
-        }
-
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(
                     LocalDateTime.of(from, LocalTime.MIN),
                     LocalDateTime.of(to, LocalTime.MAX),
                     SOMU_TYPE_EVENTS,
                     caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
 
             data.forEach((audit) -> {
                 try {
@@ -308,15 +308,13 @@ public class ExportService {
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
-        if (convert){
-            exportDataConverter.initialise();
-        }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     CORRESPONDENT_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
 
             data.forEach((audit) -> {
                 try {
@@ -370,14 +368,14 @@ public class ExportService {
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
-        if (convert){
-            exportDataConverter.initialise();
-        }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     ALLOCATION_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
+
             data.forEach((audit) -> {
                 try {
                     String[] parsedAudit = parseAllocationAuditPayload(audit, zonedDateTimeConverter);
