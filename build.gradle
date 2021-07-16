@@ -38,6 +38,10 @@ repositories {
 }
 
 dependencies {
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.4'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.4'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.4'
+
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude(module: 'spring-boot-starter-tomcat')
     }
