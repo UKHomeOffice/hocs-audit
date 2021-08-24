@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDataDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.EntityDto;
 
 import java.util.*;
 
@@ -26,6 +28,7 @@ public class ExportDataConverterFactoryTest {
 
     @Before
     public void before() {
+
         when(infoClient.getUsers()).thenReturn(Set.of());
         when(infoClient.getAllTeams()).thenReturn(Set.of());
         when(infoClient.getUnits()).thenReturn(Set.of());
@@ -37,6 +40,17 @@ public class ExportDataConverterFactoryTest {
 
     @Test
     public void shouldGenerateExportDataConverter() {
+        ExportDataConverter exportDataConverter = converterFactory.getInstance();
+
+        assertThat(exportDataConverter).isNotNull();
+    }
+
+    @Test
+    public void shouldHandleDuplicateSimpleName() {
+        Set<EntityDto> entityDtos = Set.of(new EntityDto(1L, UUID.randomUUID(), "Name1", new EntityDataDto("title1"), UUID.randomUUID(), true),
+                new EntityDto(1L, UUID.randomUUID(), "Name1", new EntityDataDto("title1"), UUID.randomUUID(), true));
+        when(infoClient.getEntitiesForList("MPAM_ENQUIRY_SUBJECTS")).thenReturn(entityDtos);
+
         ExportDataConverter exportDataConverter = converterFactory.getInstance();
 
         assertThat(exportDataConverter).isNotNull();
