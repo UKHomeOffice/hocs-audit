@@ -10,6 +10,7 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,8 +43,8 @@ public class ExportDataConverterFactory {
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
 
         for (String listName : MPAM_CODE_MAPPING_LISTS) {
-            mpamCodeToName.putAll(infoClient.getEntitiesForList(listName).stream()
-                    .collect(Collectors.toMap(EntityDto::getSimpleName, entity -> entity.getData().getTitle())));
+            Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
+            entities.forEach(e -> mpamCodeToName.put(e.getSimpleName(), e.getData().getTitle()));
         }
 
         return new ExportDataConverter(uuidToName, mpamCodeToName, caseworkClient);
