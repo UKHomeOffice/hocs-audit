@@ -304,6 +304,52 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void caseExtensionExportShouldOnlyRequestExtensionEventsAndCaseType() throws IOException {
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getExtensionDataAuditData().stream());
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.EXTENSIONS, false, false, null, null);
+        verify(auditRepository, times(1)).findAuditDataByDateRangeAndEvents(from, to, ExportService.EXTENSION_EVENTS, "a1");
+        verify(exportDataConverter, times(0)).convertData(any(), any());
+    }
+
+    @Test
+    public void caseExtensionsExportShouldReturnRowHeaders() throws IOException {
+        String[] expectedHeaders = new String[]{"timestamp", "event", "userId", "caseId", "created", "type", "note"};
+
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getExtensionDataAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.EXTENSIONS, false, false, null, null);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+    }
+
+    @Test
+    public void extensionsExtractShouldReturnCSVData() throws IOException {
+
+        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
+
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getExtensionDataAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.EXTENSIONS, false, false, null, null);
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(2);
+
+        CSVRecord row = rows.stream().filter((r) -> r.get("type").equals("TEST_EXTENSION_TYPE_2")).findFirst().get();
+        assertThat(row.get("timestamp")).isEqualTo("2019-04-23T12:57:58.000000");
+        assertThat(row.get("event")).isEqualTo("EXTENSION_APPLIED");
+        assertThat(row.get("userId")).isEqualTo("71e0da5a-8c1b-4a70-bf4b-e92d3db108ea");
+        assertThat(row.get("caseId")).isEqualTo("e7cfa12e-5503-4663-853e-3ed6fbb1dc12");
+        assertThat(row.get("created")).isEqualTo("2021-09-07T10:26:27.538487");
+        assertThat(row.get("type")).isEqualTo("TEST_EXTENSION_TYPE_2");
+        assertThat(row.get("note")).isEqualTo("TEST Extension applied. Reason: A second reason");
+    }
+
+    @Test
     public void caseAllocationsExportShouldReturnRowHeaders() throws IOException {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid","stage", "allocatedTo", "deadline"};
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAllocationDataAuditData().stream());
@@ -467,6 +513,16 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void verifyHeadersAreSubstitutedWithExtractExtract() throws IOException {
+        OutputStream outputStream = new ByteArrayOutputStream();
+        OutputStream buffer = new BufferedOutputStream(outputStream);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        exportService.extensionExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
+        verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+
+    @Test
     public void verifyHeadersAreSubstitutedWithTopicExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
@@ -553,6 +609,13 @@ public class AuditExportServiceTest {
     private Set<AuditData> getCorrespondentDataAuditData() {
         return new HashSet<AuditData>(){{
             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
+        }};
+    }
+
+    private Set<AuditData> getExtensionDataAuditData() {
+        return new HashSet<>(){{
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A reason\", \"type\": \"TEST_EXTENSION\", \"caseId\": \"90f22002-f6b2-41fe-8ed1-0a4b58b40ef1\", \"created\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "a294d133-629c-49ee-a2af-51b4c851eb3c"));
+            add(new AuditData(UUID.fromString("e7cfa12e-5503-4663-853e-3ed6fbb1dc12"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A second reason\", \"type\": \"TEST_EXTENSION_TYPE_2\", \"caseId\": \"7ba51018-9d46-460c-ab0a-a6e9efb1a7fe\", \"created\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
         }};
     }
 
