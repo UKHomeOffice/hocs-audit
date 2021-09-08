@@ -47,6 +47,7 @@ public class ExportService {
     public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED"};
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
+    public static final String[] EXTENSION_EVENTS = {"EXTENSION_APPLIED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
@@ -78,6 +79,9 @@ public class ExportService {
                 break;
             case CORRESPONDENTS:
                 correspondentExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
+                break;
+            case EXTENSIONS:
+                extensionExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
                 break;
             case ALLOCATIONS:
                 allocationExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
@@ -331,6 +335,54 @@ public class ExportService {
             });
             log.info("Export CORRESPONDENT to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
         }
+    }
+
+    void extensionExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting EXTENSION to CSV", value(EVENT, CSV_EXPORT_START));
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseId",
+                "created", "type", "note").collect(Collectors.toList());
+
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                    EXTENSION_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
+
+            data.forEach((audit) -> {
+                try {
+                    String[] auditRow = parseExtensionAuditPayload(audit, zonedDateTimeConverter);
+                    if (convert){
+                        auditRow = exportDataConverter.convertData(auditRow, caseTypeCode);
+                    }
+                    auditRow = malformedDateConverter.correctDateFields(auditRow);
+                    printer.printRecord(auditRow);
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to get record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export EXTENSION to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    private String[] parseExtensionAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        List<String> data = new ArrayList<>();
+        AuditPayload.Extension extensionData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Extension.class);
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
+        data.add(audit.getType());
+        data.add(audit.getUserID());
+        data.add(Objects.toString(audit.getCaseUUID(), ""));
+        data.add(extensionData.getCreated().toString());
+        data.add(extensionData.getType());
+        data.add(extensionData.getNote());
+
+        return data.toArray(new String[data.size()]);
     }
 
     private String[] parseCorrespondentAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {

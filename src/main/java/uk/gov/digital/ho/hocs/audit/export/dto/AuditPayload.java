@@ -154,4 +154,21 @@ public interface AuditPayload {
 
     }
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Extension {
+
+        @JsonProperty("caseId")
+        private UUID caseId;
+
+        @JsonProperty("created")
+        private LocalDateTime created;
+
+        @JsonProperty("type")
+        private String type;
+
+        @JsonProperty("note")
+        private String note;
+    }
+
 }
