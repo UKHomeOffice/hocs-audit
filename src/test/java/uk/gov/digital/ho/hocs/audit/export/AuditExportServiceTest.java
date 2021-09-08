@@ -328,9 +328,6 @@ public class AuditExportServiceTest {
 
     @Test
     public void extensionsExtractShouldReturnCSVData() throws IOException {
-
-        when(infoClient.getCaseExportFields("MIN")).thenReturn(fields);
-
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getExtensionDataAuditData().stream());
 
         OutputStream outputStream = new ByteArrayOutputStream();
