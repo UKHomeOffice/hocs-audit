@@ -513,7 +513,7 @@ public class AuditExportServiceTest {
     }
 
     @Test
-    public void verifyHeadersAreSubstitutedWithExtractExtract() throws IOException {
+    public void verifyHeadersAreSubstitutedWithExtensionExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");

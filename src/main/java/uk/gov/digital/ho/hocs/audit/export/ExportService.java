@@ -356,7 +356,7 @@ public class ExportService {
 
             data.forEach((audit) -> {
                 try {
-                    String[] auditRow = getExtensionAuditPayloadRow(audit, zonedDateTimeConverter);
+                    String[] auditRow = parseExtensionAuditPayload(audit, zonedDateTimeConverter);
                     if (convert){
                         auditRow = exportDataConverter.convertData(auditRow, caseTypeCode);
                     }
@@ -371,7 +371,7 @@ public class ExportService {
         }
     }
 
-    private String[] getExtensionAuditPayloadRow(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseExtensionAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Extension extensionData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Extension.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
