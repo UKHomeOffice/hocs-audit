@@ -200,7 +200,7 @@ public class ExportService {
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
 
         log.info("Exporting Case Data Somu to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuTypeUuid", "somuItemUuid").collect(Collectors.toList());
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid").collect(Collectors.toList());
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
         LinkedHashSet<String> somuHeaders = new LinkedHashSet<>();
