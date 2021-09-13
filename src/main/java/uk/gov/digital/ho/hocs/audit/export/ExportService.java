@@ -22,6 +22,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -65,7 +66,7 @@ public class ExportService {
         final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
 
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
         switch (exportType) {
             case CASE_DATA:
@@ -91,39 +92,85 @@ public class ExportService {
         }
     }
 
-    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
-        log.info("Exporting CASE_DATA to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toList());
-        LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
-        headers.addAll(caseDataHeaders);
+    private void printAudit(String[] parsedAudit, OutputStreamWriter outputWriter, CSVPrinter printer) throws StreamBrokenException{
+        try{
+            if(parsedAudit != null){
+                printer.printRecord(parsedAudit);
+                outputWriter.flush();
+            }
+        } catch (IOException e) {
+            throw new StreamBrokenException(e);
+        }
+    }
 
+    private Stream<AuditData> getAuditDataStream(boolean lastAudit, String[] events, LocalDate from, LocalDate to, String caseTypeCode){
+        if(lastAudit){
+            return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                    events, caseTypeCode);
+        }
+        else{
+            return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                events, caseTypeCode);
+        }
+    }
+
+    private void genericParseAndPrint(boolean lastAuditDataStream, String[] events, ExportType exportType, LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter, LinkedHashSet<String> caseDataHeaders, List<String> headers) throws IOException{
         List<String> substitutedHeaders = headers;
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
-                    CASE_DATA_EVENTS, caseTypeCode);
-
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
+            Stream<AuditData> data = getAuditDataStream(lastAuditDataStream, events, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-
             data.forEach((audit) -> {
+                String[] parsedAudit = null;
                 try {
-                    String[] parsedAudit = parseCaseDataAuditPayload(audit, caseDataHeaders, zonedDateTimeConverter);
-                    if (convert){
+                    parsedAudit = parseData(exportType, audit, zonedDateTimeConverter, caseDataHeaders);
+                    if (convert) {
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                    printer.printRecord(parsedAudit);
-                    outputWriter.flush();
-                } catch (Exception e) {
+                }
+                catch(IOException e){
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
+                printAudit(parsedAudit, outputWriter, printer);
             });
-            log.info("Export CASE_DATA to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+            log.info("Export {} to CSV Complete", exportType, value(EVENT, CSV_EXPORT_COMPETE));
         }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
+        }
+    }
+
+    private String[] parseData(ExportType exportType, AuditData audit, ZonedDateTimeConverter zonedDateTimeConverter, LinkedHashSet<String> caseDataHeaders) throws IOException {
+        switch (exportType) {
+            case CASE_DATA:
+                return parseCaseDataAuditPayload(audit, caseDataHeaders, zonedDateTimeConverter);
+            case CASE_NOTES:
+                return parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
+            case TOPICS:
+                return  parseTopicAuditPayload(audit, zonedDateTimeConverter);
+            case CORRESPONDENTS:
+                return parseCorrespondentAuditPayload(audit, zonedDateTimeConverter);
+            case ALLOCATIONS:
+                return parseAllocationAuditPayload(audit, zonedDateTimeConverter);
+            default:
+                throw new AuditExportException("Unknown export type requests");
+        }
+    }
+
+    void caseDataExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, String caseType, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting CASE_DATA to CSV", value(EVENT, CSV_EXPORT_START));
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline", "primaryCorrespondent", "primaryTopic").collect(Collectors.toList());
+        LinkedHashSet<String> caseDataHeaders = infoClient.getCaseExportFields(caseType);
+        headers.addAll(caseDataHeaders);
+        genericParseAndPrint(true, CASE_DATA_EVENTS, ExportType.CASE_DATA, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, caseDataHeaders, headers);
     }
 
     private String[] parseCaseDataAuditPayload(AuditData audit, LinkedHashSet<String> caseDataHeaders, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
@@ -144,39 +191,13 @@ public class ExportService {
                 data.add(caseData.getData().getOrDefault(field, ""));
             }
         }
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     void caseNotesExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CASE_NOTES to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text").collect(Collectors.toList());
-        List<String> substitutedHeaders = headers;
-        if (convertHeader) {
-            substitutedHeaders = headerConverter.substitute(headers);
-        }
-
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
-                    CASE_NOTES_EVENTS, caseTypeCode);
-
-            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-
-            data.forEach((audit) -> {
-                try {
-                    String[] parsedAudit = parseCaseNotesAuditPayload(audit, zonedDateTimeConverter);
-                    if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
-                    }
-                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                    printer.printRecord(parsedAudit);
-                    outputWriter.flush();
-                } catch (Exception e) {
-                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-            log.info("Export CASE_NOTES to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
-        }
+        genericParseAndPrint(false, CASE_NOTES_EVENTS, ExportType.CASE_NOTES, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
     }
 
     private String[] parseCaseNotesAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
@@ -189,14 +210,14 @@ public class ExportService {
         data.add(Objects.toString(audit.getUuid()));
         data.add(caseNote.getCaseNoteType());
         data.add(caseNote.getText());
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     @Transactional(readOnly = true)
     public void auditSomuExport(LocalDate from, LocalDate to, OutputStream output, String caseType, String somuType, boolean convert, final String timestampFormat, final String timeZoneId) throws IOException {
         final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
 
         log.info("Exporting Case Data Somu to CSV", value(EVENT, CSV_EXPORT_START));
@@ -207,31 +228,30 @@ public class ExportService {
 
         headers.addAll(somuFields.stream().map(SomuTypeField::getExtractColumnLabel).collect(Collectors.toList()));
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(
-                    LocalDateTime.of(from, LocalTime.MIN),
-                    LocalDateTime.of(to, LocalTime.MAX),
-                    SOMU_TYPE_EVENTS,
-                    caseTypeCode);
-
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
+            Stream<AuditData> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-
             data.forEach((audit) -> {
+                String[] parsedAudit = null;
                 try {
                     if (filterSomuIType(audit, somuTypeDto)) {
-                        String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuFields, zonedDateTimeConverter);
+                        parsedAudit = parseCaseDataSomuAuditPayload(audit, somuFields, zonedDateTimeConverter);
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
                         parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                        printer.printRecord(parsedAudit);
-                        outputWriter.flush();
                     }
                 } catch (Exception e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
+                printAudit(parsedAudit, outputWriter, printer);
             });
-            log.info("Export CASE_DATA to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+            log.info("Export SOMU_DATA to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
     }
 
@@ -248,7 +268,7 @@ public class ExportService {
         for (SomuTypeField header : headers) {
             data.add(getSomuDataValue(somuData.getData(), header.getName()));
         }
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     private boolean filterSomuIType(AuditData auditData, SomuTypeDto somuTypeDto) throws IOException {
@@ -267,26 +287,32 @@ public class ExportService {
         log.info("Exporting TOPIC to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "topicUuid", "topic").collect(Collectors.toList());
         List<String> substitutedHeaders = headers;
+
         if (convertHeader) {
             substitutedHeaders = headerConverter.substitute(headers);
         }
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
-                    TOPIC_EVENTS, caseTypeCode);
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
+            Stream<AuditData> data = getAuditDataStream(false, TOPIC_EVENTS, from, to, caseTypeCode);
+
             data.forEach((audit) -> {
+                String[] parsedAudit = null;
                 try {
-                    printer.printRecord(parseTopicAuditPayload(audit, zonedDateTimeConverter));
-                    outputWriter.flush();
+                    parsedAudit = parseTopicAuditPayload(audit, zonedDateTimeConverter);
                 } catch (IOException e) {
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
+                printAudit(parsedAudit, outputWriter, printer);
             });
             log.info("Export TOPIC to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
         }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
+        }
     }
 
-    private List<String> parseTopicAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseTopicAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
 
         AuditPayload.Topic topicData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Topic.class);
@@ -296,7 +322,7 @@ public class ExportService {
         data.add(Objects.toString(audit.getCaseUUID(), ""));
         data.add(topicData.getTopicUuid().toString());
         data.add(topicData.getTopicName());
-        return data;
+        return data.toArray(new String[0]);
     }
 
     void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
@@ -305,34 +331,7 @@ public class ExportService {
                 "correspondentUuid", "fullname", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey").collect(Collectors.toList());
-
-        List<String> substitutedHeaders = headers;
-        if (convertHeader) {
-            substitutedHeaders = headerConverter.substitute(headers);
-        }
-
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
-                    CORRESPONDENT_EVENTS, caseTypeCode);
-
-            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-
-            data.forEach((audit) -> {
-                try {
-                    String[] parsedAudit = parseCorrespondentAuditPayload(audit, zonedDateTimeConverter);
-                    if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
-                    }
-                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                    printer.printRecord(parsedAudit);
-                    outputWriter.flush();
-                } catch (IOException e) {
-                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-            log.info("Export CORRESPONDENT to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
-        }
+        genericParseAndPrint(false, CORRESPONDENT_EVENTS, ExportType.CORRESPONDENTS, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
     }
 
     void extensionExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
@@ -407,40 +406,13 @@ public class ExportService {
         data.add(correspondentData.getEmail());
         data.add(correspondentData.getReference());
         data.add(correspondentData.getExternalKey());
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     void allocationExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting ALLOCATION to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "stage", "allocatedTo", "deadline").collect(Collectors.toList());
-
-        List<String> substitutedHeaders = headers;
-        if (convertHeader) {
-            substitutedHeaders = headerConverter.substitute(headers);
-        }
-
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
-                    ALLOCATION_EVENTS, caseTypeCode);
-
-            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-
-            data.forEach((audit) -> {
-                try {
-                    String[] parsedAudit = parseAllocationAuditPayload(audit, zonedDateTimeConverter);
-                    if (convert){
-                        parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
-                    }
-                    parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                    printer.printRecord(parsedAudit);
-                    outputWriter.flush();
-                } catch (IOException e) {
-                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-            log.info("Export ALLOCATION to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
-        }
+        genericParseAndPrint(false, ALLOCATION_EVENTS, ExportType.ALLOCATIONS, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
     }
 
     private String[] parseAllocationAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
@@ -455,14 +427,14 @@ public class ExportService {
         data.add(Objects.toString(allocationData.getAllocatedToUUID(), ""));
         data.add(Objects.toString(allocationData.getDeadline(), ""));
 
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     public void staticTopicExport(OutputStream output, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC TOPIC LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         List<String> headers = Stream.of("topicUUID", "topicName", "active").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
@@ -471,7 +443,7 @@ public class ExportService {
         }
         Set<TopicDto> topics = infoClient.getTopics();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
 
             topics.forEach((topic) -> {
                 try {
@@ -479,9 +451,15 @@ public class ExportService {
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for static topic {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    throw new StreamBrokenException(e);
                 }
             });
             log.info("Export STATIC TOPIC LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
 
     }
@@ -490,7 +468,7 @@ public class ExportService {
                                             String caseType, boolean convertHeader) throws IOException {
         log.info("Exporting STATIC TOPICS with TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         List<String> headers = Stream.of("caseType", "topicUUID", "topicName", "teamUUID", "teamName").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
@@ -499,19 +477,24 @@ public class ExportService {
         }
         Set<TopicTeamDto> topicTeams = infoClient.getTopicsWithTeams(caseType);
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))){
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))){
 
             topicTeams.forEach(topic -> {
-
                 topic.getTeams().forEach(team -> {
                     try {
                         printer.printRecord(caseType, topic.getUuid(), topic.getDisplayName(), team.getUuid(), team.getDisplayName());
                         outputWriter.flush();
                     } catch (IOException e) {
                         log.error("Unable to parse record for static topic {} and team {} for reason {}", topic.getUuid(), team.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                        throw new StreamBrokenException(e);
                     }
                 });
             });
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
     }
 
@@ -520,7 +503,7 @@ public class ExportService {
         log.info("Exporting STATIC USER LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         List<String> headers = Stream.of("userUUID", "username", "firstName", "lastName", "email").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
@@ -529,17 +512,24 @@ public class ExportService {
         }
         Set<UserDto> users = infoClient.getUsers();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
 
             users.forEach((user) -> {
+
                 try {
                     printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for static user {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    throw new StreamBrokenException(e);
                 }
             });
             log.info("Export STATIC USER LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
     }
 
@@ -547,7 +537,7 @@ public class ExportService {
         log.info("Exporting STATIC TEAM LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         List<String> headers = Stream.of("teamUUID", "teamName").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
@@ -556,17 +546,24 @@ public class ExportService {
         }
         Set<TeamDto> teams = infoClient.getTeams();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
 
             teams.forEach((team) -> {
+
                 try {
                     printer.printRecord(team.getUuid(), team.getDisplayName());
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to parse record for static team {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    throw new StreamBrokenException(e);
                 }
             });
             log.info("Export STATIC TEAM LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
     }
 
@@ -574,7 +571,7 @@ public class ExportService {
         log.info("Exporting STATIC UNITS and TEAMS LIST to CSV", value(EVENT, CSV_EXPORT_START));
 
         OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         List<String> headers = Stream.of("unitUUID", "unitName", "teamUUID", "teamName").collect(Collectors.toList());
 
         List<String> substitutedHeaders = headers;
@@ -583,7 +580,7 @@ public class ExportService {
         }
         Set<UnitDto> units = infoClient.getUnits();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
 
             units.forEach((unit) -> {
                 Set<TeamDto> teams = infoClient.getTeamsForUnit(unit.getUuid());
@@ -594,6 +591,7 @@ public class ExportService {
                         outputWriter.flush();
                     } catch (IOException e) {
                         log.error("Unable to parse record for static unit {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                        throw new StreamBrokenException(e);
                     }
                 } else {
                     teams.forEach((team) -> {
@@ -602,11 +600,17 @@ public class ExportService {
                             outputWriter.flush();
                         } catch (IOException e) {
                             log.error("Unable to parse record for static unit and team {} for reason {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                            throw new StreamBrokenException(e);
                         }
                     });
                 }
             });
             log.info("Export STATIC UNITS and TEAMS LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+        catch (StreamBrokenException e) {
+            outputWriter.close();
+            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+            throw new IOException(e);
         }
     }
 }
