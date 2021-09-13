@@ -50,10 +50,6 @@ public class ExportService {
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] EXTENSION_EVENTS = {"EXTENSION_APPLIED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-    private static class StreamBrokenException extends RuntimeException {
-        Throwable throwable;
-        StreamBrokenException(Throwable throwable){this.throwable = throwable;}
-    }
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
@@ -228,25 +224,18 @@ public class ExportService {
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid").collect(Collectors.toList());
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
-        LinkedHashSet<String> somuHeaders = new LinkedHashSet<>();
-        for (SomuTypeField field : schema.getFields()) {
-            somuHeaders.add(field.getName());
-        }
-        headers.addAll(somuHeaders);
+        LinkedHashSet<SomuTypeField> somuFields = new LinkedHashSet<>(schema.getFields());
+
+        headers.addAll(somuFields.stream().map(SomuTypeField::getExtractColumnLabel).collect(Collectors.toList()));
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
             Stream<AuditData> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
             data.forEach((audit) -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 String[] parsedAudit = null;
                 try {
                     if (filterSomuIType(audit, somuTypeDto)) {
-                        parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
+                        parsedAudit = parseCaseDataSomuAuditPayload(audit, somuFields, zonedDateTimeConverter);
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
@@ -266,18 +255,18 @@ public class ExportService {
         }
     }
 
-    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<String> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID()));
-        data.add(somuData.getUuid().toString());
         data.add(somuData.getSomuTypeUuid().toString());
+        data.add(somuData.getUuid().toString());
 
-        for (String header : headers) {
-            data.add(getSomuDataValue(somuData.getData(), header));
+        for (SomuTypeField header : headers) {
+            data.add(getSomuDataValue(somuData.getData(), header.getName()));
         }
         return data.toArray(new String[0]);
     }
