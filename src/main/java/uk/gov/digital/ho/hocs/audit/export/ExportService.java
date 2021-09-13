@@ -203,11 +203,9 @@ public class ExportService {
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid").collect(Collectors.toList());
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
-        LinkedHashSet<String> somuHeaders = new LinkedHashSet<>();
-        for (SomuTypeField field : schema.getFields()) {
-            somuHeaders.add(field.getName());
-        }
-        headers.addAll(somuHeaders);
+        LinkedHashSet<SomuTypeField> somuFields = new LinkedHashSet<>(schema.getFields());
+
+        headers.addAll(somuFields.stream().map(SomuTypeField::getExtractColumnLabel).collect(Collectors.toList()));
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[headers.size()])))) {
             Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(
@@ -221,7 +219,7 @@ public class ExportService {
             data.forEach((audit) -> {
                 try {
                     if (filterSomuIType(audit, somuTypeDto)) {
-                        String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuHeaders, zonedDateTimeConverter);
+                        String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuFields, zonedDateTimeConverter);
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
@@ -237,18 +235,18 @@ public class ExportService {
         }
     }
 
-    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<String> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID()));
-        data.add(somuData.getUuid().toString());
         data.add(somuData.getSomuTypeUuid().toString());
+        data.add(somuData.getUuid().toString());
 
-        for (String header : headers) {
-            data.add(getSomuDataValue(somuData.getData(), header));
+        for (SomuTypeField header : headers) {
+            data.add(getSomuDataValue(somuData.getData(), header.getName()));
         }
         return data.toArray(new String[data.size()]);
     }
