@@ -37,8 +37,10 @@ public class ExportDataConverterFactory {
                 .collect(Collectors.toMap(team -> team.getUuid().toString(), TeamDto::getDisplayName)));
         uuidToName.putAll(infoClient.getUnits().stream()
                 .collect(Collectors.toMap(UnitDto::getUuid, UnitDto::getDisplayName)));
-        uuidToName.putAll(caseworkClient.getAllCaseTopics().stream()
-                .collect(Collectors.toMap(topic -> topic.getTopicUUID().toString(), GetTopicResponse::getTopicText)));
+        caseworkClient.getAllCaseTopics()
+                .forEach(
+                        topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText())
+                );
         uuidToName.putAll(caseworkClient.getAllActiveCorrespondents().stream()
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
 
