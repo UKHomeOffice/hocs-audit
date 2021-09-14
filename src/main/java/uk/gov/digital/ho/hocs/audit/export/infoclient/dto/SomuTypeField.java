@@ -6,7 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class SomuTypeField {
-    String component;
     String name;
-    String label;
+    String extractColumnLabel;
 }

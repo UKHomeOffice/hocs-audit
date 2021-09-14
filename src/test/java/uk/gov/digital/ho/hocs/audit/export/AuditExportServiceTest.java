@@ -239,7 +239,7 @@ public class AuditExportServiceTest {
 
     @Test
     public void auditSomuExportShouldReturnCSVData() throws IOException {
-        SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\"},{\"name\":\"field2\"}]}", true);
+        SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\", \"extractColumnLabel\": \"Field 1\"},{\"name\":\"field2\", \"extractColumnLabel\": \"Field 2\"}]}", true);
         when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
 
@@ -250,8 +250,8 @@ public class AuditExportServiceTest {
         assertThat(rows.size()).isEqualTo(1);
 
         CSVRecord row = rows.get(0);
-        assertThat(row.get("field1")).isEqualTo("value1");
-        assertThat(row.get("field2")).isEqualTo("value2");
+        assertThat(row.get("Field 1")).isEqualTo("value1");
+        assertThat(row.get("Field 2")).isEqualTo("value2");
     }
 
     @Test
