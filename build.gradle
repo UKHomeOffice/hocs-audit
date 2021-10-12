@@ -1,32 +1,9 @@
-buildscript {
-    ext {
-        springBootVersion = '2.5.1'
-        camelVersion = '2.23.4'
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
+plugins {
+    id 'org.springframework.boot' version '2.5.1'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+    id 'jacoco'
 }
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'jacoco'
-
-task copyLombok(type: Copy) {
-    outputs.upToDateWhen { false }
-    into "${buildDir}/libs"
-    include "lombok*.jar"
-    from configurations.compileClasspath
-}
-
-build.dependsOn(copyLombok)
 
 group = 'uk.gov.digital.ho.hocs'
 version = '0.0.1-SNAPSHOT'
@@ -37,6 +14,15 @@ repositories {
     mavenCentral()
 }
 
+task copyLombok(type: Copy) {
+    outputs.upToDateWhen { false }
+    into "${buildDir}/libs"
+    include "lombok*.jar"
+    from configurations.compileClasspath
+}
+
+build.dependsOn(copyLombok)
+
 dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.5'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.5'
@@ -45,8 +31,8 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude(module: 'spring-boot-starter-tomcat')
     }
-
     implementation('org.springframework.boot:spring-boot-starter-undertow')
+
     implementation('net.logstash.logback:logstash-logback-encoder:5.1')
     implementation('org.springframework.boot:spring-boot-starter-json')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
