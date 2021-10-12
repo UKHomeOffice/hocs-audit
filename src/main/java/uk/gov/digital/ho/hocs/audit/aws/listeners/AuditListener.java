@@ -21,7 +21,7 @@ public class AuditListener {
         this.auditDataService = auditDataService;
     }
 
-    @SqsListener(value = "${audit.queue}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+    @SqsListener(value = "${aws.queue.audit.url}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void onAuditEvent(String message) {
         CreateAuditDto createAuditEvent = gson.fromJson(message, CreateAuditDto.class);
 
@@ -34,8 +34,6 @@ public class AuditListener {
                 createAuditEvent.getAuditTimestamp(),
                 createAuditEvent.getType(),
                 createAuditEvent.getUserID());
-
-        log.info(message);
     }
 
 }

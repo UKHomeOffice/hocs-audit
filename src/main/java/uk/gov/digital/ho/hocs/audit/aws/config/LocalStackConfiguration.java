@@ -22,8 +22,9 @@ public class LocalStackConfiguration {
 
     @Primary
     @Bean
-    public AmazonSQSAsync awsSqsClient(@Value("${aws.local.host:localhost}") String awsHost) {
-        String host = String.format("http://%s:4576/", awsHost);
+    public AmazonSQSAsync awsSqsClient(@Value("${aws.queue.host}") String awsHost,
+                                       @Value("${aws.queue.audit.url}") String awsQueue,
+                                       @Value("${aws.queue.redrive.policy}") String awsRedrivePolicy) {
         BasicAWSCredentials credentials = new BasicAWSCredentials("test", "test");
 
         AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(host, "eu-west-2");
