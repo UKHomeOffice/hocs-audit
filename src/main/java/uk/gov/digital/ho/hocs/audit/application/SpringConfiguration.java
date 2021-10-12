@@ -4,17 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.format.Formatter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -52,9 +48,9 @@ public class SpringConfiguration implements WebMvcConfigurer {
 
     @Bean
     public Formatter<LocalDate> localDateFormatter() {
-        return new Formatter<LocalDate>() {
+        return new Formatter<>() {
             @Override
-            public LocalDate parse(String text, Locale locale) throws ParseException {
+            public LocalDate parse(String text, Locale locale)  {
                 return LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
             }
 
@@ -64,6 +60,5 @@ public class SpringConfiguration implements WebMvcConfigurer {
             }
         };
     }
-
 
 }
