@@ -40,10 +40,6 @@ dependencies {
 
     implementation('com.github.ben-manes.caffeine:caffeine')
 
-    implementation("org.apache.camel:camel-spring-boot:${camelVersion}")
-    implementation("org.apache.camel:camel-jackson:${camelVersion}")
-    implementation("org.apache.camel:camel-aws:${camelVersion}")
-    implementation("org.apache.camel:camel-http4:${camelVersion}")
     implementation('org.apache.httpcomponents:httpmime:4.5.6')
     implementation('com.amazonaws:aws-java-sdk:1.11.380')
 
@@ -55,7 +51,6 @@ dependencies {
     compileOnly('org.projectlombok:lombok')
     annotationProcessor('org.projectlombok:lombok')
 
-    testImplementation("org.apache.camel:camel-test-spring:${camelVersion}")
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('org.assertj:assertj-core')
 
