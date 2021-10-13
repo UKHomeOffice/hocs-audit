@@ -2,6 +2,7 @@ package uk.gov.digital.ho.hocs.audit.aws.listeners.integration;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.model.PurgeQueueRequest;
+import org.junit.After;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,21 +22,18 @@ public class BaseAwsSqsIntegrationTest {
     @Value("${aws.queue.audit.url}")
     public String auditQueue;
 
-    @Value("${aws.queue.audit.dlq.url}")
-    public String auditDeadLetterQueue;
-
     @Before
     public void setup() {
         amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
-        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditDeadLetterQueue));
+    }
+
+    @After
+    public void teardown() {
+        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
     }
 
     public int getNumberOfMessagesOnQueue() {
         return getValueFromQueue(auditQueue, APPROXIMATE_NUMBER_OF_MESSAGES);
-    }
-
-    public int getNumberOfMessagesOnDeadLetterQueue() {
-        return getValueFromQueue(auditDeadLetterQueue, APPROXIMATE_NUMBER_OF_MESSAGES);
     }
 
     public int getNumberOfMessagesNotVisibleOnQueue() {

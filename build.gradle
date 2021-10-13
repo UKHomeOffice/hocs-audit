@@ -1,8 +1,7 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.1'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
-    id 'jacoco'
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 group = 'uk.gov.digital.ho.hocs'
@@ -18,51 +17,42 @@ ext {
     springCloudVersion = "Hoxton.SR12"
 }
 
-task copyLombok(type: Copy) {
-    outputs.upToDateWhen { false }
-    into "${buildDir}/libs"
-    include "lombok*.jar"
-    from configurations.compileClasspath
-}
-
-build.dependsOn(copyLombok)
-
 dependencies {
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.5'
-
-    implementation('org.springframework.boot:spring-boot-starter-web') {
+    implementation('org.springframework.boot:spring-boot-starter-web:2.5.5') {
         exclude(module: 'spring-boot-starter-tomcat')
     }
-    implementation('org.springframework.boot:spring-boot-starter-undertow')
 
-    implementation('net.logstash.logback:logstash-logback-encoder:5.1')
-    implementation('org.springframework.boot:spring-boot-starter-json')
-    implementation('org.springframework.boot:spring-boot-starter-actuator')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation 'org.springframework.boot:spring-boot-starter-undertow:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-json:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.5'
+    implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
 
-    implementation 'org.springframework.cloud:spring-cloud-aws-messaging'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
 
-    implementation('com.github.ben-manes.caffeine:caffeine')
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.4'
+    implementation 'org.apache.httpcomponents:httpmime:4.5.13'
+    implementation 'com.amazonaws:aws-java-sdk:1.12.85'
+    implementation 'org.apache.commons:commons-csv:1.8'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
 
-    implementation('org.apache.httpcomponents:httpmime:4.5.6')
-    implementation('com.amazonaws:aws-java-sdk:1.11.380')
+    // cannot be brought upto date, community version doesn't support Postgres 9.6
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
 
-    implementation('org.flywaydb:flyway-core')
-    implementation('org.apache.commons:commons-csv:1.5')
+    compileOnly 'org.projectlombok:lombok:1.18.22'
 
-    runtimeOnly('org.postgresql:postgresql')
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
 
-    compileOnly('org.projectlombok:lombok')
-    annotationProcessor('org.projectlombok:lombok')
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation('org.assertj:assertj-core')
-    testImplementation 'junit:junit:4.13.1'
-
-    implementation "com.google.code.gson:gson:2.8.5"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
+    testImplementation 'org.springframework.boot:spring-boot-test:2.5.5'
+    testImplementation 'org.awaitility:awaitility:4.1.0'
+    testImplementation 'org.assertj:assertj-core:3.21.0'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 dependencyManagement {
