@@ -21,7 +21,7 @@ public class AuditListener {
         this.auditDataService = auditDataService;
     }
 
-    @SqsListener(value = "${aws.queue.audit.url}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+    @SqsListener(value = "${aws.sqs.audit.url}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void onAuditEvent(String message) {
         CreateAuditDto createAuditEvent = gson.fromJson(message, CreateAuditDto.class);
 

@@ -19,7 +19,7 @@ public class BaseAwsSqsIntegrationTest {
     @Autowired
     public AmazonSQSAsync amazonSQSAsync;
 
-    @Value("${aws.queue.audit.url}")
+    @Value("${aws.sqs.audit.url}")
     public String auditQueue;
 
     @Before
