@@ -1,7 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.aws.listeners;
 
 import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
 import org.springframework.stereotype.Service;
@@ -9,7 +8,6 @@ import uk.gov.digital.ho.hocs.audit.AuditDataService;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.CreateAuditDto;
 
 @Service
-@Slf4j
 public class AuditListener {
 
     private final Gson gson;

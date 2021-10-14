@@ -24,14 +24,11 @@ public class LocalStackConfiguration {
     public AmazonSQSAsync awsSqsClient(
             @Value("${aws.queue.audit.name}") String queueName,
             @Value("${aws.sqs.config.url}") String awsBaseUrl) {
-        BasicAWSCredentials credentials = new BasicAWSCredentials("test", "test");
-
-        AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(awsBaseUrl, "eu-west-2");
-
         var queueClient =  AmazonSQSAsyncClientBuilder
                 .standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withEndpointConfiguration(endpoint)
+                .withCredentials(new AWSStaticCredentialsProvider(
+                        new BasicAWSCredentials("test", "test")))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(awsBaseUrl, "eu-west-2"))
                 .build();
 
         createQueue(queueClient, queueName);

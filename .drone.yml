@@ -26,9 +26,7 @@ steps:
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     environment:
       DB_HOST: "postgres"
-      AWS_SQS_CONFIG_HOST: "localstack"
-      SPRING_PROFILES_ACTIVE: "development, test"
-      SERVER_PORT: 8080
+      LOCALSTACK_HOST: "localstack"
     commands:
       - ./gradlew check --no-daemon
     depends_on:
