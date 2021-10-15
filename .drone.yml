@@ -10,6 +10,12 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: dev
 
+  - name: localstack
+    image: quay.io/ukhomeofficedigital/localstack
+    environment:
+      SERVICES: sqs
+      DEFAULT_REGION: eu-west-2
+
 steps:
   - name: build project
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
@@ -20,12 +26,8 @@ steps:
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     environment:
       DB_HOST: "postgres"
+      LOCALSTACK_HOST: "localstack"
     commands:
-      - SPRING_PROFILES_ACTIVE='development, local, test'
-      - SERVER_PORT='8080'
-      - AUDIT_QUEUE_NAME='audit-queue'
-      - AUDIT_QUEUE_DLQ_NAME='audit-queue-dlq'
-      - AWS_LOCAL_HOST="localstack"
       - ./gradlew check --no-daemon
     depends_on:
       - build project

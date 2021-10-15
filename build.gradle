@@ -1,32 +1,8 @@
-buildscript {
-    ext {
-        springBootVersion = '2.5.1'
-        camelVersion = '2.23.4'
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'jacoco'
-
-task copyLombok(type: Copy) {
-    outputs.upToDateWhen { false }
-    into "${buildDir}/libs"
-    include "lombok*.jar"
-    from configurations.compileClasspath
-}
-
-build.dependsOn(copyLombok)
 
 group = 'uk.gov.digital.ho.hocs'
 version = '0.0.1-SNAPSHOT'
@@ -37,43 +13,44 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.5'
+ext {
+    springCloudVersion = "Hoxton.SR12"
+}
 
-    implementation('org.springframework.boot:spring-boot-starter-web') {
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-web:2.5.5') {
         exclude(module: 'spring-boot-starter-tomcat')
     }
 
-    implementation('org.springframework.boot:spring-boot-starter-undertow')
-    implementation('net.logstash.logback:logstash-logback-encoder:5.1')
-    implementation('org.springframework.boot:spring-boot-starter-json')
-    implementation('org.springframework.boot:spring-boot-starter-actuator')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation 'org.springframework.boot:spring-boot-starter-undertow:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.5'
+    implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
 
-    implementation('com.github.ben-manes.caffeine:caffeine')
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.4'
+    implementation 'org.apache.commons:commons-csv:1.8'
+    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
 
-    implementation("org.apache.camel:camel-spring-boot:${camelVersion}")
-    implementation("org.apache.camel:camel-jackson:${camelVersion}")
-    implementation("org.apache.camel:camel-aws:${camelVersion}")
-    implementation("org.apache.camel:camel-http4:${camelVersion}")
-    implementation('org.apache.httpcomponents:httpmime:4.5.6')
-    implementation('com.amazonaws:aws-java-sdk:1.11.380')
+    // cannot be brought upto date, community version doesn't support Postgres 9.6
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
 
-    implementation('org.flywaydb:flyway-core')
-    implementation('org.apache.commons:commons-csv:1.5')
+    compileOnly 'org.projectlombok:lombok:1.18.22'
 
-    runtimeOnly('org.postgresql:postgresql')
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
 
-    compileOnly('org.projectlombok:lombok')
-    annotationProcessor('org.projectlombok:lombok')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
+    testImplementation 'org.awaitility:awaitility:4.1.0'
+    testImplementation 'org.assertj:assertj-core:3.21.0'
+    testImplementation 'junit:junit:4.13.2'
+}
 
-    testImplementation("org.apache.camel:camel-test-spring:${camelVersion}")
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation('org.assertj:assertj-core')
-
-    implementation "com.google.code.gson:gson:2.8.5"
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 jar {
