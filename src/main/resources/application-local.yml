@@ -1,12 +1,9 @@
-localstack:
-  host: localhost
-
 aws:
   sqs:
-    config:
-      port: 4566
-      url: http://${localstack.host}:${aws.sqs.config.port}
     audit:
-      url: ${aws.sqs.config.url}/queue/${aws.queue.audit.name}
-
-postgresViewAllowList: allow1,allow2
+      name: audit-queue
+      access.key: 12345
+      secret.key: 12345
+      region: eu-west-2
+      endpoint: http://localhost:4566
+      url: ${aws.sqs.audit.endpoint}/queue/${aws.sqs.audit.name}
