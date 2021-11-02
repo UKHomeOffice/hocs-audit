@@ -71,6 +71,11 @@ public class AuditData implements Serializable {
     @Setter
     private Boolean deleted;
 
+    @Transient
+    @Getter
+    @Setter
+    private String primaryCorrespondent;
+
     public AuditData( String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;

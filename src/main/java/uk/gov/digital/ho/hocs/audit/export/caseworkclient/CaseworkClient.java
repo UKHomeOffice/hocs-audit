@@ -69,4 +69,16 @@ public class CaseworkClient {
             return new GetCaseReferenceResponse(UUID.fromString(uuid), "");
         }
     }
+
+    public GetCorrespondentsResponse getCaseCorrespondents(String caseUuid){
+        try {
+            GetCorrespondentsResponse caseCorrespondentsResponse = restHelper.get(serviceBaseURL, String.format("/case/%s/correspondent", caseUuid), GetCorrespondentsResponse.class);
+            log.info("Got {} correspondents for uuid {}", caseCorrespondentsResponse.getCorrespondents().size(), caseUuid, value(EVENT, CASEWORK_CLIENT_GET_CASE_CORRESPONDENTS_SUCCESS));
+            return caseCorrespondentsResponse;
+        } catch (Exception e) {
+            log.error("Error retrieving correspondents: reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CASEWORK_CLIENT_GET_CASE_CORRESPONDENTS_FAILURE));
+            return new GetCorrespondentsResponse(null);
+        }
+
+    }
 }

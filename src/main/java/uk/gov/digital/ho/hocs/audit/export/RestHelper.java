@@ -48,6 +48,7 @@ public class RestHelper {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(AUTHORIZATION, getBasicAuth());
+        headers.add(RequestData.GROUP_HEADER, requestData.groups());
         headers.add(RequestData.USER_ID_HEADER, requestData.userId());
         headers.add(RequestData.CORRELATION_ID_HEADER, requestData.correlationId());
         return headers;

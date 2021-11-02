@@ -15,6 +15,8 @@ import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentsResponse;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
@@ -57,6 +59,9 @@ public class AuditExportServiceTest {
 
     @Mock
     private HeaderConverter caseNoteHeaderConverter;
+
+    @Mock
+    private CaseworkClient caseworkClient;
 
     private ExportService exportService;
     private ExportService exportServiceTestHeaders;
@@ -113,9 +118,9 @@ public class AuditExportServiceTest {
                 return (List<String>) args[0];
             }
         });
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter);
-        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, headerConverter, malformedDateConverter);
-        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, caseNoteHeaderConverter, malformedDateConverter);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter, caseworkClient);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, headerConverter, malformedDateConverter, caseworkClient);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, caseNoteHeaderConverter, malformedDateConverter, caseworkClient);
     }
 
     @Test
@@ -242,6 +247,7 @@ public class AuditExportServiceTest {
         SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\", \"extractColumnLabel\": \"Field 1\"},{\"name\":\"field2\", \"extractColumnLabel\": \"Field 2\"}]}", true);
         when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
+        when(caseworkClient.getCaseCorrespondents(any())).thenReturn(new GetCorrespondentsResponse(null));
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", false, null, null);
