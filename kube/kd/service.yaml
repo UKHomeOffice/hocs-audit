@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: hocs-audit
+  name: hocs-audit
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 10443
+  selector:
+    name: hocs-audit
