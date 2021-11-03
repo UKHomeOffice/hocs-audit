@@ -71,10 +71,10 @@ public class AuditExportServiceTest {
     private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
         add(new CaseTypeDto("DCU Ministerial", "a1", "MIN"));
     }};
-    private LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
-    private LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
-    private String caseType = "MIN";
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
+    private final LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
+    private final String caseType = "MIN";
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final ZonedDateTimeConverter defaultZonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
     private final MalformedDateConverter malformedDateConverter = new MalformedDateConverter();
 
@@ -247,7 +247,6 @@ public class AuditExportServiceTest {
         SomuTypeDto somuTypeDto = new SomuTypeDto(UUID.fromString("655ddfa7-5ccf-4d9b-86fd-8cef5f61a318"), "MIN", "somuType", "{\"fields\":[{\"name\":\"field1\", \"extractColumnLabel\": \"Field 1\"},{\"name\":\"field2\", \"extractColumnLabel\": \"Field 2\"}]}", true);
         when(infoClient.getSomuType("MIN", "somuType")).thenReturn(somuTypeDto);
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), eq(ExportService.SOMU_TYPE_EVENTS), any())).thenReturn(getCaseDataWithSomuTypeAuditData().stream());
-        when(caseworkClient.getCaseCorrespondents(any())).thenReturn(new GetCorrespondentsResponse(null));
 
         OutputStream outputStream = new ByteArrayOutputStream();
         exportService.auditSomuExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, "somuType", false, null, null);

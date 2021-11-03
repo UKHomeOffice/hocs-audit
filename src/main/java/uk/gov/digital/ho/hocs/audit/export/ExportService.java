@@ -13,9 +13,6 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentWithPrimaryFlagResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentsResponse;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
@@ -238,10 +235,6 @@ public class ExportService {
             Stream<AuditData> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
             data.forEach((audit) -> {
-                String primaryCorrespondent = caseworkClient.getCaseCorrespondents(audit.getCaseUUID().toString()).getPrimaryCorrespondentName();
-                if(primaryCorrespondent != null){
-                    audit.setPrimaryCorrespondent(primaryCorrespondent);
-                }
                 String[] parsedAudit = null;
                 try {
                     if (filterSomuIType(audit, somuTypeDto)) {
@@ -268,7 +261,7 @@ public class ExportService {
     private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
-        somuData.getData().put("primaryCorrespondent", audit.getPrimaryCorrespondent());
+
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
@@ -277,6 +270,12 @@ public class ExportService {
         data.add(somuData.getUuid().toString());
 
         for (SomuTypeField header : headers) {
+            if(header.getName().equals("primaryCorrespondent")){
+                String primaryCorrespondent = caseworkClient.getCaseCorrespondents(audit.getCaseUUID().toString()).getPrimaryCorrespondentName();
+                if(primaryCorrespondent != null){
+                    somuData.getData().put("primaryCorrespondent", primaryCorrespondent);
+                }
+            }
             data.add(getSomuDataValue(somuData.getData(), header.getName()));
         }
         return data.toArray(new String[0]);
