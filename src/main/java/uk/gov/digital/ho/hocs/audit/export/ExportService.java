@@ -261,7 +261,6 @@ public class ExportService {
     private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
-
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
         data.add(audit.getType());
         data.add(audit.getUserID());
