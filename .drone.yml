@@ -17,10 +17,19 @@ services:
       DEFAULT_REGION: eu-west-2
 
 steps:
+  - name: setup localstack
+    image: quay.io/ukhomeofficedigital/localstack # need curl which is not in alpine
+    commands:
+      - ./config/localstack/setup-queues.sh
+    depends_on:
+      - clone
+
   - name: build project
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     commands:
       - ./gradlew assemble --no-daemon
+    depends_on:
+      - setup localstack
 
   - name: test project
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
@@ -103,7 +112,8 @@ steps:
   - name: deploy to cs-dev
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     commands:
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: cs-dev
       KUBE_TOKEN:
@@ -118,7 +128,8 @@ steps:
   - name: deploy to wcs-dev
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     commands:
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: wcs-dev
       KUBE_TOKEN:
@@ -176,7 +187,8 @@ steps:
     commands:
       - source version.txt
       - echo $VERSION
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: cs-qa
       KUBE_TOKEN:
@@ -194,7 +206,8 @@ steps:
     commands:
       - source version.txt
       - echo $VERSION
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: wcs-qa
       KUBE_TOKEN:
@@ -210,7 +223,8 @@ steps:
   - name: deploy to not prod
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     commands:
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
       KUBE_TOKEN:
@@ -226,7 +240,8 @@ steps:
   - name: deploy to prod
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     commands:
-      - ./kube/deploy.sh
+      - cd kube
+      - ./deploy.sh
     environment:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
       KUBE_TOKEN:

@@ -22,18 +22,13 @@ public class LocalStackConfiguration {
     @Primary
     @Bean
     public AmazonSQSAsync awsSqsClient(
-            @Value("${aws.queue.audit.name}") String queueName,
             @Value("${aws.sqs.config.url}") String awsBaseUrl) {
-        var queueClient =  AmazonSQSAsyncClientBuilder
+        return AmazonSQSAsyncClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(
                         new BasicAWSCredentials("test", "test")))
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(awsBaseUrl, "eu-west-2"))
                 .build();
-
-        createQueue(queueClient, queueName);
-
-        return queueClient;
     }
 
     @Primary
@@ -45,11 +40,6 @@ public class LocalStackConfiguration {
         factory.setMaxNumberOfMessages(10);
 
         return factory;
-    }
-
-    private void createQueue(final AmazonSQSAsync amazonSqsAsync, final String queueName) {
-        var createQueueResult = amazonSqsAsync.createQueue(queueName);
-        amazonSqsAsync.purgeQueue(new PurgeQueueRequest(createQueueResult.getQueueUrl()));
     }
 
 }
