@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hocs-refresh-dcu-caseview
+spec:
+  schedule: {{.REFRESH_CRON}}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            name: hocs-refresh-dcu-caseview
+            role: hocs-backend
+        spec:
+          containers:
+            - name: hocs-refresh-dcu-caseview
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+              image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
+              env:
+                - name: HOCS_BASICAUTH
+                  valueFrom:
+                    secretKeyRef:
+                      name: ui-casework-creds
+                      key: plaintext
+              command: ["/bin/sh", "-c"]
+              args:
+                - >
+                  http_status=$( curl -vk -X POST -u ${HOCS_BASICAUTH} -w '%{http_code}' -H 'User-Agent: Refresh DCU_AGGREGATED_CASES'
+                  https://hocs-audit.{{.KUBE_NAMESPACE}}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh );
+                  if [[ $http_status -eq 200 ]]; then exit 0; else exit 1; fi
+          restartPolicy: Never
