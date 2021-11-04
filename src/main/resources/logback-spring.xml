@@ -37,15 +37,7 @@
         <appender-ref ref="consoleAppender"/>
     </logger>
 
-    <logger name="org.apache.camel" additivity="false" level="WARN">
-        <appender-ref ref="consoleAppender"/>
-    </logger>
-
     <logger name="com.amazonaws" additivity="false" level="WARN">
-        <appender-ref ref="consoleAppender"/>
-    </logger>
-
-    <logger name="org.camunda" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
     </logger>
 
@@ -66,6 +58,14 @@
     </logger>
 
     <logger name="com.zaxxer" additivity="false" level="WARN">
+        <appender-ref ref="consoleAppender"/>
+    </logger>
+
+    <logger name="org.xnio" additivity="false" level="WARN">
+        <appender-ref ref="consoleAppender"/>
+    </logger>
+
+    <logger name="org.jboss" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
     </logger>
 
