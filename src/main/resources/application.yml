@@ -25,6 +25,15 @@ spring:
                 temp:
                     use_jdbc_metadata_defaults: false
 
+management:
+    endpoints:
+        enabled-by-default: false
+    endpoint:
+        health:
+            enabled: true
+            probes:
+                enabled: true
+
 aws:
     account:
         id: 123456789012
