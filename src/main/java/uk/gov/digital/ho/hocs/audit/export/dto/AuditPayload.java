@@ -137,6 +137,9 @@ public interface AuditPayload {
         @JsonProperty("fullname")
         private String fullname;
 
+        @JsonProperty("organisation")
+        private String organisation;
+
         @JsonProperty("address")
         private AddressDto address;
 

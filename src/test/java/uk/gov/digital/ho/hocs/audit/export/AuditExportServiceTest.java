@@ -280,7 +280,7 @@ public class AuditExportServiceTest {
     @Test
     public void caseCorrespondentsExportShouldReturnRowHeaders() throws IOException {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid",
-                "correspondentUuid", "fullname", "address1", "address2",
+                "correspondentUuid", "fullname", "organisation", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey"};
 
@@ -605,7 +605,7 @@ public class AuditExportServiceTest {
 
     private Set<AuditData> getCorrespondentDataAuditData() {
         return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"organisation\": \"An Organisation\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
