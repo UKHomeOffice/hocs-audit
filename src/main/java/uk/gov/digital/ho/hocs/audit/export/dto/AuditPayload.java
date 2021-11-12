@@ -167,7 +167,7 @@ public interface AuditPayload {
         @JsonProperty("created")
         private LocalDateTime created;
 
-        @JsonProperty("type")
+        @JsonProperty("action_uuid")
         private String type;
 
         @JsonProperty("note")
