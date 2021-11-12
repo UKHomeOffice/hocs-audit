@@ -164,7 +164,7 @@ public interface AuditPayload {
         @JsonProperty("caseId")
         private UUID caseId;
 
-        @JsonProperty("created")
+        @JsonProperty("created_timestamp")
         private LocalDateTime created;
 
         @JsonProperty("action_uuid")
