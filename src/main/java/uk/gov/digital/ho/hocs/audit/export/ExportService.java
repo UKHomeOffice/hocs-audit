@@ -50,7 +50,7 @@ public class ExportService {
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] EXTENSION_EVENTS = {"EXTENSION_APPLIED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-    private static final int maxCaseNoteSize = 32766;
+    public static final int EXCEL_MAX_CELL_SIZE = 32766;
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
@@ -210,7 +210,7 @@ public class ExportService {
         data.add(Objects.toString(audit.getCaseUUID()));
         data.add(Objects.toString(audit.getUuid()));
         data.add(caseNote.getCaseNoteType());
-        data.add(caseNote.getText().substring(0, Math.min(caseNote.getText().length(), maxCaseNoteSize)));
+        data.add(caseNote.getText().substring(0, Math.min(caseNote.getText().length(), EXCEL_MAX_CELL_SIZE - 1)));
         return data.toArray(new String[0]);
     }
 
