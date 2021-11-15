@@ -337,7 +337,7 @@ public class ExportService {
     void correspondentExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         log.info("Exporting CORRESPONDENT to CSV", value(EVENT, CSV_EXPORT_START));
         List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid",
-                "correspondentUuid", "fullname", "address1", "address2",
+                "correspondentUuid", "fullname", "organisation", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey").collect(Collectors.toList());
         genericParseAndPrint(false, CORRESPONDENT_EVENTS, ExportType.CORRESPONDENTS, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
@@ -400,6 +400,7 @@ public class ExportService {
         data.add(Objects.toString(audit.getCaseUUID(), ""));
         data.add(correspondentData.getUuid().toString());
         data.add(correspondentData.getFullname());
+        data.add(correspondentData.getOrganisation());
 
         if (correspondentData.getAddress() != null) {
             data.add(correspondentData.getAddress().getAddress1());
