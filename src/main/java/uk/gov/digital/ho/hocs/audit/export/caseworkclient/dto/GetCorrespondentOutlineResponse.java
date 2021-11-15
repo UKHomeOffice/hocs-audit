@@ -17,4 +17,8 @@ public class GetCorrespondentOutlineResponse {
 
     @JsonProperty("fullname")
     private String fullname;
+
+    @JsonProperty("isPrimary")
+    @Getter
+    private Boolean isPrimary;
 }

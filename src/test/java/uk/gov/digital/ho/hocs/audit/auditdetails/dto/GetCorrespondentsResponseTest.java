@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
 import org.junit.Test;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentWithPrimaryFlagResponse;
+import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentsResponse;
 
 import java.util.Arrays;
@@ -20,9 +20,9 @@ public class GetCorrespondentsResponseTest {
 
     @Test
     public void testCorrespondentsButNoPrimary(){
-        GetCorrespondentWithPrimaryFlagResponse correspondentOne = new GetCorrespondentWithPrimaryFlagResponse("fullName", false);
-        GetCorrespondentWithPrimaryFlagResponse correspondentTwo = new GetCorrespondentWithPrimaryFlagResponse("fullName", false);
-        Set<GetCorrespondentWithPrimaryFlagResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne, correspondentTwo));
+        GetCorrespondentOutlineResponse correspondentOne = new GetCorrespondentOutlineResponse(null, "fullName", false);
+        GetCorrespondentOutlineResponse correspondentTwo = new GetCorrespondentOutlineResponse(null, "fullName", false);
+        Set<GetCorrespondentOutlineResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne, correspondentTwo));
         GetCorrespondentsResponse response = new GetCorrespondentsResponse(correspondents);
         String name = response.getPrimaryCorrespondentName();
         assert(name == null);
@@ -30,8 +30,8 @@ public class GetCorrespondentsResponseTest {
 
     @Test
     public void testSinglePrimary(){
-        GetCorrespondentWithPrimaryFlagResponse correspondentOne = new GetCorrespondentWithPrimaryFlagResponse("fullName", true);
-        Set<GetCorrespondentWithPrimaryFlagResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne));
+        GetCorrespondentOutlineResponse correspondentOne = new GetCorrespondentOutlineResponse(null, "fullName", true);
+        Set<GetCorrespondentOutlineResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne));
         GetCorrespondentsResponse response = new GetCorrespondentsResponse(correspondents);
         String name = response.getPrimaryCorrespondentName();
         assert(name.equals("fullName"));
@@ -39,10 +39,10 @@ public class GetCorrespondentsResponseTest {
 
     @Test
     public void testFindPrimaryAmongOthers(){
-        GetCorrespondentWithPrimaryFlagResponse correspondentOne = new GetCorrespondentWithPrimaryFlagResponse("fullName", false);
-        GetCorrespondentWithPrimaryFlagResponse correspondentTwo = new GetCorrespondentWithPrimaryFlagResponse("primaryPerson", true);
-        GetCorrespondentWithPrimaryFlagResponse correspondentThree = new GetCorrespondentWithPrimaryFlagResponse("fullName", false);
-        Set<GetCorrespondentWithPrimaryFlagResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne, correspondentTwo, correspondentThree));
+        GetCorrespondentOutlineResponse correspondentOne = new GetCorrespondentOutlineResponse(null, "fullName", false);
+        GetCorrespondentOutlineResponse correspondentTwo = new GetCorrespondentOutlineResponse(null, "primaryPerson", true);
+        GetCorrespondentOutlineResponse correspondentThree = new GetCorrespondentOutlineResponse(null, "fullName", false);
+        Set<GetCorrespondentOutlineResponse> correspondents = new HashSet<>(Arrays.asList(correspondentOne, correspondentTwo, correspondentThree));
         GetCorrespondentsResponse response = new GetCorrespondentsResponse(correspondents);
         String name = response.getPrimaryCorrespondentName();
         assert(name.equals("primaryPerson"));

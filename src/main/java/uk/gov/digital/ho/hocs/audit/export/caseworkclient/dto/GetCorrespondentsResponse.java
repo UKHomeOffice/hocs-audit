@@ -14,16 +14,16 @@ import java.util.stream.Stream;
 public class GetCorrespondentsResponse {
 
     @JsonProperty("correspondents")
-    Set<GetCorrespondentWithPrimaryFlagResponse> correspondents;
+    Set<GetCorrespondentOutlineResponse> correspondents;
 
     public String getPrimaryCorrespondentName(){
-        Optional<GetCorrespondentWithPrimaryFlagResponse> primary = Stream.ofNullable(correspondents)
+        Optional<GetCorrespondentOutlineResponse> primary = Stream.ofNullable(correspondents)
                 .flatMap(Collection::stream)
                 .flatMap(Stream::ofNullable)
-                .filter(c -> c.getIsPrimary())
+                .filter(GetCorrespondentOutlineResponse::getIsPrimary)
                 .findAny();
 
-        return primary.map(GetCorrespondentWithPrimaryFlagResponse::getFullname).orElse(null);
+        return primary.map(GetCorrespondentOutlineResponse::getFullname).orElse(null);
     }
 
 }
