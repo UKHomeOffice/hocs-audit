@@ -354,9 +354,9 @@ public class AuditExportServiceTest {
         exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.APPEALS, false, false, null, null);
 
         List<CSVRecord> rows = getCSVRows(outputStream.toString());
-        assertThat(rows.size()).isEqualTo(2);
+        assertThat(rows.size()).isEqualTo(1);
 
-        CSVRecord row = rows.stream().filter((r) -> r.get("type").equals("0fd81db1-71d7-4471-826c-d3d46b0bb2d6")).collect(Collectors.toList()).get(1);
+        CSVRecord row = rows.stream().filter((r) -> r.get("type").equals("0fd81db1-71d7-4471-826c-d3d46b0bb2d6")).collect(Collectors.toList()).get(0);
         assertThat(row.get("status")).isEqualTo("Pending");
         assertThat(row.get("dateSentRMS")).isEqualTo("");
         assertThat(row.get("outcome")).isEqualTo("");
@@ -658,15 +658,6 @@ public class AuditExportServiceTest {
                     LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter),
                     "APPEAL_CREATED",
                     "a294d133-629c-49ee-a2af-51b4c851eb3c"));
-            add(new AuditData(
-                    UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),
-                    UUID.randomUUID(),UUID.randomUUID().toString(),
-                    "a-service",
-                    "{\"note\": \"UPDATED NOTE\", \"caseTypeActionUuid\": \"0fd81db1-71d7-4471-826c-d3d46b0bb2d6\", \"created\": \"2021-09-07T10:26:27.538487\", \"status\": \"Complete\", \"outcome\": \"DecisionUpheld\", \"complexCase\":\"No\", \"officerType\": \"SOME_TYPE\", \"officerName\": \"SOME_NAME\", \"officerDirectorate\": \"SOME_DIRECTORATE\", \"dateSentRMS\": \"\" }",
-                    "an-env",
-                    LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter),
-                    "APPEAL_UPDATED",
-                    "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
         }};
     }
 
