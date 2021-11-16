@@ -51,6 +51,7 @@ public class ExportService {
     public static final String[] EXTENSION_EVENTS = {"EXTENSION_APPLIED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
     public static final int EXCEL_MAX_CELL_SIZE = 32766;
+    public static final String[] APPEAL_EVENTS = {"APPEAL_CREATED", "APPEAL_UPDATED"};
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
@@ -87,6 +88,9 @@ public class ExportService {
                 break;
             case ALLOCATIONS:
                 allocationExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
+                break;
+            case APPEALS:
+                appealExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
                 break;
             default:
                 throw new AuditExportException("Unknown export type requests");
@@ -376,7 +380,7 @@ public class ExportService {
         data.add(audit.getType());
         data.add(audit.getUserID());
         data.add(Objects.toString(audit.getCaseUUID(), ""));
-        data.add(extensionData.getCreated().toString());
+        data.add(Objects.toString(extensionData.getCreated(), null));
         data.add(extensionData.getType());
         data.add(extensionData.getNote());
 
@@ -615,6 +619,66 @@ public class ExportService {
             throw new IOException(e);
         }
     }
+
+    private void appealExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode,
+                              boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+
+        log.info("Exporting APPEALS to CSV", value(EVENT, CSV_EXPORT_START));
+
+        List<String> headers = Stream.of("timestamp", "event", "userId", "caseId",
+                "created", "type", "status", "dateSentRMS", "outcome", "complex",
+                "note", "officerType", "officerName","officerDirectorate").collect(Collectors.toList());
+
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
+            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                            from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                    APPEAL_EVENTS, caseTypeCode);
+
+            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
+
+            data.forEach((audit) -> {
+                try {
+                    String[] auditRow = parseAppealAuditPayload(audit, zonedDateTimeConverter);
+                    if (convert){
+                        auditRow = exportDataConverter.convertData(auditRow, caseTypeCode);
+                    }
+                    auditRow = malformedDateConverter.correctDateFields(auditRow);
+                    printer.printRecord(auditRow);
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to get record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export APPEALS to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    private String[] parseAppealAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        List<String> data = new ArrayList<>();
+        AuditPayload.Appeal appealData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Appeal.class);
+        data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
+        data.add(audit.getType());
+        data.add(audit.getUserID());
+        data.add(Objects.toString(audit.getCaseUUID(), ""));
+        data.add(Objects.toString(appealData.getCreated(),null));
+        data.add(Objects.toString(appealData.getType(), null));
+        data.add(appealData.getStatus());
+        data.add(Objects.toString(appealData.getDateSentRMS(), null));
+        data.add(appealData.getOutcome());
+        data.add(appealData.getComplexCase());
+        data.add(appealData.getNote());
+        data.add(appealData.getOfficerType());
+        data.add(appealData.getOfficerName());
+        data.add(appealData.getOfficerDirectorate());
+
+        return data.toArray(new String[data.size()]);
+    }
+
 }
 
 

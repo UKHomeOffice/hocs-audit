@@ -164,14 +164,31 @@ public interface AuditPayload {
         @JsonProperty("caseId")
         private UUID caseId;
 
-        @JsonProperty("created")
+        @JsonProperty("createTimestamp")
         private LocalDateTime created;
 
-        @JsonProperty("type")
+        @JsonProperty("caseTypeActionUuid")
         private String type;
 
         @JsonProperty("note")
         private String note;
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Appeal {
+
+        @JsonProperty("caseTypeActionUuid")
+        private UUID type;
+        private String status;
+        private LocalDate dateSentRMS;
+        private String outcome;
+        private String complexCase;
+        private String note;
+        private String officerType;
+        private String officerName;
+        private String officerDirectorate;
+        private LocalDateTime created;
     }
 
 }

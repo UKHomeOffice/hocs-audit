@@ -228,6 +228,45 @@ public class InfoClientTest {
         verifyNoMoreInteractions(restHelper);
     }
 
+    @Test
+    public void getCaseTypeActions_shouldReturnListOfActions() {
+        CaseTypeActionDto caseTypeAction1 = new CaseTypeActionDto(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "CT1",
+                "ACTION_1",
+                "ACTION_LABEL_1",
+                1,
+                10,
+                true,
+                "{}"
+        );
+        CaseTypeActionDto caseTypeAction2 = new CaseTypeActionDto(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "CT2",
+                "ACTION_2",
+                "ACTION_LABEL_2",
+                1,
+                20,
+                true,
+                "{}"
+        );
+
+        List<CaseTypeActionDto> caseTypeActionsList = new LinkedList<>();
+        caseTypeActionsList.add(caseTypeAction1);
+        caseTypeActionsList.add(caseTypeAction2);
+        when(restHelper.get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class))).thenReturn(caseTypeActionsList);
+
+
+        List<CaseTypeActionDto> results = infoClient.getCaseTypeActions();
+
+        assertThat(results).isEqualTo(caseTypeActionsList);
+        verify(restHelper).get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class));
+
+        verifyNoMoreInteractions(restHelper);
+    }
+
 
     private List<ExportViewDto> buildExportViews() {
         return new ArrayList<>(Arrays.asList(buildExportView1(), buildExportView2()));
