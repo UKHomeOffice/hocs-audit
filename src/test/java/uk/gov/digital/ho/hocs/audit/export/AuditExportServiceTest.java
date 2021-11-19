@@ -280,7 +280,7 @@ public class AuditExportServiceTest {
     @Test
     public void caseCorrespondentsExportShouldReturnRowHeaders() throws IOException {
         String[] expectedHeaders = new String[]{"timestamp", "event" ,"userId","caseUuid",
-                "correspondentUuid", "fullname", "address1", "address2",
+                "correspondentUuid", "fullname", "organisation", "address1", "address2",
                 "address3", "country", "postcode", "telephone", "email",
                 "reference", "externalKey"};
 
@@ -344,6 +344,28 @@ public class AuditExportServiceTest {
         assertThat(row.get("created")).isNotEmpty();
         assertThat(row.get("type")).isEqualTo("TEST_EXTENSION_TYPE_2");
         assertThat(row.get("note")).isEqualTo("TEST Extension applied. Reason: A second reason");
+    }
+
+    @Test
+    public void appealsExtractShouldReturnCSVData() throws IOException {
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(getAppealsDataAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, caseType, ExportType.APPEALS, false, false, null, null);
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+        assertThat(rows.size()).isEqualTo(1);
+
+        CSVRecord row = rows.stream().filter((r) -> r.get("type").equals("0fd81db1-71d7-4471-826c-d3d46b0bb2d6")).collect(Collectors.toList()).get(0);
+        assertThat(row.get("status")).isEqualTo("Pending");
+        assertThat(row.get("dateSentRMS")).isEqualTo("");
+        assertThat(row.get("outcome")).isEqualTo("");
+        assertThat(row.get("complex")).isEqualTo("");
+        assertThat(row.get("note")).isEqualTo("");
+        assertThat(row.get("officerType")).isEqualTo("");
+        assertThat(row.get("officerName")).isEqualTo("");
+        assertThat(row.get("officerDirectorate")).isEqualTo("");
+        assertThat(row.get("created")).isEqualTo("2021-09-07T10:26:27.538487");
     }
 
     @Test
@@ -605,14 +627,14 @@ public class AuditExportServiceTest {
 
     private Set<AuditData> getCorrespondentDataAuditData() {
         return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"organisation\": \"An Organisation\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
     private Set<AuditData> getExtensionDataAuditData() {
         return new HashSet<>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A reason\", \"type\": \"TEST_EXTENSION\", \"caseId\": \"90f22002-f6b2-41fe-8ed1-0a4b58b40ef1\", \"created\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "a294d133-629c-49ee-a2af-51b4c851eb3c"));
-            add(new AuditData(UUID.fromString("e7cfa12e-5503-4663-853e-3ed6fbb1dc12"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A second reason\", \"type\": \"TEST_EXTENSION_TYPE_2\", \"caseId\": \"7ba51018-9d46-460c-ab0a-a6e9efb1a7fe\", \"created\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
+            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION\", \"caseId\": \"90f22002-f6b2-41fe-8ed1-0a4b58b40ef1\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "a294d133-629c-49ee-a2af-51b4c851eb3c"));
+            add(new AuditData(UUID.fromString("e7cfa12e-5503-4663-853e-3ed6fbb1dc12"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A second reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION_TYPE_2\", \"caseId\": \"7ba51018-9d46-460c-ab0a-a6e9efb1a7fe\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
         }};
     }
 
@@ -621,6 +643,21 @@ public class AuditExportServiceTest {
             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:29",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"64b4c266-7671-4049-882e-82b1269570c2\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
+        }};
+    }
+
+
+    private Set<AuditData> getAppealsDataAuditData() {
+        return new HashSet<>(){{
+            add(new AuditData(
+                    UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),
+                    UUID.randomUUID(),UUID.randomUUID().toString(),
+                    "a-service",
+                    "{\"note\": \"\", \"caseTypeActionUuid\": \"0fd81db1-71d7-4471-826c-d3d46b0bb2d6\", \"created\": \"2021-09-07T10:26:27.538487\", \"status\": \"Pending\", \"outcome\": \"\", \"complexCase\":\"\", \"officerType\": \"\", \"officerName\": \"\", \"officerDirectorate\": \"\" }",
+                    "an-env",
+                    LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter),
+                    "APPEAL_CREATED",
+                    "a294d133-629c-49ee-a2af-51b4c851eb3c"));
         }};
     }
 

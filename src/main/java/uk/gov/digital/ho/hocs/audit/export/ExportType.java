@@ -6,5 +6,6 @@ public enum ExportType {
     TOPICS,
     CORRESPONDENTS,
     EXTENSIONS,
-    ALLOCATIONS
+    ALLOCATIONS,
+    APPEALS;
 }
