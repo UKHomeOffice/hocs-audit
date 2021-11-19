@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.5.5'
+    id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
@@ -13,23 +13,19 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    springCloudVersion = "Hoxton.SR12"
-}
-
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-web:2.5.5') {
+    implementation('org.springframework.boot:spring-boot-starter-web:2.5.6') {
         exclude(module: 'spring-boot-starter-tomcat')
     }
 
-    implementation 'org.springframework.boot:spring-boot-starter-undertow:2.5.5'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-undertow:2.5.6'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.6'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.6'
     implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.4'
     implementation 'org.apache.commons:commons-csv:1.8'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
 
     // cannot be brought upto date, community version doesn't support Postgres 9.6
@@ -39,18 +35,18 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.22'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.6'
     annotationProcessor "org.springframework:spring-context-indexer:5.3.12"
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
-    testImplementation 'org.awaitility:awaitility:4.1.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
+    testImplementation 'org.awaitility:awaitility:4.1.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'
     testImplementation 'junit:junit:4.13.2'
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2020.0.4"
     }
 }
 
