@@ -43,6 +43,8 @@ public class ExportDataConverterFactory {
                 );
         uuidToName.putAll(caseworkClient.getAllActiveCorrespondents().stream()
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
+        uuidToName.putAll(infoClient.getCaseTypeActions().stream()
+                .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
         for (String listName : MPAM_CODE_MAPPING_LISTS) {
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
