@@ -364,7 +364,7 @@ spec:
                   key: plaintext
           resources:
             limits:
-              cpu: 1600m
+              cpu: 2000m
               memory: 768Mi
             requests:
               cpu: 350m
@@ -379,9 +379,9 @@ spec:
               httpHeaders:
                 - name: X-probe
                   value: kubelet
-            initialDelaySeconds: 20
-            periodSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 6
+            periodSeconds: 2
+            failureThreshold: 22
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
