@@ -17,7 +17,7 @@ fi
 if [[ ${KUBE_NAMESPACE} == *prod ]]
 then
     export MIN_REPLICAS="2"
-    export MAX_REPLICAS="4"
+    export MAX_REPLICAS="3"
 
     export REFRESH_CRON="30 5 * * *"
     export UPTIME_PERIOD="Mon-Sun 05:00-23:00 Europe/London"
