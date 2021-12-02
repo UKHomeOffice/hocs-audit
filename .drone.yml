@@ -44,7 +44,7 @@ steps:
   - name: sonar scanner
     image: quay.io/ukhomeofficedigital/sonar-scanner:v3.0.2
     depends_on:
-      - build project
+      - test project
 
   - name: build & push branch
     image: plugins/docker
