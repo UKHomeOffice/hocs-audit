@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
@@ -75,6 +75,8 @@ public class CustomExportService {
 
                 customExportDataConverter.initialiseAdapters();
 
+                AtomicBoolean connected = new AtomicBoolean(true);
+
                 retrieveAuditData(exportViewDto.getCode())
                         .parallel()
                         .map(data -> {
@@ -87,16 +89,17 @@ public class CustomExportService {
 
                             return converted;
                         })
+                        .takeWhile(c -> connected.get())
                         .forEachOrdered(converted -> {
                             try {
                                 printer.printRecord(converted);
                                 outputWriter.flush();
                             } catch (IOException e) {
+                                connected.set(false);
                                 log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                             }
                         });
-            }
-
+                }
             log.info("Export Custom Report '{}' to CSV Complete, event {}", exportViewDto.getCode(), value(EVENT, CSV_EXPORT_COMPETE));
         }
     }
