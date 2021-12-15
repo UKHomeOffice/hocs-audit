@@ -45,7 +45,7 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
-    implementation 'org.apache.commons:commons-csv:1.8'
+    implementation 'org.apache.commons:commons-csv:1.9.0'
     implementation 'com.google.code.gson:gson:2.8.9'
 
     // cannot be brought upto date, community version doesn't support Postgres 9.6
@@ -65,7 +65,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2020.0.4"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2021.0.0"
     }
 }
 
