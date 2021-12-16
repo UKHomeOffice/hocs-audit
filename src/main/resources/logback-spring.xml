@@ -12,30 +12,27 @@
                 <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
             </layout>
         </appender>
+        <logger name="uk.gov" additivity="false" level="DEBUG">
+            <appender-ref ref="consoleAppender"/>
+        </logger>
     </springProfile>
 
     <springProfile name="!development">
         <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <includeCallerInfo>true</includeCallerInfo>
                 <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
                     <pattern>
                         {
-                        "timestamp" : "%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSXXX\", UTC}",
-                        "thread"    : "%thread",
-                        "service"   : " ${appName}",
-                        "logger"    : "%logger{50}",
                         "exception" : "%exception"
                         }
                     </pattern>
                 </provider>
             </encoder>
         </appender>
+        <logger name="uk.gov" additivity="false" level="INFO">
+            <appender-ref ref="consoleAppender"/>
+        </logger>
     </springProfile>
-
-    <logger name="uk.gov" additivity="false" level="INFO">
-        <appender-ref ref="consoleAppender"/>
-    </logger>
 
     <logger name="com.amazonaws" additivity="false" level="WARN">
         <appender-ref ref="consoleAppender"/>
