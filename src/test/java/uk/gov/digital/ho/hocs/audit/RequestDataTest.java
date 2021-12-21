@@ -2,9 +2,9 @@ package uk.gov.digital.ho.hocs.audit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.digital.ho.hocs.audit.application.RequestData;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequestDataTest
 {
     @Mock

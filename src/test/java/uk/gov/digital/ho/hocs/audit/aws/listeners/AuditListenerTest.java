@@ -1,12 +1,13 @@
 package uk.gov.digital.ho.hocs.audit.aws.listeners;
 
 import com.google.gson.Gson;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.digital.ho.hocs.audit.AuditDataService;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
@@ -18,7 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class AuditListenerTest {
 
@@ -48,19 +49,23 @@ public class AuditListenerTest {
         verifyNoMoreInteractions(auditDataService);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void callsAuditServiceWithNullCreateCaseMessage() {
         AuditListener auditListener = new AuditListener(gson, auditDataService);
 
-        auditListener.onAuditEvent(null);
+        Assertions.assertThrows(NullPointerException.class,() ->
+            auditListener.onAuditEvent(null)
+        );
     }
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void callsAuditServiceWithInvalidCreateCaseMessage() {
         String incorrectMessage = "{test:1}";
         AuditListener auditListener = new AuditListener(gson, new AuditDataService(auditRepository));
 
-        auditListener.onAuditEvent(incorrectMessage);
+        Assertions.assertThrows(EntityCreationException.class,() ->
+                auditListener.onAuditEvent(incorrectMessage)
+        );
     }
 
 }

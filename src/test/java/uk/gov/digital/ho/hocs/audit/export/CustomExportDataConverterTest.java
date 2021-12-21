@@ -2,9 +2,9 @@ package uk.gov.digital.ho.hocs.audit.export;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CustomExportDataConverterTest {
     private static final String PERMISSION_1 = "permission_name1";
     private static final String VIEW_CODE_1 = "view_name1";

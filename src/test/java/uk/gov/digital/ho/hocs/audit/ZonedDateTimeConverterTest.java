@@ -2,8 +2,8 @@ package uk.gov.digital.ho.hocs.audit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 
 import java.time.LocalDateTime;
@@ -12,7 +12,7 @@ import java.time.zone.ZoneRulesException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class ZonedDateTimeConverterTest {
 
     @Test

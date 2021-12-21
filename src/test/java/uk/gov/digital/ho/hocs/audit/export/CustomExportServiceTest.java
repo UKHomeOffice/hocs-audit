@@ -1,11 +1,12 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
 import uk.gov.digital.ho.hocs.audit.application.RequestData;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CustomExportServiceTest {
 
     private static final String PERMISSION_1 = "permission_name1";
@@ -63,15 +64,16 @@ public class CustomExportServiceTest {
         customExportService = new CustomExportService(auditRepository, infoClient, customExportDataConverter, passThroughHeaderConverter, requestData);
     }
 
-    @Test(expected = EntityPermissionException.class)
-    public void customExport_NoPermission() throws IOException {
+    @Test
+    public void customExport_NoPermission() {
         ExportViewDto exportViewDto = buildExportView1();
         when(infoClient.getExportView(VIEW_CODE_1)).thenReturn(exportViewDto);
         when(requestData.roles()).thenReturn(new ArrayList<>());
 
-        customExportService.customExport(servletResponse, VIEW_CODE_1, true);
+        Assertions.assertThrows(EntityPermissionException.class,() ->
+            customExportService.customExport(servletResponse, VIEW_CODE_1, true)
+        );
 
-        checkNoMoreInteractions();
     }
 
     @Test()

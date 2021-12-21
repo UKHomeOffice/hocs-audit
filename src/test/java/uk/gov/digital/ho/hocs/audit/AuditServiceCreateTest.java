@@ -1,10 +1,11 @@
 package uk.gov.digital.ho.hocs.audit;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AuditServiceCreateTest {
     
     private String correlationID = "correlationIDTest";
@@ -50,15 +51,18 @@ public class AuditServiceCreateTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
-    @Test(expected = EntityCreationException.class)
-    public void shouldNotCreateAuditWhenCorrelationnIDIsNullException() {
-        auditService.createAudit(null,
-                raisingService,
-                auditPayload,
-                namespace,
-                dateTime,
-                auditType,
-                userID);
+    @Test
+    public void shouldNotCreateAuditWhenCorrelationIDIsNullException() {
+
+        Assertions.assertThrows(EntityCreationException.class,() ->
+            auditService.createAudit(null,
+                    raisingService,
+                    auditPayload,
+                    namespace,
+                    dateTime,
+                    auditType,
+                    userID)
+        );
     }
 
     @Test
@@ -77,15 +81,17 @@ public class AuditServiceCreateTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void shouldNotCreateAuditWhenRaisingServiceIsNullException() {
-        auditService.createAudit(correlationID,
-                null,
-                auditPayload,
-                namespace,
-                dateTime,
-                auditType,
-                userID);
+        Assertions.assertThrows(EntityCreationException.class,() ->
+            auditService.createAudit(correlationID,
+                    null,
+                    auditPayload,
+                    namespace,
+                    dateTime,
+                    auditType,
+                    userID)
+        );
     }
 
     @Test
@@ -105,15 +111,17 @@ public class AuditServiceCreateTest {
     }
 
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void shouldNotCreateAuditWhenNamespaceIsNullException() {
-        auditService.createAudit(correlationID,
-                raisingService,
-                auditPayload,
-                null,
-                dateTime,
-                auditType,
-                userID);
+        Assertions.assertThrows(EntityCreationException.class,() ->
+            auditService.createAudit(correlationID,
+                    raisingService,
+                    auditPayload,
+                    null,
+                    dateTime,
+                    auditType,
+                    userID)
+        );
     }
 
     @Test
@@ -132,15 +140,17 @@ public class AuditServiceCreateTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void shouldNotCreateAuditWhenTimestampIsNullException() {
-        auditService.createAudit(correlationID,
-                raisingService,
-                auditPayload,
-                namespace,
-                null,
-                auditType,
-                userID);
+        Assertions.assertThrows(EntityCreationException.class,() ->
+            auditService.createAudit(correlationID,
+                    raisingService,
+                    auditPayload,
+                    namespace,
+                    null,
+                    auditType,
+                    userID)
+        );
     }
 
     @Test
@@ -159,15 +169,17 @@ public class AuditServiceCreateTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void shouldNotCreateAuditWhenTypeIsNullException() {
-        auditService.createAudit(correlationID,
-                raisingService,
-                auditPayload,
-                namespace,
-                dateTime,
-                null,
-                userID);
+        Assertions.assertThrows(EntityCreationException.class,() ->
+            auditService.createAudit(correlationID,
+                    raisingService,
+                    auditPayload,
+                    namespace,
+                    dateTime,
+                    null,
+                    userID)
+        );
     }
 
     @Test
@@ -187,16 +199,18 @@ public class AuditServiceCreateTest {
         verifyNoMoreInteractions(auditRepository);
     }
 
-    @Test(expected = EntityCreationException.class)
+    @Test
     public void shouldNotCreateAuditWhenUserIDIsNullException() {
 
+        Assertions.assertThrows(EntityCreationException.class,() ->
         auditService.createAudit(correlationID,
                 raisingService,
                 auditPayload,
                 namespace,
                 dateTime,
                 auditType,
-                null);
+                null)
+        );
     }
 
     @Test

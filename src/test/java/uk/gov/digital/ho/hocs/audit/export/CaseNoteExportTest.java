@@ -5,9 +5,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
@@ -29,7 +29,7 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseNoteExportTest {
 
     private ExportService exportService;

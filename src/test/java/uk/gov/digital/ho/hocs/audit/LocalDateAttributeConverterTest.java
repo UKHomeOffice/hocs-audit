@@ -2,8 +2,8 @@ package uk.gov.digital.ho.hocs.audit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateAttributeConverter;
 
 import java.sql.Date;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class LocalDateAttributeConverterTest {
 
     private LocalDateAttributeConverter converter;
