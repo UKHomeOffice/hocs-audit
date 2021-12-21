@@ -5,7 +5,7 @@ name: build
 
 services:
   - name: postgres
-    image: quay.io/ukhomeofficedigital/postgres-alpine
+    image: postgres:alpine
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: dev
