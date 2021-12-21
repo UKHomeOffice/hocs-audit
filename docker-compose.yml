@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   postgres:
-    image: postgres:9.6
+    image: postgres:alpine
     restart: always
     ports:
       - 5432:5432
