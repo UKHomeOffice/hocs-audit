@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -16,7 +16,6 @@ import java.util.UUID;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.doesNotHave;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,7 +46,7 @@ public class AuditResourceTest {
     private int page = 5;
     private int limit = 10;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         auditResource = new AuditDataResource(auditService);
     }

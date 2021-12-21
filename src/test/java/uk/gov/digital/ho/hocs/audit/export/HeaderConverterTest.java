@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -18,7 +18,7 @@ public class HeaderConverterTest {
 
     private HeaderConverter converter;
 
-    @Before
+    @BeforeEach
     public void before() {
         converter = new HeaderConverter();
     }

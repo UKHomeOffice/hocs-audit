@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.aws.listeners;
 
 import com.google.gson.Gson;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;

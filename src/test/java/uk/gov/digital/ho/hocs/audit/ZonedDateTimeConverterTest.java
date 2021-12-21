@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
@@ -62,9 +63,11 @@ public class ZonedDateTimeConverterTest {
         assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldThrowExceptionIfTimestampFormatInvalid() {
-        new ZonedDateTimeConverter("INVALID", null);
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+            new ZonedDateTimeConverter("INVALID", null)
+        );
     }
 
     @Test
@@ -115,9 +118,11 @@ public class ZonedDateTimeConverterTest {
         assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
     }
 
-    @Test(expected = ZoneRulesException.class)
+    @Test
     public void shouldThrowExceptionIfZoneIdInvalid() {
-        new ZonedDateTimeConverter(null, "INVALID");
+        Assertions.assertThrows(ZoneRulesException.class, () ->
+            new ZonedDateTimeConverter(null, "INVALID")
+        );
     }
 
 }

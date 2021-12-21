@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateAttributeConverter;
@@ -16,7 +16,7 @@ public class LocalDateAttributeConverterTest {
 
     private LocalDateAttributeConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.converter = new LocalDateAttributeConverter();
     }

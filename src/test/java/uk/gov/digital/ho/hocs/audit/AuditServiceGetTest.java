@@ -1,8 +1,7 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -32,7 +31,7 @@ public class AuditServiceGetTest {
     @Mock
     private AuditDataService auditService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.auditService = new AuditDataService(auditRepository);
     }

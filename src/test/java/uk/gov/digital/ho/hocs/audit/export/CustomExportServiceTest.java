@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -51,7 +51,7 @@ public class CustomExportServiceTest {
 
     private CustomExportService customExportService;
 
-    @Before
+    @BeforeEach
     public void before() {
         when(passThroughHeaderConverter.substitute(anyList())).thenAnswer(new Answer<List<String>>() {
             @Override

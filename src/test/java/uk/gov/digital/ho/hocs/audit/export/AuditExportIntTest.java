@@ -2,8 +2,8 @@ package uk.gov.digital.ho.hocs.audit.export;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +58,7 @@ public class AuditExportIntTest {
     @LocalServerPort
     private int port;
 
-    @Before
+    @BeforeEach
     public void setup() {
         headers = new HttpHeaders();
         mockInfoService = buildMockService();

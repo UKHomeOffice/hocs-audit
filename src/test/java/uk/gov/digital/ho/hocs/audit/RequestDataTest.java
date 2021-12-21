@@ -1,7 +1,7 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -23,7 +23,7 @@ public class RequestDataTest
 
     private RequestData requestData;
 
-    @Before
+    @BeforeEach
     public void setup() {
         requestData = new RequestData();
     }

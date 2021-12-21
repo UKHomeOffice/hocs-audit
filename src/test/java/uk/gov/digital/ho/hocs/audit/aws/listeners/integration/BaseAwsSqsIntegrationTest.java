@@ -2,8 +2,8 @@ package uk.gov.digital.ho.hocs.audit.aws.listeners.integration;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.model.PurgeQueueRequest;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,12 +22,12 @@ public class BaseAwsSqsIntegrationTest {
     @Value("${aws.sqs.audit.url}")
     public String auditQueue;
 
-    @Before
+    @BeforeEach
     public void setup() {
         amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
     }
