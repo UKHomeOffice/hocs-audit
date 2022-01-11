@@ -19,6 +19,7 @@ import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -370,6 +371,39 @@ public class AuditExportServiceTest {
     }
 
     @Test
+    public void userWithTeamsExportShouldReturnCSV() throws IOException {
+        String[] expectedHeaders = new String[]{"userUUID", "teamsUUID"};
+        UUID team1UUID = UUID.randomUUID();
+        UUID team2UUID = UUID.randomUUID();
+        ArrayList<UUID> user1Teams = new ArrayList<>();
+        ArrayList<UUID> user2Teams = new ArrayList<>();
+        user1Teams.add(team1UUID);
+        user2Teams.add(team2UUID);
+        user2Teams.add(team1UUID);
+
+        LinkedHashSet<UserWithTeamsDto> teams = new LinkedHashSet<UserWithTeamsDto>(){{
+            add(new UserWithTeamsDto(UUID.randomUUID().toString(), "User 1", "User1@email.com", "John", "Doe",
+                    user1Teams, true
+            ));
+            add(new UserWithTeamsDto(UUID.randomUUID().toString(), "User 2", "User2@email.com", "Jane", "Doe",
+                    user2Teams, true));
+        }};
+
+        when(infoClient.getUsersWithTeams()).thenReturn(teams);
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.staticTeamExport(outputStream, false);
+
+        String csvBody = outputStream.toString();
+        Set<String> headers = getCSVHeaders(csvBody).keySet();
+        List<CSVRecord> rows = getCSVRows(csvBody);
+        assertThat(rows.size()).isEqualTo(2);
+        assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
+        assertThat(rows.get(0).get("teamsUUID")).isEqualTo(team1UUID.toString());
+        assertThat(rows.get(1).get("teamsUUID")).isEqualTo(team2UUID + ", " + team1UUID);
+    }
+
+    @Test
     public void staticUnitsForTeamsExportShouldReturnCSV() throws IOException {
         String[] expectedHeaders = new String[]{"unitUUID", "unitName", "teamUUID", "teamName"};
         String unitUUID = UUID.randomUUID().toString();
@@ -446,6 +480,11 @@ public class AuditExportServiceTest {
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         exportService.caseDataExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", "MIN", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
+    }
+
+    @Test
+    public void verifyHeadersAreSubstitutedWithUserWithTeamsExtract() throws IOException {
+
     }
 
     @Test

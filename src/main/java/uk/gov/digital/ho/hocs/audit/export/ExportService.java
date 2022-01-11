@@ -17,6 +17,7 @@ import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -490,6 +492,45 @@ public class ExportService {
                 }
             });
             log.info("Export STATIC USER LIST to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+    void userTeamsExport(OutputStream output, boolean convertHeader) throws IOException{
+        log.info("Exporting USER_TEAMS_DATA to CSV", value(EVENT, CSV_EXPORT_START));
+        OutputStream buffer = new BufferedOutputStream(output);
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        List<String> headers = Stream.of("User UUID", "Teams UUID").collect(Collectors.toList());
+
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
+        Set<UserWithTeamsDto> users = infoClient.getUsersWithTeams();
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[headers.size()])))) {
+            users.forEach((user) -> {
+                try {
+                    List<UUID> userTeams = user.getTeamUUIDs();
+                    final AtomicReference<String> teamList = new AtomicReference<>();
+                    teamList.compareAndSet(teamList.get(), "");
+                    userTeams.forEach((team) -> {
+                        String prevValue = teamList.get();
+                        String newValue = prevValue;
+                        if (prevValue.equals("")){
+                            newValue = prevValue + team;
+                        } else {
+                            newValue = prevValue + ", " + team;
+                        }
+                        teamList.compareAndSet(prevValue, newValue);
+                    });
+                    printer.printRecord(user.getId(), teamList.get());
+                    outputWriter.flush();
+                } catch (IOException exception) {
+                    log.error("Unable to export users and teams");
+                }
+            });
+        } catch (IOException exception) {
+            log.error("Unable to export users and teams");
         }
     }
 
