@@ -50,7 +50,6 @@ public class ExportService {
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
-    private final AtomicReference<String> teamList = new AtomicReference<>();
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
@@ -508,18 +507,16 @@ public class ExportService {
             users.forEach((user) -> {
                 try {
                     List<UUID> userTeams = user.getTeamUUIDs();
-                    teamList.compareAndSet(teamList.get(), "");
-                    userTeams.forEach((team) -> {
-                        String prevValue = teamList.get();
-                        String newValue;
-                        if (prevValue.equals("")){
-                            newValue = prevValue + team;
+                    StringBuilder teamUUIDs = new StringBuilder();
+
+                    for (UUID team : userTeams){
+                        if (teamUUIDs.toString().equals("")){
+                            teamUUIDs.append(team);
                         } else {
-                            newValue = prevValue + ", " + team;
+                            teamUUIDs.append(", ").append(team);
                         }
-                        teamList.compareAndSet(prevValue, newValue);
-                    });
-                    printer.printRecord(user.getId(), teamList.get());
+                    }
+                    printer.printRecord(user.getId(), teamUUIDs.toString());
                     outputWriter.flush();
                 } catch (IOException exception) {
                     log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
