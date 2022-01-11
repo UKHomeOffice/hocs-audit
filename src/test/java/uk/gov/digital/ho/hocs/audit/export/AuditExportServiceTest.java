@@ -437,7 +437,7 @@ public class AuditExportServiceTest {
 
     @Test
     public void userWithTeamsExportShouldReturnCSV() throws IOException {
-        String[] expectedHeaders = new String[]{"userUUID", "teamsUUID"};
+        String[] expectedHeaders = new String[]{"userUUID", "teamsUUIDs"};
         UUID team1UUID = UUID.randomUUID();
         UUID team2UUID = UUID.randomUUID();
         ArrayList<UUID> user1Teams = new ArrayList<>();
@@ -457,15 +457,15 @@ public class AuditExportServiceTest {
         when(infoClient.getUsersWithTeams()).thenReturn(teams);
 
         OutputStream outputStream = new ByteArrayOutputStream();
-        exportService.staticTeamExport(outputStream, false);
+        exportService.userWithTeamsExport(outputStream);
 
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
         List<CSVRecord> rows = getCSVRows(csvBody);
         assertThat(rows.size()).isEqualTo(2);
         assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
-        assertThat(rows.get(0).get("teamsUUID")).isEqualTo(team1UUID.toString());
-        assertThat(rows.get(1).get("teamsUUID")).isEqualTo(team2UUID + ", " + team1UUID);
+        assertThat(rows.get(0).get("teamsUUIDs")).isEqualTo(team1UUID.toString());
+        assertThat(rows.get(1).get("teamsUUIDs")).isEqualTo(team2UUID + ", " + team1UUID);
     }
 
     @Test
