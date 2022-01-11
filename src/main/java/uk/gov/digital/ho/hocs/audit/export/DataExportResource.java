@@ -8,7 +8,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
 
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Slf4j
@@ -113,13 +112,12 @@ public class DataExportResource {
     }
 
     @GetMapping("/export/users/teams")
-    public void getUsersWithTeams(HttpServletResponse response,
-                         @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
+    public void getUsersWithTeams(HttpServletResponse response) {
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=" + getFilename("users_teams"));
-            exportService.userTeamsExport(response.getOutputStream(), convertHeader);
+            exportService.userWithTeamsExport(response.getOutputStream());
             response.setStatus(200);
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static team list for reason {}", ex.toString());

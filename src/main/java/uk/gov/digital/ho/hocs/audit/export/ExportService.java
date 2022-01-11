@@ -50,6 +50,7 @@ public class ExportService {
     public static final String[] TOPIC_EVENTS = {"CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED"};
     public static final String[] CORRESPONDENT_EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
+    private final AtomicReference<String> teamList = new AtomicReference<>();
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
@@ -495,7 +496,7 @@ public class ExportService {
         }
     }
 
-    void userTeamsExport(OutputStream output, boolean convertHeader) throws IOException{
+    void userWithTeamsExport(OutputStream output) throws IOException{
         log.info("Exporting USER_TEAMS_DATA to CSV", value(EVENT, CSV_EXPORT_START));
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
@@ -507,7 +508,6 @@ public class ExportService {
             users.forEach((user) -> {
                 try {
                     List<UUID> userTeams = user.getTeamUUIDs();
-                    final AtomicReference<String> teamList = new AtomicReference<>();
                     teamList.compareAndSet(teamList.get(), "");
                     userTeams.forEach((team) -> {
                         String prevValue = teamList.get();
