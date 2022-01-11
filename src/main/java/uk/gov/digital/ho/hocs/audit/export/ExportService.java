@@ -501,13 +501,9 @@ public class ExportService {
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
         List<String> headers = Stream.of("User UUID", "Teams UUID").collect(Collectors.toList());
 
-        List<String> substitutedHeaders = headers;
-        if (convertHeader) {
-            substitutedHeaders = headerConverter.substitute(headers);
-        }
         Set<UserWithTeamsDto> users = infoClient.getUsersWithTeams();
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[headers.size()])))) {
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
             users.forEach((user) -> {
                 try {
                     List<UUID> userTeams = user.getTeamUUIDs();
@@ -515,7 +511,7 @@ public class ExportService {
                     teamList.compareAndSet(teamList.get(), "");
                     userTeams.forEach((team) -> {
                         String prevValue = teamList.get();
-                        String newValue = prevValue;
+                        String newValue;
                         if (prevValue.equals("")){
                             newValue = prevValue + team;
                         } else {
@@ -526,11 +522,11 @@ public class ExportService {
                     printer.printRecord(user.getId(), teamList.get());
                     outputWriter.flush();
                 } catch (IOException exception) {
-                    log.error("Unable to export users and teams");
+                    log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
             });
         } catch (IOException exception) {
-            log.error("Unable to export users and teams");
+            log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
         }
     }
 

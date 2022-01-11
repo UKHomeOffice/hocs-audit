@@ -483,11 +483,6 @@ public class AuditExportServiceTest {
     }
 
     @Test
-    public void verifyHeadersAreSubstitutedWithUserWithTeamsExtract() throws IOException {
-
-    }
-
-    @Test
     public void verifyHeadersAreSubstitutedWithAllocationsExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
