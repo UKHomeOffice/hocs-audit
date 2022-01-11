@@ -152,4 +152,11 @@ public class InfoClient {
         return entities;
     }
 
+    @Cacheable(value = "getCastTypeActions", unless = "#result == null")
+    public List<CaseTypeActionDto> getCaseTypeActions() {
+        List<CaseTypeActionDto> caseTypeActionsList = restHelper.get(serviceBaseURL, "/caseType/actions", new ParameterizedTypeReference<>(){});
+        log.info(" Got all {} case type actions", caseTypeActionsList.size());
+        return caseTypeActionsList;
+    }
+
 }

@@ -5,37 +5,50 @@ name: build
 
 services:
   - name: postgres
-    image: quay.io/ukhomeofficedigital/postgres-alpine
+    image: postgres:12-alpine
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: dev
 
+  - name: localstack
+    image: quay.io/ukhomeofficedigital/localstack
+    environment:
+      SERVICES: sqs
+      DEFAULT_REGION: eu-west-2
+
 steps:
+  - name: setup localstack
+    image: quay.io/ukhomeofficedigital/localstack # need curl which is not in alpine
+    commands:
+      - ./config/localstack/setup-queues.sh
+    depends_on:
+      - clone
+
   - name: build project
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     commands:
       - ./gradlew assemble --no-daemon
+    depends_on:
+      - setup localstack
 
   - name: test project
     image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
     environment:
       DB_HOST: "postgres"
+      LOCALSTACK_HOST: "localstack"
     commands:
-      - SPRING_PROFILES_ACTIVE='development, local, test'
-      - SERVER_PORT='8080'
-      - AUDIT_QUEUE_NAME='audit-queue'
-      - AUDIT_QUEUE_DLQ_NAME='audit-queue-dlq'
-      - AWS_LOCAL_HOST="localstack"
       - ./gradlew check --no-daemon
     depends_on:
       - build project
 
   - name: sonar scanner
-    image: quay.io/ukhomeofficedigital/sonar-scanner:v3.0.2
+    image: quay.io/ukhomeofficedigital/sonar-scanner:v4.6
+    commands:
+      - sonar-scanner -Dsonar.projectVersion="$(git rev-parse --abbrev-ref HEAD)"
     depends_on:
-      - build project
+      - test project
 
-  - name: build & push
+  - name: build & push branch
     image: plugins/docker
     settings:
       registry: quay.io
@@ -48,15 +61,22 @@ steps:
       DOCKER_PASSWORD:
         from_secret: QUAY_ROBOT_TOKEN
       DOCKER_USERNAME: ukhomeofficedigital+hocs_quay_robot
+    when:
+      branch:
+        exclude:
+          - main
+          - "dependabot*"
     depends_on:
       - test project
 
-  - name: build & push latest
+  - name: build & push main
     image: plugins/docker
     settings:
       registry: quay.io
       repo: quay.io/ukhomeofficedigital/hocs-audit
       tags:
+        - build_${DRONE_BUILD_NUMBER}
+        - ${DRONE_COMMIT_SHA}
         - latest
     environment:
       DOCKER_PASSWORD:
@@ -92,19 +112,10 @@ environment:
   DOCKER_HOST: tcp://docker:2375
 
 steps:
-  - name: clone kube repo
-    image: plugins/git
-    commands:
-      - git clone https://github.com/UKHomeOffice/kube-hocs-audit.git
-    when:
-      event:
-        - push
-        - promote
-
   - name: deploy to cs-dev
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: cs-dev
@@ -116,13 +127,11 @@ steps:
         - main
       event:
         - push
-    depends_on:
-      - clone kube repo
 
   - name: deploy to wcs-dev
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: wcs-dev
@@ -134,8 +143,6 @@ steps:
         - main
       event:
         - push
-    depends_on:
-      - clone kube repo
 
   - name: wait for docker
     image: docker
@@ -148,7 +155,7 @@ steps:
         - release
 
   - name: generate & tag build
-    image: quay.io/ukhomeofficedigital/hocs-version-bot:latest
+    image: quay.io/ukhomeofficedigital/hocs-version-bot
     commands:
       - >
         /app/hocs-deploy
@@ -179,11 +186,11 @@ steps:
         - release
 
   - name: deploy to cs-qa
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
       - source version.txt
       - echo $VERSION
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: cs-qa
@@ -195,15 +202,14 @@ steps:
       target:
         - release
     depends_on:
-      - clone kube repo
       - generate & tag build
 
   - name: deploy to wcs-qa
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
       - source version.txt
       - echo $VERSION
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: wcs-qa
@@ -215,13 +221,12 @@ steps:
       target:
         - release
     depends_on:
-      - clone kube repo
       - generate & tag build
 
   - name: deploy to not prod
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
@@ -234,13 +239,11 @@ steps:
         exclude:
           - release
           - "*-prod"
-    depends_on:
-      - clone kube repo
 
   - name: deploy to prod
-    image: quay.io/ukhomeofficedigital/kd:v1.16.0
+    image: quay.io/ukhomeofficedigital/kd
     commands:
-      - cd kube-hocs-audit
+      - cd kube
       - ./deploy.sh
     environment:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
@@ -252,5 +255,3 @@ steps:
       target:
         include:
           - "*-prod"
-    depends_on:
-      - clone kube repo

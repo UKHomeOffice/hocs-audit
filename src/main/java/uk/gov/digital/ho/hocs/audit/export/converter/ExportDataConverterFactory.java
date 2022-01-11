@@ -10,6 +10,7 @@ import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,14 +37,18 @@ public class ExportDataConverterFactory {
                 .collect(Collectors.toMap(team -> team.getUuid().toString(), TeamDto::getDisplayName)));
         uuidToName.putAll(infoClient.getUnits().stream()
                 .collect(Collectors.toMap(UnitDto::getUuid, UnitDto::getDisplayName)));
-        uuidToName.putAll(caseworkClient.getAllCaseTopics().stream()
-                .collect(Collectors.toMap(topic -> topic.getUuid().toString(), GetTopicResponse::getTopicText)));
+        caseworkClient.getAllCaseTopics()
+                .forEach(
+                        topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText())
+                );
         uuidToName.putAll(caseworkClient.getAllActiveCorrespondents().stream()
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
+        uuidToName.putAll(infoClient.getCaseTypeActions().stream()
+                .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
         for (String listName : MPAM_CODE_MAPPING_LISTS) {
-            mpamCodeToName.putAll(infoClient.getEntitiesForList(listName).stream()
-                    .collect(Collectors.toMap(EntityDto::getSimpleName, entity -> entity.getData().getTitle())));
+            Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
+            entities.forEach(e -> mpamCodeToName.put(e.getSimpleName(), e.getData().getTitle()));
         }
 
         return new ExportDataConverter(uuidToName, mpamCodeToName, caseworkClient);

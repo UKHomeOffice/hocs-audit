@@ -1,10 +1,8 @@
 package uk.gov.digital.ho.hocs.audit.auditdetails.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,32 +11,31 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreateAuditDto {
 
-    @JsonProperty(value= "correlation_id", required = true)
+    @SerializedName("correlation_id")
     private String correlationID;
 
-    @JsonProperty(value= "caseUUID")
+    @SerializedName("caseUUID")
     private UUID caseUUID;
 
-    @JsonProperty(value= "stageUUID")
+    @SerializedName(value= "stageUUID")
     private UUID stageUUID;
 
-    @JsonProperty(value= "raising_service", required = true)
+    @SerializedName(value= "raising_service")
     private String raisingService;
 
-    @JsonProperty(value= "audit_payload")
+    @SerializedName(value= "audit_payload")
     private String auditPayload;
 
-    @JsonProperty(value= "namespace", required = true)
+    @SerializedName(value= "namespace")
     private String namespace;
 
-    @JsonProperty(value="audit_timestamp", required = true)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @SerializedName(value="audit_timestamp")
     private LocalDateTime auditTimestamp;
 
-    @JsonProperty(value= "type", required = true)
+    @SerializedName(value= "type")
     private String type;
 
-    @JsonProperty(value= "user_id", required = true)
+    @SerializedName(value= "user_id")
     private String userID;
 
     public CreateAuditDto(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){

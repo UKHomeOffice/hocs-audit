@@ -137,6 +137,9 @@ public interface AuditPayload {
         @JsonProperty("fullname")
         private String fullname;
 
+        @JsonProperty("organisation")
+        private String organisation;
+
         @JsonProperty("address")
         private AddressDto address;
 
@@ -152,6 +155,40 @@ public interface AuditPayload {
         @JsonProperty("externalKey")
         private String externalKey;
 
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Extension {
+
+        @JsonProperty("caseId")
+        private UUID caseId;
+
+        @JsonProperty("createTimestamp")
+        private LocalDateTime created;
+
+        @JsonProperty("caseTypeActionUuid")
+        private String type;
+
+        @JsonProperty("note")
+        private String note;
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Appeal {
+
+        @JsonProperty("caseTypeActionUuid")
+        private UUID type;
+        private String status;
+        private LocalDate dateSentRMS;
+        private String outcome;
+        private String complexCase;
+        private String note;
+        private String officerType;
+        private String officerName;
+        private String officerDirectorate;
+        private LocalDateTime created;
     }
 
 }
