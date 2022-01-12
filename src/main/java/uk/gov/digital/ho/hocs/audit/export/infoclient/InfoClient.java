@@ -8,6 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.export.RestHelper;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,6 +74,13 @@ public class InfoClient {
         });
         log.info("Got {} teams", teams.size(), value(EVENT, INFO_CLIENT_GET_TEAMS_SUCCESS));
         return teams;
+    }
+
+    public Set<UserWithTeamsDto> getUsersWithTeams() {
+        Set<UserWithTeamsDto> users = restHelper.get(serviceBaseURL, "/team/users", new ParameterizedTypeReference<>() {
+        });
+        log.info("Got {} users", users.size(), value(EVENT, INFO_CLIENT_GET_USERS_AND_TEAMS_SUCCESS));
+        return users;
     }
 
     public Set<TeamDto> getAllTeams() {

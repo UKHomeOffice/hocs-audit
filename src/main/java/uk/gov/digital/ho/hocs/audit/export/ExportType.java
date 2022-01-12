@@ -5,6 +5,7 @@ public enum ExportType {
     CASE_NOTES,
     TOPICS,
     CORRESPONDENTS,
+    USER_TEAMS,
     EXTENSIONS,
     ALLOCATIONS,
     APPEALS;

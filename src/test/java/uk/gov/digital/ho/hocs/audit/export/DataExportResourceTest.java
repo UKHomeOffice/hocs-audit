@@ -195,6 +195,41 @@ public class DataExportResourceTest {
     }
 
     @Test
+    public void getUsersWithTeams() throws IOException {
+
+        ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(servletOutputStream);
+
+        dataExportResource.getUsersWithTeams(response);
+
+        verify(response).setContentType("text/csv");
+        verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=users_teams-" + LocalDate.now().toString() + ".csv");
+        verify(response).setStatus(200);
+        verify(response).getOutputStream();
+        verify(exportService).userWithTeamsExport(servletOutputStream);
+        checkNoMoreInteractions();
+    }
+
+    @Test
+    public void getUsersWithTeams_OnException() throws IOException {
+
+        ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(servletOutputStream);
+        doThrow(new IllegalArgumentException("Dummy exception")).when(exportService).userWithTeamsExport(servletOutputStream);
+
+        dataExportResource.getUsersWithTeams(response);
+
+        verify(response).setContentType("text/csv");
+        verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=users_teams-" + LocalDate.now().toString() + ".csv");
+        verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        verify(response).getOutputStream();
+        verify(exportService).userWithTeamsExport(servletOutputStream);
+        checkNoMoreInteractions();
+    }
+
+    @Test
     public void getUnitsForTeams_OnException() throws IOException {
 
         ServletOutputStream servletOutputStream = mock(ServletOutputStream.class);
