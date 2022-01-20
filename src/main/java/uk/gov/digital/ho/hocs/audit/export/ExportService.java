@@ -555,7 +555,7 @@ public class ExportService {
                     List<String> teamNames = user.getTeamNames();
                     List<String> unitNames = user.getUnitNames();
                     if (teamNames.size()>0) {
-                        for (int i = 0; i <= teamNames.size(); i++) {
+                        for (int i = 0; i < teamNames.size(); i++) {
                             printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamNames.get(i), unitNames.get(i));
                             outputWriter.flush();
                         }
