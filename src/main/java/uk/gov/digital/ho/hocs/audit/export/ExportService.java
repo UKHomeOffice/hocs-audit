@@ -554,10 +554,11 @@ public class ExportService {
                 try {
                     List<String> teamNames = user.getTeamNames();
                     List<String> unitNames = user.getUnitNames();
-                    String teamNamesString = String.join(", ", teamNames);
-                    String unitNamesString = String.join(", ", unitNames);
-                    printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamNamesString, unitNamesString);
-                    outputWriter.flush();
+                    String teamNameToUse;
+                    for (int i = 0; i<= teamNames.size(); i++){
+                        printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamNames.get(i), unitNames.get(i));
+                        outputWriter.flush();
+                    }
                 } catch (IOException exception) {
                     log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
                 }
