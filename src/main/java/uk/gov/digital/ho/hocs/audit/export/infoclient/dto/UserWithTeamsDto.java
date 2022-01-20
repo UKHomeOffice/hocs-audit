@@ -19,10 +19,11 @@ public class UserWithTeamsDto {
     private String email;
     private String firstName;
     private String lastName;
-    private List<UUID> teamUUIDs;
+    private List<String> teamNames;
+    private List<String> unitNames;
     private boolean enabled;
 
-    public static UserWithTeamsDto from(UserDto user, List<UUID> teamUUIDS, boolean enabled) {
-        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), teamUUIDS, enabled);
+    public static UserWithTeamsDto from(UserDto user, List<String> teamNames, List<String> unitNames, boolean enabled) {
+        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), teamNames, unitNames, enabled);
     }
 }

@@ -545,16 +545,18 @@ public class ExportService {
         log.info("Exporting USER_TEAMS_DATA to CSV", value(EVENT, CSV_EXPORT_START));
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        List<String> headers = List.of("username", "teamsUUIDs");
+        List<String> headers = List.of("username", "First Name", "Last Name", "Team Name(s)", "Unit Name(s)");
 
         Set<UserWithTeamsDto> users = infoClient.getUsersWithTeams();
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
             users.forEach((user) -> {
                 try {
-                    List<UUID> userTeams = user.getTeamUUIDs();
-                    String teamUUIDs = userTeams.stream().map(UUID::toString).collect(Collectors.joining(", "));
-                    printer.printRecord(user.getUsername(), teamUUIDs);
+                    List<String> teamNames = user.getTeamNames();
+                    List<String> unitNames = user.getUnitNames();
+                    String teamNamesString = String.join(", ", teamNames);
+                    String unitNamesString = String.join(", ", unitNames);
+                    printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamNamesString, unitNamesString);
                     outputWriter.flush();
                 } catch (IOException exception) {
                     log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
