@@ -553,14 +553,14 @@ public class ExportService {
             users.forEach((user) -> {
                 try {
                     List<String> teamNames = user.getTeamNames();
-                    List<String> unitNames = user.getUnitNames();
+                    Map<String, String> unitNames = user.getUnitNames();
                     if (teamNames.isEmpty()) {
                         printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), "", "");
                         outputWriter.flush();
                     }
                     else {
-                        for (int i = 0; i < teamNames.size(); i++) {
-                            printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamNames.get(i), unitNames.get(i));
+                        for (String teamName: teamNames) {
+                            printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamName, unitNames.get(teamName));
                             outputWriter.flush();
                         }
 

@@ -440,14 +440,14 @@ public class AuditExportServiceTest {
         String[] expectedHeaders = new String[]{"Username", "First Name", "Last Name", "Team Name", "Unit Name"};
         ArrayList<String> user1Teams = new ArrayList<>();
         ArrayList<String> user2Teams = new ArrayList<>();
-        ArrayList<String> user1Units = new ArrayList<>();
-        ArrayList<String> user2Units = new ArrayList<>();
+        Map<String, String> user1Units = new HashMap<>();
+        Map<String, String> user2Units = new HashMap<>();
         user1Teams.add("Team 1");
         user2Teams.add("Team 1");
         user2Teams.add("Team 2");
-        user1Units.add("Unit 1");
-        user2Units.add("Unit 1");
-        user2Units.add("Unit 2");
+        user1Units.put("Team 1", "Unit 1");
+        user2Units.put("Team 1", "Unit 1");
+        user2Units.put("Team 2", "Unit 2");
 
         LinkedHashSet<UserWithTeamsDto> teams = new LinkedHashSet<UserWithTeamsDto>(){{
             add(new UserWithTeamsDto(UUID.randomUUID().toString(), "User 1", "User1@email.com", "John", "Doe",
