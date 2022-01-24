@@ -438,23 +438,23 @@ public class AuditExportServiceTest {
     @Test
     public void userWithTeamsExportShouldReturnCSV() throws IOException {
         String[] expectedHeaders = new String[]{"Username", "First Name", "Last Name", "Team Name", "Unit Name"};
-        ArrayList<String> user1Teams = new ArrayList<>();
-        ArrayList<String> user2Teams = new ArrayList<>();
-        Map<String, String> user1Units = new HashMap<>();
-        Map<String, String> user2Units = new HashMap<>();
-        user1Teams.add("Team 1");
-        user2Teams.add("Team 1");
-        user2Teams.add("Team 2");
-        user1Units.put("Team 1", "Unit 1");
-        user2Units.put("Team 1", "Unit 1");
-        user2Units.put("Team 2", "Unit 2");
+        ArrayList<String> unit1Teams = new ArrayList<>();
+        ArrayList<String> unit2Teams = new ArrayList<>();
+        Map<String, List<String>> user1UnitsAndTeams = new HashMap<>();
+        Map<String, List<String>> user2UnitsAndTeams = new HashMap<>();
+        unit1Teams.add("Team 1");
+        unit2Teams.add("Team 3");
+        unit2Teams.add("Team 2");
+        user1UnitsAndTeams.put("Unit 1", unit1Teams);
+        user2UnitsAndTeams.put("Unit 1", unit1Teams);
+        user2UnitsAndTeams.put("Unit 2", unit2Teams);
 
         LinkedHashSet<UserWithTeamsDto> teams = new LinkedHashSet<UserWithTeamsDto>(){{
             add(new UserWithTeamsDto(UUID.randomUUID().toString(), "User 1", "User1@email.com", "John", "Doe",
-                    user1Teams, user1Units, true
+                    user1UnitsAndTeams, true
             ));
             add(new UserWithTeamsDto(UUID.randomUUID().toString(), "User 2", "User2@email.com", "Jane", "Doe",
-                    user2Teams, user2Units, true));
+                    user2UnitsAndTeams, true));
         }};
 
         when(infoClient.getUsersWithTeams()).thenReturn(teams);
@@ -465,14 +465,16 @@ public class AuditExportServiceTest {
         String csvBody = outputStream.toString();
         Set<String> headers = getCSVHeaders(csvBody).keySet();
         List<CSVRecord> rows = getCSVRows(csvBody);
-        assertThat(rows.size()).isEqualTo(3);
+        assertThat(rows.size()).isEqualTo(4);
         assertThat(headers).containsExactlyInAnyOrder(expectedHeaders);
         assertThat(rows.get(0).get("Team Name")).isEqualTo("Team 1");
         assertThat(rows.get(0).get("Unit Name")).isEqualTo("Unit 1");
-        assertThat(rows.get(1).get("Team Name")).isEqualTo("Team 1");
-        assertThat(rows.get(1).get("Unit Name")).isEqualTo("Unit 1");
+        assertThat(rows.get(1).get("Team Name")).isEqualTo("Team 3");
+        assertThat(rows.get(1).get("Unit Name")).isEqualTo("Unit 2");
         assertThat(rows.get(2).get("Team Name")).isEqualTo("Team 2");
         assertThat(rows.get(2).get("Unit Name")).isEqualTo("Unit 2");
+        assertThat(rows.get(3).get("Team Name")).isEqualTo("Team 1");
+        assertThat(rows.get(3).get("Unit Name")).isEqualTo("Unit 1");
     }
 
     @Test
