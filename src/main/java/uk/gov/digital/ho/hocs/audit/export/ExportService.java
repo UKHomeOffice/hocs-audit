@@ -552,18 +552,16 @@ public class ExportService {
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
             users.forEach((user) -> {
                 try {
-                    List<String> teamNames = user.getTeamNames();
-                    Map<String, String> unitNames = user.getUnitNames();
-                    if (teamNames.isEmpty()) {
+
+                    Map<String, List<String>> unitAndTeamNames = user.getUnitAndTeamNames();
+                    if (unitAndTeamNames.isEmpty()) {
                         printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), "", "");
                         outputWriter.flush();
                     }
-                    else {
-                        for (String teamName: teamNames) {
-                            printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamName, unitNames.get(teamName));
-                            outputWriter.flush();
+                    for (var entry : unitAndTeamNames.entrySet()){
+                        for (String teamName: entry.getValue()){
+                            printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamName, entry.getKey());
                         }
-
                     }
                 } catch (IOException exception) {
                     log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));

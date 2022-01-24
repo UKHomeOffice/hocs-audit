@@ -16,11 +16,10 @@ public class UserWithTeamsDto {
     private String email;
     private String firstName;
     private String lastName;
-    private List<String> teamNames;
-    private Map<String, String> unitNames;
+    private Map<String, List<String>> unitAndTeamNames;
     private boolean enabled;
 
-    public static UserWithTeamsDto from(UserDto user, List<String> teamNames, Map<String, String> unitNames, boolean enabled) {
-        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), teamNames, unitNames, enabled);
+    public static UserWithTeamsDto from(UserDto user,  Map<String, List<String>> unitAndTeamNames, boolean enabled) {
+        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), unitAndTeamNames, enabled);
     }
 }
