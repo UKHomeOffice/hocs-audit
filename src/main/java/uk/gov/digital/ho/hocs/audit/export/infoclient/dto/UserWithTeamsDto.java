@@ -4,11 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
-
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,10 +16,10 @@ public class UserWithTeamsDto {
     private String email;
     private String firstName;
     private String lastName;
-    private List<UUID> teamUUIDs;
+    private Map<String, List<String>> unitAndTeamNames;
     private boolean enabled;
 
-    public static UserWithTeamsDto from(UserDto user, List<UUID> teamUUIDS, boolean enabled) {
-        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), teamUUIDS, enabled);
+    public static UserWithTeamsDto from(UserDto user,  Map<String, List<String>> unitAndTeamNames, boolean enabled) {
+        return new UserWithTeamsDto(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName(), unitAndTeamNames, enabled);
     }
 }
