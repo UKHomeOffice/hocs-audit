@@ -166,6 +166,8 @@ spec:
             - --resources=uri=/export/MTS*|roles=MPAM_EXPORT_USER
             - --resources=uri=/export/COMP*|roles=COMP_EXPORT_USER
             - --resources=uri=/export/FOI*|roles=FOI_EXPORT_USER
+            - --resources=uri=/export/TO*|roles=TO_EXPORT_USER
+            - --resources=uri=/export/BF*|roles=BF_EXPORT_USER
             - --resources=uri=/export/IEDET*|roles=IEDET_EXPORT_USER
             - --resources=uri=/export/somu/FOI*|roles=FOI_EXPORT_USER
             - --resources=uri=/export/somu/MPAM*|roles=MPAM_EXPORT_USER
