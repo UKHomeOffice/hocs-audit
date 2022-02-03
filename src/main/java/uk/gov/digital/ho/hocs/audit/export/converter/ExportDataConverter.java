@@ -19,6 +19,8 @@ public class ExportDataConverter {
     private final Map<String, String> uuidToName;
     private final Map<String, String> mpamCodeToName;
 
+    private final String REFERENCE_NOT_FOUND = "REFERENCE NOT FOUND";
+
     ExportDataConverter
             (Map<String, String> uuidToName, Map<String, String> mpamCodeToName, CaseworkClient caseworkClient) {
         this.caseworkClient = caseworkClient;
@@ -34,7 +36,10 @@ public class ExportDataConverter {
                     auditData[i] = uuidToName.get(fieldData);
                 } else {
                     GetCaseReferenceResponse caseReferenceResponse = caseworkClient.getCaseReference(fieldData);
-                    if (StringUtils.hasText(caseReferenceResponse.getReference())) {
+
+                    if (StringUtils.hasText(caseReferenceResponse.getReference()) &&
+                            // if the reference is not found, the uuid does not refer to a case, and can pass through
+                            !caseReferenceResponse.getReference().equals(REFERENCE_NOT_FOUND)) {
                         uuidToName.put(fieldData, caseReferenceResponse.getReference());
                         auditData[i] = caseReferenceResponse.getReference();
                     }

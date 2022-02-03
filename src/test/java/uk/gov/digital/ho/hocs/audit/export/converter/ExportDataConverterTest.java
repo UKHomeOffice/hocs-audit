@@ -22,6 +22,7 @@ public class ExportDataConverterTest {
     private static final String USER1_ID = UUID.randomUUID().toString();
     private static final String USER1_USERNAME = "user-Jim";
     private static final String UNIT1_ID = UUID.randomUUID().toString();
+    private static final String AUDIT_RECORD_ID = UUID.randomUUID().toString();
     private static final String UNIT1_DISPLAY_NAME = "Unit 1";
     private static final String TOPIC1_ID = UUID.randomUUID().toString();
     private static final String TOPIC1_TEXT = "Topic 1";
@@ -31,6 +32,7 @@ public class ExportDataConverterTest {
     private static final String CORR1_FULLNAME = "Bob Smith";
     private static final String CASE_REF = "REF/1234567/890";
     private static final String CASE_REF_NONE = "";
+    private static final String REFERENCE_NOT_FOUND = "REFERENCE NOT FOUND";
     private static final String CASE_TYPE_SHORT_CODE = "x1";
     private static final String ENTITY_1_SIMPLE_NAME = "aaaa_bbbb_cccc";
     private static final String ENTITY_1_TITLE = "aaaa bbbb / (cccc)";
@@ -49,6 +51,7 @@ public class ExportDataConverterTest {
     public void before() {
         when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
         when(caseworkClient.getCaseReference(CASE_ID_NONE)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), CASE_REF_NONE));
+        when(caseworkClient.getCaseReference(AUDIT_RECORD_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), REFERENCE_NOT_FOUND));
 
         converter = new ExportDataConverter(UUID_TO_NAME, MPAM_CODE_TO_NAME, caseworkClient);
     }
@@ -65,16 +68,17 @@ public class ExportDataConverterTest {
     @Test
     public void convertDataWhenNothingToConvertThenNothingConverted() {
 
-        String[] testData = { "a", "b", "c", "d" };
+        String[] testData = { "a", "b", "c", "d", AUDIT_RECORD_ID};
 
         String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
 
         assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
+        assertThat(testResult.length).isEqualTo(5);
         assertThat(testResult[0]).isEqualTo(testData[0]);
         assertThat(testResult[1]).isEqualTo(testData[1]);
         assertThat(testResult[2]).isEqualTo(testData[2]);
         assertThat(testResult[3]).isEqualTo(testData[3]);
+        assertThat(testResult[4]).isEqualTo(testData[4]);
     }
 
     @Test
