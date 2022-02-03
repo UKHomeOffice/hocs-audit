@@ -54,7 +54,6 @@ steps:
       registry: quay.io
       repo: quay.io/ukhomeofficedigital/hocs-audit
       tags:
-        - build_${DRONE_BUILD_NUMBER}
         - ${DRONE_COMMIT_SHA}
         - branch-${DRONE_COMMIT_BRANCH/\//_}
     environment:
@@ -75,7 +74,6 @@ steps:
       registry: quay.io
       repo: quay.io/ukhomeofficedigital/hocs-audit
       tags:
-        - build_${DRONE_BUILD_NUMBER}
         - ${DRONE_COMMIT_SHA}
         - latest
     environment:
@@ -112,6 +110,12 @@ environment:
   DOCKER_HOST: tcp://docker:2375
 
 steps:
+  - name: fetch and checkout
+    image: alpine/git
+    commands:
+      - git fetch --tags
+      - git checkout $${VERSION}
+
   - name: deploy to cs-dev
     image: quay.io/ukhomeofficedigital/kd
     commands:
@@ -121,7 +125,9 @@ steps:
       ENVIRONMENT: cs-dev
       KUBE_TOKEN:
         from_secret: hocs_audit_cs_dev
-      VERSION: build_${DRONE_BUILD_NUMBER}
+      VERSION: "${DRONE_COMMIT_SHA}"
+    depends_on:
+      - fetch and checkout
     when:
       branch:
         - main
@@ -137,7 +143,9 @@ steps:
       ENVIRONMENT: wcs-dev
       KUBE_TOKEN:
         from_secret: hocs_audit_wcs_dev
-      VERSION: build_${DRONE_BUILD_NUMBER}
+      VERSION: "${DRONE_COMMIT_SHA}"
+    depends_on:
+      - fetch and checkout
     when:
       branch:
         - main
@@ -179,6 +187,7 @@ steps:
         from_secret: GITHUB_TOKEN
     depends_on:
       - wait for docker
+      - fetch and checkout
     when:
       event:
         - promote
@@ -232,6 +241,8 @@ steps:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
       KUBE_TOKEN:
         from_secret: hocs_audit_${DRONE_DEPLOY_TO/-/_}
+    depends_on:
+      - fetch and checkout
     when:
       event:
         - promote
@@ -249,6 +260,8 @@ steps:
       ENVIRONMENT: ${DRONE_DEPLOY_TO}
       KUBE_TOKEN:
         from_secret: hocs_audit_${DRONE_DEPLOY_TO/-/_}
+    depends_on:
+      - fetch and checkout
     when:
       event:
         - promote
