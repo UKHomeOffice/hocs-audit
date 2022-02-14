@@ -46,7 +46,7 @@ dependencies {
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
     implementation 'org.apache.commons:commons-csv:1.9.0'
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
     implementation 'org.flywaydb:flyway-core:8.4.4'
     runtimeOnly 'org.postgresql:postgresql:42.3.2'
