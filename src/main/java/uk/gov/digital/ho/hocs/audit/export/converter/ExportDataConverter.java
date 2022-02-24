@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
+import uk.gov.digital.ho.hocs.audit.utils.UuidStringChecker;
 
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +13,6 @@ import java.util.Set;
 @Slf4j
 public class ExportDataConverter {
 
-    private static final String UUID_REGEX = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
     private static final Set<String> MPAM_SHORT_CODES = Set.of("b5", "b6");
 
     private final CaseworkClient caseworkClient;
@@ -31,7 +31,7 @@ public class ExportDataConverter {
     public String[] convertData(String[] auditData, String caseShortCode) {
         for (int i = 0; i < auditData.length; i++){
             String fieldData = auditData[i];
-            if (isUUID(fieldData)) {
+            if (UuidStringChecker.isUUID(fieldData)) {
                 if (uuidToName.containsKey(fieldData)) {
                     auditData[i] = uuidToName.get(fieldData);
                 } else {
@@ -55,13 +55,6 @@ public class ExportDataConverter {
             }
         }
         return auditData;
-    }
-
-    boolean isUUID(String uuid) {
-        if (StringUtils.hasText(uuid)) {
-            return uuid.matches(UUID_REGEX);
-        }
-        return false;
     }
 
     private String sanitiseForCsv(String value) {
