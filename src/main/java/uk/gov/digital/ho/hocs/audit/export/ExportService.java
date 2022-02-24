@@ -18,6 +18,7 @@ import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
+import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +45,7 @@ public class ExportService {
     private final ExportDataConverterFactory exportDataConverterFactory;
     private final HeaderConverter headerConverter;
     private final MalformedDateConverter malformedDateConverter;
+    private final DataParserFactory dataParserFactory;
     public static final String[] CASE_DATA_EVENTS = {"CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED"};
     public static final String[] CASE_NOTES_EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
     public static final String[] SOMU_TYPE_EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED"};
@@ -54,15 +55,18 @@ public class ExportService {
     public static final String[] ALLOCATION_EVENTS = {"STAGE_ALLOCATED_TO_TEAM", "STAGE_CREATED", "STAGE_RECREATED", "STAGE_COMPLETED", "STAGE_ALLOCATED_TO_USER", "STAGE_UNALLOCATED_FROM_USER"};
     public static final int EXCEL_MAX_CELL_SIZE = 32766;
     public static final String[] APPEAL_EVENTS = {"APPEAL_CREATED", "APPEAL_UPDATED"};
+    public static final String[] INTEREST_EVENTS = {"EXTERNAL_INTEREST_CREATED", "EXTERNAL_INTEREST_UPDATED"};
+
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
-                         HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
+                         HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter, DataParserFactory dataParserFactory) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
         this.exportDataConverterFactory = exportDataConverterFactory;
         this.headerConverter = headerConverter;
         this.malformedDateConverter = malformedDateConverter;
+        this.dataParserFactory = dataParserFactory;
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +97,9 @@ public class ExportService {
                 break;
             case APPEALS:
                 appealExport(from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter);
+                break;
+            case INTERESTS:
+                interestExport(from, to, outputWriter, caseTypeCode, caseType, convert, convertHeader, zonedDateTimeConverter);
                 break;
             default:
                 throw new AuditExportException("Unknown export type requests");
@@ -712,6 +719,35 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
+    private void interestExport(LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode,
+                              String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting INTERESTS to CSV", value(EVENT, CSV_EXPORT_START));
+
+        List<String> headers = List.of("timestamp", "event", "userId", "caseId", "partyType", "interestDetails");
+
+        List<String> substitutedHeaders = headers;
+        if (convertHeader) {
+            substitutedHeaders = headerConverter.substitute(headers);
+        }
+
+        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
+            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                            from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                    INTEREST_EVENTS, caseTypeCode);
+
+            var dataParser = dataParserFactory.getInterestInstance(caseType, convert, zonedDateTimeConverter);
+
+            data.forEach(audit -> {
+                try {
+                    printer.printRecord((Object[])dataParser.parsePayload(audit));
+                    outputWriter.flush();
+                } catch (IOException e) {
+                    log.error("Unable to get record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
+            log.info("Export INTERESTS to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
+        }
+    }
+
+
 }
-
-
