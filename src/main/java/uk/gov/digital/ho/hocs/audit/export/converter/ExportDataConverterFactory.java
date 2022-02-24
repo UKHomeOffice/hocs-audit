@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCorrespondentOutlineResponse;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 
@@ -17,7 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class ExportDataConverterFactory {
 
-    private static final String[] MPAM_CODE_MAPPING_LISTS = { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" };
+    private static final String[] CODE_MAPPING_ENTITY_LISTS = {
+            "MPAM_ENQUIRY_SUBJECTS",
+            "MPAM_ENQUIRY_REASONS_ALL",
+            "MPAM_BUS_UNITS_ALL",
+    };
 
     private final InfoClient infoClient;
     private final CaseworkClient caseworkClient;
@@ -29,7 +32,7 @@ public class ExportDataConverterFactory {
 
     public ExportDataConverter getInstance() {
         Map<String, String> uuidToName = new HashMap<>();
-        Map<String, String> mpamCodeToName = new HashMap<>();
+        Map<String, String> entityListItemToName = new HashMap<>();
 
         uuidToName.putAll(infoClient.getUsers().stream()
                 .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
@@ -46,11 +49,13 @@ public class ExportDataConverterFactory {
         uuidToName.putAll(infoClient.getCaseTypeActions().stream()
                 .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
-        for (String listName : MPAM_CODE_MAPPING_LISTS) {
+        for (String listName : CODE_MAPPING_ENTITY_LISTS) {
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
-            entities.forEach(e -> mpamCodeToName.put(e.getSimpleName(), e.getData().getTitle()));
+            entities.forEach(e -> entityListItemToName.put(e.getSimpleName(), e.getData().getTitle()));
         }
 
-        return new ExportDataConverter(uuidToName, mpamCodeToName, caseworkClient);
+        return new ExportDataConverter(uuidToName, entityListItemToName, caseworkClient);
     }
+
+
 }

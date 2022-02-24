@@ -13,19 +13,19 @@ import java.util.Set;
 @Slf4j
 public class ExportDataConverter {
 
-    private static final Set<String> MPAM_SHORT_CODES = Set.of("b5", "b6");
+    private static final Set<String> CASE_TYPE_SHORT_CODES = Set.of("b5", "b6");
 
     private final CaseworkClient caseworkClient;
     private final Map<String, String> uuidToName;
-    private final Map<String, String> mpamCodeToName;
+    private final Map<String, String> entityListItemToName;
 
     private final String REFERENCE_NOT_FOUND = "REFERENCE NOT FOUND";
 
     ExportDataConverter
-            (Map<String, String> uuidToName, Map<String, String> mpamCodeToName, CaseworkClient caseworkClient) {
+            (Map<String, String> uuidToName, Map<String, String> entityListItemToName, CaseworkClient caseworkClient) {
         this.caseworkClient = caseworkClient;
         this.uuidToName = uuidToName;
-        this.mpamCodeToName = mpamCodeToName;
+        this.entityListItemToName = entityListItemToName;
     }
 
     public String[] convertData(String[] auditData, String caseShortCode) {
@@ -45,9 +45,9 @@ public class ExportDataConverter {
                     }
                 }
             } else {
-                if (MPAM_SHORT_CODES.contains(caseShortCode)) {
-                    if (mpamCodeToName.containsKey(fieldData)) {
-                        String displayValue = mpamCodeToName.get(fieldData);
+                if (CASE_TYPE_SHORT_CODES.contains(caseShortCode)) {
+                    if (entityListItemToName.containsKey(fieldData)) {
+                        String displayValue = entityListItemToName.get(fieldData);
                         String sanitizedDisplayValue = sanitiseForCsv(displayValue);
                         auditData[i] = sanitizedDisplayValue;
                     }
