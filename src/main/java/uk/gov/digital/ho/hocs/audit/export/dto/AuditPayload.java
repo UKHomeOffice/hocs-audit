@@ -191,4 +191,13 @@ public interface AuditPayload {
         private LocalDateTime created;
     }
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Interest {
+
+        private String partyType;
+        private String interestDetails;
+
+    }
+
 }
