@@ -13,6 +13,7 @@ import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.CaseTypeDto;
+import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,6 +50,9 @@ public class CaseNoteExportTest {
     @Mock
     private MalformedDateConverter malformedDateConverter;
 
+    @Mock
+    private DataParserFactory dataParserFactory;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
@@ -76,7 +80,7 @@ public class CaseNoteExportTest {
         when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(Stream.of(auditData));
         when(infoClient.getCaseTypes()).thenReturn(Set.of(new CaseTypeDto("displayName", "a1", "type")));
         when(malformedDateConverter.correctDateFields(any())).then(returnsFirstArg());
-        return new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter);
+        return new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter, dataParserFactory);
     }
 
     private String createCaseNoteText(int length){
