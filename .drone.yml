@@ -25,14 +25,14 @@ steps:
       - clone
 
   - name: build project
-    image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
+    image: quay.io/ukhomeofficedigital/hocs-base-image
     commands:
       - ./gradlew assemble --no-daemon
     depends_on:
       - setup localstack
 
   - name: test project
-    image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
+    image: quay.io/ukhomeofficedigital/hocs-base-image
     environment:
       DB_HOST: "postgres"
       LOCALSTACK_HOST: "localstack"
@@ -55,7 +55,6 @@ steps:
       repo: quay.io/ukhomeofficedigital/hocs-audit
       tags:
         - ${DRONE_COMMIT_SHA}
-        - branch-${DRONE_COMMIT_BRANCH/\//_}
     environment:
       DOCKER_PASSWORD:
         from_secret: QUAY_ROBOT_TOKEN
