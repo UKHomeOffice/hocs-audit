@@ -37,7 +37,7 @@ steps:
       DB_HOST: "postgres"
       LOCALSTACK_HOST: "localstack"
     commands:
-      - ./gradlew check --no-daemon
+      - ./gradlew check
     depends_on:
       - build project
 
