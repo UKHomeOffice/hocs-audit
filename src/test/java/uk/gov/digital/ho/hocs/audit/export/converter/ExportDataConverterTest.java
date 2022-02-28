@@ -261,27 +261,6 @@ public class ExportDataConverterTest {
         assertThat(testResult[3]).isEqualTo(testData[3]);
     }
 
-    @Test
-    public void isUuid_TrueWithValidUuid() {
-        String uuid = UUID.randomUUID().toString();
-        assertThat(converter.isUUID(uuid)).isTrue();
-    }
-
-    @Test
-    public void isUuid_FalseWithInvalidUuidText() {
-        assertThat(converter.isUUID("Test")).isFalse();
-    }
-
-    @Test
-    public void isUuid_FalseWithNull() {
-        assertThat(converter.isUUID(null)).isFalse();
-    }
-
-    @Test
-    public void isUuid_FalseWithEmpty() {
-        assertThat(converter.isUUID("")).isFalse();
-    }
-
     private static Map<String, String> buildUuidToNameMap() {
         return new HashMap<>(
                 Map.ofEntries(

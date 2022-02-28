@@ -20,6 +20,8 @@ import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
+import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
+import uk.gov.digital.ho.hocs.audit.export.parsers.interests.BfInterestDataParser;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -59,6 +61,9 @@ public class AuditExportServiceTest {
     @Mock
     private HeaderConverter caseNoteHeaderConverter;
 
+    @Mock
+    private DataParserFactory dataParserFactory;
+
     private ExportService exportService;
     private ExportService exportServiceTestHeaders;
     private ExportService exportServiceCaseNotesHeaders;
@@ -66,6 +71,7 @@ public class AuditExportServiceTest {
     private ObjectMapper mapper;
     private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
         add(new CaseTypeDto("DCU Ministerial", "a1", "MIN"));
+        add(new CaseTypeDto("TEST", "a1", "BF"));
     }};
     private LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
     private LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
@@ -114,9 +120,9 @@ public class AuditExportServiceTest {
                 return (List<String>) args[0];
             }
         });
-        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter);
-        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, headerConverter, malformedDateConverter);
-        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, caseNoteHeaderConverter, malformedDateConverter);
+        exportService = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter, dataParserFactory);
+        exportServiceTestHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, headerConverter, malformedDateConverter, dataParserFactory);
+        exportServiceCaseNotesHeaders = new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, caseNoteHeaderConverter, malformedDateConverter, dataParserFactory);
     }
 
     @Test
@@ -367,6 +373,31 @@ public class AuditExportServiceTest {
         assertThat(row.get("officerName")).isEqualTo("");
         assertThat(row.get("officerDirectorate")).isEqualTo("");
         assertThat(row.get("created")).isEqualTo("2021-09-07T10:26:27.538487");
+    }
+
+    @Test
+    public void interestExtractShouldReturnCSVData() throws IOException {
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any()))
+                .thenReturn(getInterestDataAuditData().stream());
+
+        when(dataParserFactory.getInterestInstance(any(), anyBoolean(), any())).thenReturn(
+                new BfInterestDataParser(null, null, mapper,
+                        defaultZonedDateTimeConverter, false));
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), to.toLocalDate(), outputStream, "BF",
+                ExportType.INTERESTS, false, false, null, null);
+
+        List<CSVRecord> rows = getCSVRows(outputStream.toString());
+
+        assertThat(rows.size()).isEqualTo(2);
+
+        CSVRecord row = rows.stream()
+                .filter(r -> r.get("event").equals("EXTERNAL_INTEREST_CREATED"))
+                .findFirst().orElseThrow();
+
+        assertThat(row.get("partyType")).isEqualTo("TEST_PARTY");
+        assertThat(row.get("interestDetails")).isEqualTo("TEST");
     }
 
     @Test
@@ -702,6 +733,31 @@ public class AuditExportServiceTest {
                     "APPEAL_CREATED",
                     "a294d133-629c-49ee-a2af-51b4c851eb3c"));
         }};
+    }
+
+    private Set<AuditData> getInterestDataAuditData() {
+        return Set.of(
+                new AuditData(
+                        UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                        UUID.randomUUID(),
+                        UUID.randomUUID().toString(),
+                        "TEST_SERVICE",
+                        "{\"uuid\": \"81a29ce7-95ec-46ef-87b9-cec511f19d64\", \"caseType\": \"BF\", \"eventType\": \"EXTERNAL_INTEREST_UPDATED\", \"partyType\": \"TEST_PARTY\", \"caseDataUuid\": \"00000000-0000-0000-000000000000\", \"interestDetails\": \"TEST\"}",
+                        "TEST_NAMESPACE",
+                        LocalDateTime.parse("2020-01-01 00:00:00", dateFormatter),
+                        "EXTERNAL_INTEREST_CREATED",
+                        "10000000-0000-0000-0000-000000000000"),
+                new AuditData(
+                        UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                        UUID.randomUUID(),
+                        UUID.randomUUID().toString(),
+                        "TEST_SERVICE",
+                        "{\"uuid\": \"81a29ce7-95ec-46ef-87b9-cec511f19d64\", \"caseType\": \"BF\", \"eventType\": \"EXTERNAL_INTEREST_CREATED\", \"partyType\": \"TEST_PARTY\", \"caseDataUuid\": \"00000000-0000-0000-000000000000\", \"interestDetails\": \"TEST1\"}",
+                        "TEST_NAMESPACE",
+                        LocalDateTime.parse("2020-01-01 00:00:00", dateFormatter),
+                        "EXTERNAL_INTEREST_UPDATED",
+                        "10000000-0000-0000-0000-000000000001")
+        );
     }
 
 }

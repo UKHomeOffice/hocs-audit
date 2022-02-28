@@ -1,12 +1,13 @@
 package uk.gov.digital.ho.hocs.audit.export;
 
 public enum ExportType {
+    ALLOCATIONS,
+    APPEALS,
     CASE_DATA,
     CASE_NOTES,
-    TOPICS,
     CORRESPONDENTS,
-    USER_TEAMS,
     EXTENSIONS,
-    ALLOCATIONS,
-    APPEALS;
+    INTERESTS,
+    TOPICS,
+    USER_TEAMS;
 }
