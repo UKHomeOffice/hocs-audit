@@ -24,22 +24,15 @@ steps:
     depends_on:
       - clone
 
-  - name: build project
-    image: quay.io/ukhomeofficedigital/hocs-base-image-build
-    commands:
-      - ./gradlew clean assemble
-    depends_on:
-      - setup localstack
-
   - name: test project
     image: quay.io/ukhomeofficedigital/hocs-base-image-build
     environment:
       DB_HOST: "postgres"
       LOCALSTACK_HOST: "localstack"
     commands:
-      - ./gradlew check
+      - ./gradlew clean build --no-daemon
     depends_on:
-      - build project
+      - setup localstack
 
   - name: sonar scanner
     image: quay.io/ukhomeofficedigital/sonar-scanner
