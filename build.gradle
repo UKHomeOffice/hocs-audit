@@ -47,7 +47,7 @@ dependencies {
     implementation 'org.apache.commons:commons-csv:1.9.0'
     implementation 'com.google.code.gson:gson:2.9.0'
 
-    implementation 'org.flywaydb:flyway-core:8.5.1'
+    implementation 'org.flywaydb:flyway-core:8.5.2'
     runtimeOnly 'org.postgresql:postgresql:42.3.3'
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
