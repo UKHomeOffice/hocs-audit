@@ -21,7 +21,7 @@ The source for this service can be found on [GitHub](https://github.com/UKHomeOf
 
 ### Prerequisites
 
-* ```Java 8```
+* ```Java 11```
 * ```Docker```
 * ```Postgres```
 * ```SQS```
