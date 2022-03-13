@@ -10,7 +10,7 @@ export VERSION=${VERSION}
 export PROXY_TIMEOUT=${PROXY_TIMEOUT:-300}
 
 export DOMAIN="cs"
-if [ ${KUBE_NAMESPACE%-*} == "wcs" ]; then
+if [ "${KUBE_NAMESPACE%-*}" == "wcs" ]; then
     export DOMAIN="wcs"
 fi
 
