@@ -31,7 +31,8 @@ public class DataParserFactory {
                 return new FoiInterestDataParser(infoClientSupplier, caseworkClient, objectMapper,
                         zonedDateTimeConverter, convert);
             }
-            case "BF": {
+            case "BF":
+            case "BF2": {
                 return new BfInterestDataParser(infoClientSupplier, caseworkClient, objectMapper,
                         zonedDateTimeConverter, convert);
             }
