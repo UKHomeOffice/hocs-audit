@@ -1,0 +1,59 @@
+info:
+  app:
+    fullname: Hocs Audit Service
+    name: ${name:hocs-audit-service}
+    version: ${version:0.0.1}
+
+server:
+  http2:
+    enabled: true
+  max-http-header-size: 1048576
+  port: 8087
+  shutdown: graceful
+
+spring:
+  main:
+    banner-mode: off
+  cache:
+    caffeine:
+      spec: initialCapacity=500,expireAfterWrite=600s
+  datasource:
+    url: jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.name:postgres}?currentSchema=${db.schema.name:audit}&user=${db.username:root}&password=${db.password:dev}&stringtype=unspecified
+  flyway:
+    locations: classpath:/db/migration/postgresql
+    schemas: ${db.schema.name:audit}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+      probes:
+        enabled: true
+
+aws:
+  account:
+    id: 123456789012
+  queue:
+    audit:
+      name: audit-queue
+  sqs:
+    access:
+      key: 12345
+    region: eu-west-2
+    secret:
+      key: 12345
+
+hocs:
+  case-service: http://localhost:8082
+  info-service: http://localhost:8085
+  basicauth: UNSET
+
+postgresViewAllowList: dcu_aggregated_cases,dcu_business,dcu_prau_workflow
