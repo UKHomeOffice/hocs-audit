@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS audit_data cascade;
+DROP TABLE IF EXISTS audit_data_two cascade;
 
-CREATE TABLE IF NOT EXISTS audit_data
+CREATE TABLE IF NOT EXISTS audit_data_two
 (
   id                     BIGSERIAL   PRIMARY KEY,
   uuid                   UUID        NOT NULL,
@@ -18,4 +18,4 @@ CREATE TABLE IF NOT EXISTS audit_data
   CONSTRAINT audit_uuid_idempotent UNIQUE (uuid)
 );
 
-CREATE INDEX idx_case_uuid ON audit_data (case_uuid);
+CREATE INDEX idx_case_uuid ON audit_data_two (case_uuid);

@@ -1,1 +1,1 @@
-CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_data (audit_timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_data_two (audit_timestamp);

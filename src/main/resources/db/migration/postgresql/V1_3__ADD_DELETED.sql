@@ -1,2 +1,2 @@
-ALTER TABLE audit_data
+ALTER TABLE audit_data_two
 ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
