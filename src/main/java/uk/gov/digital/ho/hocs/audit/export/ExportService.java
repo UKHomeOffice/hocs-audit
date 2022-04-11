@@ -137,6 +137,8 @@ public class ExportService {
         }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
+            outputWriter.flush();
+
             Stream<AuditData> data = getAuditDataStream(lastAuditDataStream, events, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
             data.forEach((audit) -> {
