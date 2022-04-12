@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Slf4j
 @Entity
-@Table(name = "audit_data")
+@Table(name = "audit_event")
 @NoArgsConstructor
 public class AuditData implements Serializable {
 
