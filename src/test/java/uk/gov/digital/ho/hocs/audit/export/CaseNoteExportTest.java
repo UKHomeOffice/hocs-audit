@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
@@ -76,8 +76,8 @@ public class CaseNoteExportTest {
 
     private ExportService createExportService(int lengthOfCaseNote){
         String payload = "{\"text\" : \"" + createCaseNoteText(lengthOfCaseNote) + "\", \"caseNoteType\" : \"SEND_TO_WORKFLOW_MANAGER\"}";
-        AuditData auditData = new AuditData("", "", payload, "", LocalDateTime.now(), "", "");
-        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(Stream.of(auditData));
+        AuditEvent auditEvent = new AuditEvent("", "", payload, "", LocalDateTime.now(), "", "");
+        when(auditRepository.findAuditDataByDateRangeAndEvents(any(), any(), any(), any())).thenReturn(Stream.of(auditEvent));
         when(infoClient.getCaseTypes()).thenReturn(Set.of(new CaseTypeDto("displayName", "a1", "type")));
         when(malformedDateConverter.correctDateFields(any())).then(returnsFirstArg());
         return new ExportService(auditRepository, mapper, infoClient, exportDataConverterFactory, passThroughHeaderConverter, malformedDateConverter, dataParserFactory);

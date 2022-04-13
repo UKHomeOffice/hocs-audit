@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.digital.ho.hocs.audit.AuditDataService;
+import uk.gov.digital.ho.hocs.audit.AuditEventService;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
@@ -29,28 +29,28 @@ public class AuditListenerTest {
     private AuditRepository auditRepository;
 
     @Mock
-    private AuditDataService auditDataService;
+    private AuditEventService auditEventService;
 
     @Test
     public void callsAuditServiceWithValidCreateCaseMessage() {
         UUID correlationId = UUID.randomUUID();
         String message = String.format("{ correlation_id: \"%s\"}", correlationId);
 
-        AuditListener auditListener = new AuditListener(gson, auditDataService);
+        AuditListener auditListener = new AuditListener(gson, auditEventService);
 
         auditListener.onAuditEvent(message);
 
-        verify(auditDataService)
+        verify(auditEventService)
                 .createAudit(any(), any(), eq(correlationId.toString()),
                         any(), any(), any(),
                         any(), any(), any());
 
-        verifyNoMoreInteractions(auditDataService);
+        verifyNoMoreInteractions(auditEventService);
     }
 
     @Test(expected = NullPointerException.class)
     public void callsAuditServiceWithNullCreateCaseMessage() {
-        AuditListener auditListener = new AuditListener(gson, auditDataService);
+        AuditListener auditListener = new AuditListener(gson, auditEventService);
 
         auditListener.onAuditEvent(null);
     }
@@ -58,7 +58,7 @@ public class AuditListenerTest {
     @Test(expected = EntityCreationException.class)
     public void callsAuditServiceWithInvalidCreateCaseMessage() {
         String incorrectMessage = "{test:1}";
-        AuditListener auditListener = new AuditListener(gson, new AuditDataService(auditRepository));
+        AuditListener auditListener = new AuditListener(gson, new AuditEventService(auditRepository));
 
         auditListener.onAuditEvent(incorrectMessage);
     }

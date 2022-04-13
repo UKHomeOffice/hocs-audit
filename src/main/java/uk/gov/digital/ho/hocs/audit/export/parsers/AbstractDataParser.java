@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClientSupplier;
@@ -90,7 +90,7 @@ public abstract class AbstractDataParser {
         return value;
     }
 
-    public abstract String[] parsePayload(AuditData audit) throws JsonProcessingException;
+    public abstract String[] parsePayload(AuditEvent audit) throws JsonProcessingException;
     protected abstract List<String> getEntityLists();
     protected abstract Stream<Supplier<Map<String, String>>> getUuidSuppliers();
 

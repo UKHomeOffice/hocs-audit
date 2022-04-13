@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -39,14 +39,14 @@ public class GetAuditSummaryResponse {
     @JsonProperty(value = "user_id", required = true)
     private String userID;
 
-    public static GetAuditSummaryResponse from(AuditData auditData) {
+    public static GetAuditSummaryResponse from(AuditEvent auditEvent) {
         return new GetAuditSummaryResponse(
-                auditData.getUuid(),
-                auditData.getCorrelationID(),
-                auditData.getRaisingService(),
-                auditData.getNamespace(),
-                auditData.getAuditTimestamp(),
-                auditData.getType(),
-                auditData.getUserID());
+                auditEvent.getUuid(),
+                auditEvent.getCorrelationID(),
+                auditEvent.getRaisingService(),
+                auditEvent.getNamespace(),
+                auditEvent.getAuditTimestamp(),
+                auditEvent.getType(),
+                auditEvent.getUserID());
     }
 }
