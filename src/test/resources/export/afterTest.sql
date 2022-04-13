@@ -1,1 +1,1 @@
-DELETE FROM audit_data WHERE true;
+DELETE FROM audit_event WHERE true;

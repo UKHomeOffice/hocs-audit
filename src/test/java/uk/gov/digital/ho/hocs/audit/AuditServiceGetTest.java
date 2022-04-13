@@ -1,12 +1,11 @@
 package uk.gov.digital.ho.hocs.audit;
 
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
 import java.time.LocalDateTime;
@@ -30,11 +29,11 @@ public class AuditServiceGetTest {
     private AuditRepository auditRepository;
 
     @Mock
-    private AuditDataService auditService;
+    private AuditEventService auditService;
 
     @Before
     public void setUp() {
-        this.auditService = new AuditDataService(auditRepository);
+        this.auditService = new AuditEventService(auditRepository);
     }
 
     @Test
@@ -45,7 +44,7 @@ public class AuditServiceGetTest {
         String[] typesArray = {"TYPE1","TYPE2"};
 
         ArrayList auditData = new ArrayList() {{
-            add(new AuditData(correlationID,raisingService,auditPayload,namespace,dateTime,auditType,userID));
+            add(new AuditEvent(correlationID,raisingService,auditPayload,namespace,dateTime,auditType,userID));
         }};
 
         when(auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray)).thenReturn(auditData);

@@ -13,7 +13,7 @@ public class AuditDataTest {
 
     @Test
     public void auditData(){
-        AuditData auditData = new AuditData(
+        AuditEvent auditEvent = new AuditEvent(
                 "correlationId",
                 "raisingService",
                 "auditPayload",
@@ -22,7 +22,7 @@ public class AuditDataTest {
                 "type",
                 "userId");
 
-        assertThat(auditData.getDeleted()).isFalse();
+        assertThat(auditEvent.getDeleted()).isFalse();
     }
 
 }

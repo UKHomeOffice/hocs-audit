@@ -13,7 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
@@ -671,59 +671,59 @@ public class AuditExportServiceTest {
         return csvParser.getHeaderMap();
     }
 
-    private LinkedHashSet<AuditData> getCaseDataAuditData() {
-         return new LinkedHashSet<AuditData>(){{
-             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"data\": {\"valid\": \"true\", \"DateReceived\": \"2019-04-23\", \"CopyNumberTen\": \"FALSE\", \"Correspondents\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"OriginalChannel\": \"EMAIL\", \"DateOfCorrespondence\": \"2019-04-23\"}, \"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T12:57:19.738532\", \"reference\": \"MIN/0120101/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\", \"primaryTopic\": null, \"primaryCorrespondent\": \"09a89901-d2f1-4778-befe-ebab57659b90\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "CASE_UPDATED", UUID.randomUUID().toString()));
-             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T09:18:26.446343\", \"reference\": \"MIN/0120091/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
-             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
+    private LinkedHashSet<AuditEvent> getCaseDataAuditData() {
+         return new LinkedHashSet<AuditEvent>(){{
+             add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"data\": {\"valid\": \"true\", \"DateReceived\": \"2019-04-23\", \"CopyNumberTen\": \"FALSE\", \"Correspondents\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"OriginalChannel\": \"EMAIL\", \"DateOfCorrespondence\": \"2019-04-23\"}, \"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T12:57:19.738532\", \"reference\": \"MIN/0120101/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\", \"primaryTopic\": null, \"primaryCorrespondent\": \"09a89901-d2f1-4778-befe-ebab57659b90\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "CASE_UPDATED", UUID.randomUUID().toString()));
+             add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"created\": \"2019-04-23T09:18:26.446343\", \"reference\": \"MIN/0120091/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
+             add(new AuditEvent(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MIN\", \"uuid\": \"a7590ff3-4377-4ee8-a165-0c6426c744a1\", \"created\": \"2019-04-23T11:17:53.155776\", \"reference\": \"MIN/0120092/19\", \"caseDeadline\": \"2019-05-22\", \"dateReceived\": \"2019-04-23\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_CREATED", UUID.randomUUID().toString()));
 
         }};
     }
 
-    private LinkedHashSet<AuditData> getCaseNotesAuditData() {
-         return new LinkedHashSet<AuditData>(){{
-             add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type1\", \"text\": \"Note 1\" }", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
-             add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type2\", \"text\": \"Note 2\" }", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
+    private LinkedHashSet<AuditEvent> getCaseNotesAuditData() {
+         return new LinkedHashSet<AuditEvent>(){{
+             add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type1\", \"text\": \"Note 1\" }", "an-env", LocalDateTime.parse("2019-04-23 09:18:26", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
+             add(new AuditEvent(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"caseNoteType\": \"Type2\", \"text\": \"Note 2\" }", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "CASE_NOTE_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
-    private Set<AuditData> getCaseDataWithSomuTypeAuditData() {
-        return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"uuid\":\"09a89901-d2f1-4778-befe-ebab57659b90\",\"somuTypeUuid\":\"655ddfa7-5ccf-4d9b-86fd-8cef5f61a318\",\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
+    private Set<AuditEvent> getCaseDataWithSomuTypeAuditData() {
+        return new HashSet<AuditEvent>(){{
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"uuid\":\"09a89901-d2f1-4778-befe-ebab57659b90\",\"somuTypeUuid\":\"655ddfa7-5ccf-4d9b-86fd-8cef5f61a318\",\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
-    private Set<AuditData> getTopicDataAuditData() {
-        return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"topicName\": \"Cardiff University Kittens\", \"topicUuid\": \"56926a98-de02-49c6-8457-4e6782ac7d6e\"}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
+    private Set<AuditEvent> getTopicDataAuditData() {
+        return new HashSet<AuditEvent>(){{
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"topicName\": \"Cardiff University Kittens\", \"topicUuid\": \"56926a98-de02-49c6-8457-4e6782ac7d6e\"}", "an-env", LocalDateTime.parse("2019-04-23 12:48:33",dateFormatter), "CASE_TOPIC_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
-    private Set<AuditData> getCorrespondentDataAuditData() {
-        return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"organisation\": \"An Organisation\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
+    private Set<AuditEvent> getCorrespondentDataAuditData() {
+        return new HashSet<AuditEvent>(){{
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"type\": \"MEMBER\", \"uuid\": \"09a89901-d2f1-4778-befe-ebab57659b90\", \"email\": null, \"address\": {\"country\": \"United Kingdom\", \"address1\": \"House of Commons\", \"address2\": \"London\", \"address3\": null, \"postcode\": \"SW1A 0AA\"}, \"created\": \"2019-04-23T12:57:58.823287\", \"caseUUID\": \"3e5cf44f-e86a-4b21-891a-018e2343cda1\", \"fullname\": \"Christina Rees MP\", \"organisation\": \"An Organisation\", \"reference\": null, \"telephone\": null}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "CORRESPONDENT_CREATED", UUID.randomUUID().toString()));
         }};
     }
 
-    private Set<AuditData> getExtensionDataAuditData() {
+    private Set<AuditEvent> getExtensionDataAuditData() {
         return new HashSet<>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION\", \"caseId\": \"90f22002-f6b2-41fe-8ed1-0a4b58b40ef1\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "a294d133-629c-49ee-a2af-51b4c851eb3c"));
-            add(new AuditData(UUID.fromString("e7cfa12e-5503-4663-853e-3ed6fbb1dc12"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A second reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION_TYPE_2\", \"caseId\": \"7ba51018-9d46-460c-ab0a-a6e9efb1a7fe\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION\", \"caseId\": \"90f22002-f6b2-41fe-8ed1-0a4b58b40ef1\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "a294d133-629c-49ee-a2af-51b4c851eb3c"));
+            add(new AuditEvent(UUID.fromString("e7cfa12e-5503-4663-853e-3ed6fbb1dc12"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"note\": \"TEST Extension applied. Reason: A second reason\", \"caseTypeActionUuid\": \"TEST_EXTENSION_TYPE_2\", \"caseId\": \"7ba51018-9d46-460c-ab0a-a6e9efb1a7fe\", \"createTimestamp\": \"2021-09-07T10:26:27.538487\"}", "an-env", LocalDateTime.parse("2019-04-23 12:57:58",dateFormatter), "EXTENSION_APPLIED", "71e0da5a-8c1b-4a70-bf4b-e92d3db108ea"));
         }};
     }
 
-    private Set<AuditData> getAllocationDataAuditData() {
-        return new HashSet<AuditData>(){{
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
-            add(new AuditData(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:29",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
-            add(new AuditData(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"64b4c266-7671-4049-882e-82b1269570c2\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
+    private Set<AuditEvent> getAllocationDataAuditData() {
+        return new HashSet<AuditEvent>(){{
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 12:58:04",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
+            add(new AuditEvent(UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"808be858-1a4d-4117-99c8-59cf6f90edb3\"}", "an-env", LocalDateTime.parse("2019-04-23 09:18:29",dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
+            add(new AuditEvent(UUID.fromString("a7590ff3-4377-4ee8-a165-0c6426c744a1"),UUID.randomUUID(),UUID.randomUUID().toString(),"a-service", "{\"stage\": \"DCU_MIN_DATA_INPUT\", \"teamUUID\": \"1102b26b-06ed-4247-a1b3-699167f2dbcd\", \"stageUUID\": \"64b4c266-7671-4049-882e-82b1269570c2\"}", "an-env", LocalDateTime.parse("2019-04-23 11:17:53", dateFormatter), "STAGE_ALLOCATED_TO_TEAM", UUID.randomUUID().toString()));
         }};
     }
 
 
-    private Set<AuditData> getAppealsDataAuditData() {
+    private Set<AuditEvent> getAppealsDataAuditData() {
         return new HashSet<>(){{
-            add(new AuditData(
+            add(new AuditEvent(
                     UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1"),
                     UUID.randomUUID(),UUID.randomUUID().toString(),
                     "a-service",
@@ -735,9 +735,9 @@ public class AuditExportServiceTest {
         }};
     }
 
-    private Set<AuditData> getInterestDataAuditData() {
+    private Set<AuditEvent> getInterestDataAuditData() {
         return Set.of(
-                new AuditData(
+                new AuditEvent(
                         UUID.fromString("00000000-0000-0000-0000-000000000000"),
                         UUID.randomUUID(),
                         UUID.randomUUID().toString(),
@@ -747,7 +747,7 @@ public class AuditExportServiceTest {
                         LocalDateTime.parse("2020-01-01 00:00:00", dateFormatter),
                         "EXTERNAL_INTEREST_CREATED",
                         "10000000-0000-0000-0000-000000000000"),
-                new AuditData(
+                new AuditEvent(
                         UUID.fromString("00000000-0000-0000-0000-000000000001"),
                         UUID.randomUUID(),
                         UUID.randomUUID().toString(),

@@ -8,14 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Entity
-@Table(name = "audit_data")
+@Table(name = "audit_event")
 @NoArgsConstructor
-public class AuditData implements Serializable {
+public class AuditEvent implements Serializable {
 
     @Id
     @Column(name = "id")
@@ -71,7 +70,7 @@ public class AuditData implements Serializable {
     @Setter
     private Boolean deleted;
 
-    public AuditData( String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
@@ -86,7 +85,7 @@ public class AuditData implements Serializable {
         this.deleted = false;
     }
 
-    public AuditData(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
         this.stageUUID = stageUUID;

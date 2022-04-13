@@ -3,7 +3,7 @@ package uk.gov.digital.ho.hocs.audit.export.parsers.interests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClientSupplier;
@@ -30,7 +30,7 @@ public abstract class AbstractInterestDataParser extends AbstractDataParser {
     }
 
     @Override
-    public String[] parsePayload(AuditData audit) throws JsonProcessingException {
+    public String[] parsePayload(AuditEvent audit) throws JsonProcessingException {
         AuditPayload.Interest interestData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Interest.class);
 
         return new String[] {

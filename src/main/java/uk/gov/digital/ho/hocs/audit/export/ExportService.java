@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.application.LogEvent;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.AuditExportException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
@@ -117,7 +117,7 @@ public class ExportService {
         }
     }
 
-    private Stream<AuditData> getAuditDataStream(boolean lastAudit, String[] events, LocalDate from, LocalDate to, String caseTypeCode){
+    private Stream<AuditEvent> getAuditDataStream(boolean lastAudit, String[] events, LocalDate from, LocalDate to, String caseTypeCode){
         if(lastAudit){
             return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
@@ -137,7 +137,7 @@ public class ExportService {
         }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
-            Stream<AuditData> data = getAuditDataStream(lastAuditDataStream, events, from, to, caseTypeCode);
+            Stream<AuditEvent> data = getAuditDataStream(lastAuditDataStream, events, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
             data.forEach((audit) -> {
                 String[] parsedAudit = null;
@@ -162,7 +162,7 @@ public class ExportService {
         }
     }
 
-    private String[] parseData(ExportType exportType, AuditData audit, ZonedDateTimeConverter zonedDateTimeConverter, LinkedHashSet<String> caseDataHeaders) throws IOException {
+    private String[] parseData(ExportType exportType, AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, LinkedHashSet<String> caseDataHeaders) throws IOException {
         switch (exportType) {
             case CASE_DATA:
                 return parseCaseDataAuditPayload(audit, caseDataHeaders, zonedDateTimeConverter);
@@ -187,7 +187,7 @@ public class ExportService {
         genericParseAndPrint(true, CASE_DATA_EVENTS, ExportType.CASE_DATA, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, caseDataHeaders, headers);
     }
 
-    private String[] parseCaseDataAuditPayload(AuditData audit, LinkedHashSet<String> caseDataHeaders, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseDataAuditPayload(AuditEvent audit, LinkedHashSet<String> caseDataHeaders, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.CaseData caseData = mapper.readValue(audit.getAuditPayload(), AuditPayload.CaseData.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -214,7 +214,7 @@ public class ExportService {
         genericParseAndPrint(false, CASE_NOTES_EVENTS, ExportType.CASE_NOTES, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
     }
 
-    private String[] parseCaseNotesAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseNotesAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.CaseNote caseNote = mapper.readValue(audit.getAuditPayload(), AuditPayload.CaseNote.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -243,7 +243,7 @@ public class ExportService {
         headers.addAll(somuFields.stream().map(SomuTypeField::getExtractColumnLabel).collect(Collectors.toList()));
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
-            Stream<AuditData> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
+            Stream<AuditEvent> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
             ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
             data.forEach((audit) -> {
                 String[] parsedAudit = null;
@@ -269,7 +269,7 @@ public class ExportService {
         }
     }
 
-    private String[] parseCaseDataSomuAuditPayload(AuditData audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCaseDataSomuAuditPayload(AuditEvent audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -285,8 +285,8 @@ public class ExportService {
         return data.toArray(new String[0]);
     }
 
-    private boolean filterSomuIType(AuditData auditData, SomuTypeDto somuTypeDto) throws IOException {
-        AuditPayload.SomuItem somuItem = mapper.readValue(auditData.getAuditPayload(), AuditPayload.SomuItem.class);
+    private boolean filterSomuIType(AuditEvent auditEvent, SomuTypeDto somuTypeDto) throws IOException {
+        AuditPayload.SomuItem somuItem = mapper.readValue(auditEvent.getAuditPayload(), AuditPayload.SomuItem.class);
         return StringUtils.equals(somuItem.getSomuTypeUuid().toString(), somuTypeDto.getUuid().toString());
     }
 
@@ -306,7 +306,7 @@ public class ExportService {
             substitutedHeaders = headerConverter.substitute(headers);
         }
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
-            Stream<AuditData> data = getAuditDataStream(false, TOPIC_EVENTS, from, to, caseTypeCode);
+            Stream<AuditEvent> data = getAuditDataStream(false, TOPIC_EVENTS, from, to, caseTypeCode);
 
             data.forEach((audit) -> {
                 String[] parsedAudit = null;
@@ -326,7 +326,7 @@ public class ExportService {
         }
     }
 
-    private String[] parseTopicAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseTopicAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
 
         AuditPayload.Topic topicData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Topic.class);
@@ -359,7 +359,7 @@ public class ExportService {
         }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+            Stream<AuditEvent> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     EXTENSION_EVENTS, caseTypeCode);
 
@@ -382,7 +382,7 @@ public class ExportService {
         }
     }
 
-    private String[] parseExtensionAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseExtensionAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Extension extensionData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Extension.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -396,7 +396,7 @@ public class ExportService {
         return data.toArray(new String[data.size()]);
     }
 
-    private String[] parseCorrespondentAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseCorrespondentAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Correspondent correspondentData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Correspondent.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -430,7 +430,7 @@ public class ExportService {
         genericParseAndPrint(false, ALLOCATION_EVENTS, ExportType.ALLOCATIONS, from, to, outputWriter, caseTypeCode, convert, convertHeader, zonedDateTimeConverter, null, headers);
     }
 
-    private String[] parseAllocationAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseAllocationAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
 
         AuditPayload.StageAllocation allocationData = mapper.readValue(audit.getAuditPayload(), AuditPayload.StageAllocation.class);
@@ -675,7 +675,7 @@ public class ExportService {
         }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[substitutedHeaders.size()])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+            Stream<AuditEvent> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                             from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     APPEAL_EVENTS, caseTypeCode);
 
@@ -698,7 +698,7 @@ public class ExportService {
         }
     }
 
-    private String[] parseAppealAuditPayload(AuditData audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private String[] parseAppealAuditPayload(AuditEvent audit, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.Appeal appealData = mapper.readValue(audit.getAuditPayload(), AuditPayload.Appeal.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -731,7 +731,7 @@ public class ExportService {
         }
 
         try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(substitutedHeaders.toArray(new String[0])))) {
-            Stream<AuditData> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+            Stream<AuditEvent> data = auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                             from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
                     INTEREST_EVENTS, caseTypeCode);
 
