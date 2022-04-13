@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
 import java.time.LocalDateTime;
@@ -30,27 +30,27 @@ public class AuditDataServiceTest {
     private AuditRepository auditRepository;
 
     @Mock
-    private AuditDataService auditService;
+    private AuditEventService auditService;
 
     @Before
     public void setUp() {
-        this.auditService = new AuditDataService(auditRepository);
+        this.auditService = new AuditEventService(auditRepository);
     }
 
     @Test
     public void deleteCaseAuditWhenTrueUpdatedToTrue() {
 
         UUID caseUUID = UUID.randomUUID();
-        AuditData auditData = new AuditData(correlationID,raisingService,auditPayload,namespace,dateTime,auditType,userID);
+        AuditEvent auditEvent = new AuditEvent(correlationID,raisingService,auditPayload,namespace,dateTime,auditType,userID);
         ArrayList auditDatas = new ArrayList() {{
-            add(auditData);
+            add(auditEvent);
         }};
         when(auditRepository.findAuditDataByCaseUUID(caseUUID)).thenReturn(auditDatas);
 
         auditService.deleteCaseAudit(caseUUID, true);
 
         verify(auditRepository).findAuditDataByCaseUUID(caseUUID);
-        verify(auditRepository).save(auditData);
+        verify(auditRepository).save(auditEvent);
         verifyNoMoreInteractions(auditRepository);
     }
 }

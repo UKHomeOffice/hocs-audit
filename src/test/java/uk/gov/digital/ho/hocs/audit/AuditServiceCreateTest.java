@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
 import java.time.LocalDateTime;
@@ -28,11 +28,11 @@ public class AuditServiceCreateTest {
     private AuditRepository auditRepository;
 
     @Mock
-    private AuditDataService auditService;
+    private AuditEventService auditService;
 
     @Before
     public void setUp() {
-        this.auditService = new AuditDataService(auditRepository);
+        this.auditService = new AuditEventService(auditRepository);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class AuditServiceCreateTest {
                 auditType,
                 userID);
 
-        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
         verifyNoMoreInteractions(auditRepository);
     }
 
@@ -224,7 +224,7 @@ public class AuditServiceCreateTest {
                 dateTime,
                 auditType,
                 userID);
-        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
         verifyNoMoreInteractions(auditRepository);
 
     }
@@ -238,7 +238,7 @@ public class AuditServiceCreateTest {
                 dateTime,
                 auditType,
                 userID);
-        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
         verifyNoMoreInteractions(auditRepository);
 
     }
@@ -252,7 +252,7 @@ public class AuditServiceCreateTest {
                 dateTime,
                 auditType,
                 userID);
-        verify(auditRepository, times(1)).save(any(AuditData.class));
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
         verifyNoMoreInteractions(auditRepository);
 
     }

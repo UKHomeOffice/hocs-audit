@@ -5,9 +5,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.digital.ho.hocs.audit.AuditDataService;
+import uk.gov.digital.ho.hocs.audit.AuditEventService;
 
-import java.time.Duration;
 import java.util.UUID;
 
 import static org.awaitility.Awaitility.await;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.when;
 public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
 
     @MockBean
-    public AuditDataService auditDataService;
+    public AuditEventService auditEventService;
 
     @Test
     public void consumeMessageFromQueue() {
@@ -32,7 +31,7 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
 
         await().until(() -> getNumberOfMessagesOnQueue() == 0);
 
-        verify(auditDataService).createAudit(any(), any(), eq(correlationId.toString()),
+        verify(auditEventService).createAudit(any(), any(), eq(correlationId.toString()),
                 any(), any(), any(),
                 any(), any(), any());
     }
@@ -42,7 +41,7 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
         UUID correlationId = UUID.randomUUID();
         String message = String.format("{ correlation_id: \"%s\" }", correlationId);
 
-        when(auditDataService.createAudit(any(), any(), eq(correlationId.toString()),
+        when(auditEventService.createAudit(any(), any(), eq(correlationId.toString()),
                 any(), any(), any(),
                 any(), any(), any())).thenThrow(new NullPointerException("TEST"));
 
@@ -51,7 +50,7 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
         await().until(() -> getNumberOfMessagesOnQueue() == 0);
         await().until(() -> getNumberOfMessagesNotVisibleOnQueue() == 1);
 
-        verify(auditDataService).createAudit(any(), any(), eq(correlationId.toString()),
+        verify(auditEventService).createAudit(any(), any(), eq(correlationId.toString()),
                 any(), any(), any(),
                 any(), any(), any());
     }

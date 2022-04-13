@@ -8,7 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.digital.ho.hocs.audit.auditdetails.dto.*;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,14 +16,13 @@ import java.util.UUID;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.doesNotHave;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditResourceTest {
 
     @Mock
-    private AuditDataService auditService;
+    private AuditEventService auditService;
 
     private String correlationID = "correlationID1";
     private String raisingService = "raisingServiceName";
@@ -35,8 +34,8 @@ public class AuditResourceTest {
     private UUID caseUUID = UUID.randomUUID();
     private UUID stageUUID = UUID.randomUUID();
 
-    private AuditData validAudit = new AuditData(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-    private AuditDataResource auditResource;
+    private AuditEvent validAudit = new AuditEvent(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    private AuditEventResource auditResource;
 
     private CreateAuditDto request = new CreateAuditDto(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     private CreateAuditDto requestWithCaseUUID = new CreateAuditDto(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
@@ -49,7 +48,7 @@ public class AuditResourceTest {
 
     @Before
     public void setUp() {
-        auditResource = new AuditDataResource(auditService);
+        auditResource = new AuditEventResource(auditService);
     }
 
     @Test

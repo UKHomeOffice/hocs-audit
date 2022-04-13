@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
 import java.time.LocalDate;
@@ -27,42 +27,42 @@ import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
 
 @Service
 @Slf4j
-public class AuditDataService {
+public class AuditEventService {
 
     private final AuditRepository auditRepository;
 
     private Pageable pageRequest;
 
     @Autowired
-    public AuditDataService(AuditRepository auditRepository){
+    public AuditEventService(AuditRepository auditRepository){
         this.auditRepository = auditRepository;
     }
 
 
-    public AuditData createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
          return createAudit(null, null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     }
 
-    public AuditData createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         String validAuditPayload = validatePayload(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-        AuditData auditData = new AuditData(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
-        validateNotNull(auditData);
-        auditRepository.save(auditData);
-        log.info("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}, event {}",
-                auditData.getUuid(),
-                auditData.getCaseUUID(),
-                auditData.getStageUUID(),
-                auditData.getCorrelationID(),
-                auditData.getRaisingService(),
-                auditData.getUserID(),
-                auditData.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
-        return auditData;
+        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
+        validateNotNull(auditEvent);
+        auditRepository.save(auditEvent);
+        log.debug("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}, event {}",
+                auditEvent.getUuid(),
+                auditEvent.getCaseUUID(),
+                auditEvent.getStageUUID(),
+                auditEvent.getCorrelationID(),
+                auditEvent.getRaisingService(),
+                auditEvent.getUserID(),
+                auditEvent.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
+        return auditEvent;
     }
 
     public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted){
         log.debug("Case {} setting deleted to {}", caseUUID, deleted);
-        List<AuditData> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
-        for (AuditData audit : audits) {
+        List<AuditEvent> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
+        for (AuditEvent audit : audits) {
             audit.setDeleted(deleted);
             auditRepository.save(audit);
         }
@@ -71,20 +71,20 @@ public class AuditDataService {
     }
 
     @Transactional(readOnly = true)
-    public AuditData getAuditDataByUUID(UUID auditUUID) {
+    public AuditEvent getAuditDataByUUID(UUID auditUUID) {
         log.debug("Requesting Audit for Audit UUID: {} ", auditUUID);
         return auditRepository.findAuditDataByUuid(auditUUID);
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataByCaseUUID(UUID caseUUID, String types) {
+    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types) {
         log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
         String[] filterTypes = types.split(",");
         return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataList(int page, int limit){
+    public List<AuditEvent> getAuditDataList(int page, int limit){
         log.info("Requesting all audits from last seven days");
         pageRequest = PageRequest.of(page,limit);
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
@@ -92,14 +92,14 @@ public class AuditDataService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataByDateRange(String fromDate, String toDate, int page, int limit){
+    public List<AuditEvent> getAuditDataByDateRange(String fromDate, String toDate, int page, int limit){
         log.debug("Requesting all audits for dates: {} to {} ", fromDate, toDate);
         pageRequest = PageRequest.of(page,limit);
         return auditRepository.findAuditDataByDateRange(convertLocalDateToStartOfLocalDateTime(fromDate), convertLocalDateToEndOfLocalDateTime(toDate), pageRequest).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataByCorrelationID(String correlationID, int page, int limit){
+    public List<AuditEvent> getAuditDataByCorrelationID(String correlationID, int page, int limit){
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
         log.debug("Requesting audits for Correlation ID: {} from last seven days", correlationID);
         pageRequest = PageRequest.of(page,limit);
@@ -107,7 +107,7 @@ public class AuditDataService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataByUserID(String userID, int page, int limit){
+    public List<AuditEvent> getAuditDataByUserID(String userID, int page, int limit){
         log.debug("Requesting audits for User ID: {} from last seven days", userID);
         pageRequest = PageRequest.of(page,limit);
         LocalDateTime lastWeek = LocalDateTime.now().minusWeeks(1);
@@ -115,7 +115,7 @@ public class AuditDataService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditData> getAuditDataByUserIDByDateRange(String userID, String fromDate, String toDate, int page, int limit){
+    public List<AuditEvent> getAuditDataByUserIDByDateRange(String userID, String fromDate, String toDate, int page, int limit){
         log.debug("Requesting audits for User IDL {}, from dates: {} to {} ", userID, fromDate, toDate);
         pageRequest = PageRequest.of(page,limit);
         return auditRepository.findAuditDataByUserIDAndDateRange(userID, convertLocalDateToStartOfLocalDateTime(fromDate), convertLocalDateToEndOfLocalDateTime(toDate), pageRequest);
@@ -131,19 +131,19 @@ public class AuditDataService {
         return LocalDateTime.of(toDate, LocalTime.MAX);
     }
 
-    private static void validateNotNull(AuditData auditData) {
-        String correlationID = auditData.getCorrelationID();
-        String raisingService = auditData.getRaisingService();
-        String namespace = auditData.getNamespace();
-        LocalDateTime auditTimestamp = auditData.getAuditTimestamp();
-        String type = auditData.getType();
-        String userID = auditData.getUserID();
+    private static void validateNotNull(AuditEvent auditEvent) {
+        String correlationID = auditEvent.getCorrelationID();
+        String raisingService = auditEvent.getRaisingService();
+        String namespace = auditEvent.getNamespace();
+        LocalDateTime auditTimestamp = auditEvent.getAuditTimestamp();
+        String type = auditEvent.getType();
+        String userID = auditEvent.getUserID();
 
         if (correlationID == null || raisingService == null || namespace == null || auditTimestamp == null || type == null || userID == null) {
             throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s, %s)",
                     correlationID,
                     raisingService,
-                    auditData.getAuditPayload(),
+                    auditEvent.getAuditPayload(),
                     namespace,
                     auditTimestamp,
                     type,

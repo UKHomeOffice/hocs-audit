@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClientSupplier;
@@ -58,7 +58,7 @@ public class BfInterestDataParserTest {
                         "\"eventType\": \"EXTERNAL_INTEREST_CREATED\", \"partyType\": \"PARTY_TYPE_1\"," +
                         "\"caseDataUuid\": \"00000000-0000-0000-0000-000000000000\", \"interestDetails\": \"TEST_DETAILS\"}";
 
-        AuditData auditData = new AuditData(CASE_DATA_UUID, STAGE_UUID, UUID.randomUUID().toString(),
+        AuditEvent auditEvent = new AuditEvent(CASE_DATA_UUID, STAGE_UUID, UUID.randomUUID().toString(),
                 "TEST_SERVICE", eventPayload , "TEST_NAMESPACE",
                 LocalDateTime.of(2000,1,1,0,0), "TEST_TYPE",
                 USER_UUID.toString());
@@ -72,7 +72,7 @@ public class BfInterestDataParserTest {
                         CASE_DATA_UUID.toString(),
                         "PARTY_TYPE_1",
                         "TEST_DETAILS" },
-                bfInterestDataParser.parsePayload(auditData));
+                bfInterestDataParser.parsePayload(auditEvent));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class BfInterestDataParserTest {
                         "\"eventType\": \"EXTERNAL_INTEREST_CREATED\", \"partyType\": \"PARTY_TYPE_1\"," +
                         "\"caseDataUuid\": \"00000000-0000-0000-0000-000000000000\", \"interestDetails\": \"TEST_DETAILS\"}";
 
-        AuditData auditData = new AuditData(CASE_DATA_UUID, STAGE_UUID, UUID.randomUUID().toString(),
+        AuditEvent auditEvent = new AuditEvent(CASE_DATA_UUID, STAGE_UUID, UUID.randomUUID().toString(),
                 "TEST_SERVICE", eventPayload , "TEST_NAMESPACE",
                 LocalDateTime.of(2000,1,1,0,0), "TEST_TYPE",
                 USER_UUID.toString());
@@ -98,7 +98,7 @@ public class BfInterestDataParserTest {
                         "TEST_CASE",
                         "TEST_PARTY",
                         "TEST_DETAILS" },
-                bfInterestDataParser.parsePayload(auditData));
+                bfInterestDataParser.parsePayload(auditEvent));
     }
 
 }

@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import uk.gov.digital.ho.hocs.audit.application.LocalDateTimeDeserializer;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditData;
+import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -49,17 +48,17 @@ public class GetAuditResponse {
     @JsonProperty(value = "user_id")
     private String userID;
 
-    public static GetAuditResponse from(AuditData auditData) {
+    public static GetAuditResponse from(AuditEvent auditEvent) {
         return new GetAuditResponse(
-                auditData.getUuid(),
-                auditData.getCaseUUID(),
-                auditData.getStageUUID(),
-                auditData.getCorrelationID(),
-                auditData.getRaisingService(),
-                auditData.getAuditPayload(),
-                auditData.getNamespace(),
-                ZonedDateTime.of(auditData.getAuditTimestamp(), ZoneOffset.UTC),
-                auditData.getType(),
-                auditData.getUserID());
+                auditEvent.getUuid(),
+                auditEvent.getCaseUUID(),
+                auditEvent.getStageUUID(),
+                auditEvent.getCorrelationID(),
+                auditEvent.getRaisingService(),
+                auditEvent.getAuditPayload(),
+                auditEvent.getNamespace(),
+                ZonedDateTime.of(auditEvent.getAuditTimestamp(), ZoneOffset.UTC),
+                auditEvent.getType(),
+                auditEvent.getUserID());
     }
 }
