@@ -52,7 +52,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.springframework:spring-context-indexer:5.3.18'
+    annotationProcessor 'org.springframework:spring-context-indexer:5.3.19'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
