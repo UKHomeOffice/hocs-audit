@@ -30,7 +30,6 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
         checkViewNameIsAllowed(viewName);
 
         return em.createNativeQuery(String.format("SELECT * FROM %s", viewName))
-                .setHint(QueryHints.HINT_FETCH_SIZE, 20 )
                 .unwrap(Query.class)
                 .stream();
     }
@@ -54,5 +53,3 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
         return em.createNativeQuery(String.format("REFRESH MATERIALIZED VIEW %s", viewName)).executeUpdate();
     }
 }
-
-
