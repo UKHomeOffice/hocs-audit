@@ -25,7 +25,7 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
     @Test
     public void consumeMessageFromQueue() {
         UUID correlationId = UUID.randomUUID();
-        String message = String.format("{ correlation_id: \"%s\" }", correlationId);
+        String message = String.format("{ \"correlation_id\": \"%s\" }", correlationId);
 
         amazonSQSAsync.sendMessage(auditQueue, message);
 
@@ -39,7 +39,7 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
     @Test
     public void consumeMessageFromQueue_exceptionMakesMessageNotVisible() {
         UUID correlationId = UUID.randomUUID();
-        String message = String.format("{ correlation_id: \"%s\" }", correlationId);
+        String message = String.format("{ \"correlation_id\": \"%s\" }", correlationId);
 
         when(auditEventService.createAudit(any(), any(), eq(correlationId.toString()),
                 any(), any(), any(),

@@ -1,6 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint.dto;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,31 +11,31 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreateAuditDto {
 
-    @SerializedName("correlation_id")
+    @JsonProperty("correlation_id")
     private String correlationID;
 
-    @SerializedName("caseUUID")
+    @JsonProperty("caseUUID")
     private UUID caseUUID;
 
-    @SerializedName(value= "stageUUID")
+    @JsonProperty(value = "stageUUID")
     private UUID stageUUID;
 
-    @SerializedName(value= "raising_service")
+    @JsonProperty(value = "raising_service")
     private String raisingService;
 
-    @SerializedName(value= "audit_payload")
+    @JsonProperty(value = "audit_payload")
     private String auditPayload;
 
-    @SerializedName(value= "namespace")
+    @JsonProperty(value = "namespace")
     private String namespace;
 
-    @SerializedName(value="audit_timestamp")
+    @JsonProperty(value = "audit_timestamp")
     private LocalDateTime auditTimestamp;
 
-    @SerializedName(value= "type")
+    @JsonProperty(value = "type")
     private String type;
 
-    @SerializedName(value= "user_id")
+    @JsonProperty(value = "user_id")
     private String userID;
 
     public CreateAuditDto(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){

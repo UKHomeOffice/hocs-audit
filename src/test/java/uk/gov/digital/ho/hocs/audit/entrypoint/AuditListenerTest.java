@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
+import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
 
@@ -23,7 +25,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class AuditListenerTest {
 
     @Autowired
-    private Gson gson;
+    private ObjectMapper objectMapper;
 
     @Mock
     private AuditRepository auditRepository;
@@ -31,12 +33,15 @@ public class AuditListenerTest {
     @Mock
     private AuditEventService auditEventService;
 
-    @Test
-    public void callsAuditServiceWithValidCreateCaseMessage() {
-        UUID correlationId = UUID.randomUUID();
-        String message = String.format("{ correlation_id: \"%s\"}", correlationId);
+    @Mock
+    private JsonValidator jsonValidator;
 
-        AuditListener auditListener = new AuditListener(gson, auditEventService);
+    @Test
+    public void callsAuditServiceWithValidCreateCaseMessage() throws JsonProcessingException {
+        UUID correlationId = UUID.randomUUID();
+        String message = String.format("{ \"correlation_id\": \"%s\"}", correlationId);
+
+        AuditListener auditListener = new AuditListener(objectMapper, auditEventService);
 
         auditListener.onAuditEvent(message);
 
@@ -48,17 +53,17 @@ public class AuditListenerTest {
         verifyNoMoreInteractions(auditEventService);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void callsAuditServiceWithNullCreateCaseMessage() {
-        AuditListener auditListener = new AuditListener(gson, auditEventService);
+    @Test(expected = IllegalArgumentException.class)
+    public void callsAuditServiceWithNullCreateCaseMessage() throws JsonProcessingException {
+        AuditListener auditListener = new AuditListener(objectMapper, auditEventService);
 
         auditListener.onAuditEvent(null);
     }
 
     @Test(expected = EntityCreationException.class)
-    public void callsAuditServiceWithInvalidCreateCaseMessage() {
-        String incorrectMessage = "{test:1}";
-        AuditListener auditListener = new AuditListener(gson, new AuditEventService(auditRepository));
+    public void callsAuditServiceWithInvalidCreateCaseMessage() throws JsonProcessingException {
+        String incorrectMessage = "{\"test\":1}";
+        AuditListener auditListener = new AuditListener(objectMapper, new AuditEventService(auditRepository, jsonValidator));
 
         auditListener.onAuditEvent(incorrectMessage);
     }
