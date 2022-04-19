@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
 
     implementation 'org.flywaydb:flyway-core:8.5.7'
-    runtimeOnly 'org.postgresql:postgresql:42.3.3'
+    runtimeOnly 'org.postgresql:postgresql:42.3.4'
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
