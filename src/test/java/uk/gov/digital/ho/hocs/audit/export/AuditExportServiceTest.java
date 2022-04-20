@@ -72,6 +72,7 @@ public class AuditExportServiceTest {
     private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
         add(new CaseTypeDto("DCU Ministerial", "a1", "MIN"));
         add(new CaseTypeDto("TEST", "a1", "BF"));
+        add(new CaseTypeDto("TEST", "a1", "TEST"));
     }};
     private LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
     private LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
@@ -194,6 +195,17 @@ public class AuditExportServiceTest {
 
         verify(auditRepository, times(1)).findLastAuditDataByDateRangeAndEvents(from, to, ExportService.CASE_DATA_EVENTS, "a1");
         verify(exportDataConverter, times(getCaseDataAuditData().size())).convertData(any(), any());
+    }
+
+    @Test
+    public void caseDataExportTodaysDateHitsLatestTable() throws IOException {
+        when(infoClient.getCaseExportFields("TEST")).thenReturn(fields);
+        when(auditRepository.findAuditEventLatestEventsAfterDate(any(), eq(ExportService.CASE_DATA_EVENTS), any())).thenReturn(getCaseDataAuditData().stream());
+
+        OutputStream outputStream = new ByteArrayOutputStream();
+        exportService.auditExport(from.toLocalDate(), LocalDate.now(), outputStream, "TEST", ExportType.CASE_DATA, false, false, null, null);
+
+        verify(auditRepository, times(1)).findAuditEventLatestEventsAfterDate(from, ExportService.CASE_DATA_EVENTS, "a1");
     }
 
     @Test

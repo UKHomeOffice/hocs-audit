@@ -122,6 +122,10 @@ public class ExportService {
         LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
 
         if (lastAudit) {
+            if (peggedTo.equals(LocalDate.now())) {
+                return auditRepository.findAuditEventLatestEventsAfterDate(LocalDateTime.of(
+                        from, LocalTime.MIN), events, caseTypeCode);
+            }
             return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                             from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
                     events, caseTypeCode);
