@@ -22,10 +22,12 @@ public class DataExportResource {
         this.customExportService = customExportService;
     }
 
-    @GetMapping(value = "/export/{caseType}", params = {"fromDate", "toDate", "exportType"})
+    @GetMapping(value = "/export/{caseType}", params = {"fromDate", "exportType"})
     public @ResponseBody
-    void getDataExport(@RequestParam("fromDate") LocalDate fromDate, @RequestParam("toDate") LocalDate toDate,
-                       @PathVariable("caseType") String caseType, @RequestParam("exportType") ExportType exportType,
+    void getDataExport(@RequestParam("fromDate") LocalDate fromDate,
+                       @RequestParam(name = "toDate", defaultValue = "#{T(java.time.LocalDate).now()}") LocalDate toDate,
+                       @PathVariable("caseType") String caseType,
+                       @RequestParam("exportType") ExportType exportType,
                        @RequestParam(name = "convert", defaultValue = "false") boolean convert,
                        @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader,
                        @RequestParam(name = "timestampFormat", required = false) String timestampFormat,
@@ -43,10 +45,10 @@ public class DataExportResource {
         }
     }
 
-    @GetMapping(value = "/export/somu/{caseType}", params = {"fromDate", "toDate", "somuType"})
+    @GetMapping(value = "/export/somu/{caseType}", params = {"fromDate", "somuType"})
     public @ResponseBody
     void getSomuExport(@RequestParam("fromDate") LocalDate fromDate,
-                       @RequestParam("toDate") LocalDate toDate,
+                       @RequestParam(value = "toDate", defaultValue = "#{T(java.time.LocalDate).now()}") LocalDate toDate,
                        @PathVariable("caseType") String caseType,
                        @RequestParam("somuType") String somuType,
                        @RequestParam(name = "convert", defaultValue = "false") boolean convert,
