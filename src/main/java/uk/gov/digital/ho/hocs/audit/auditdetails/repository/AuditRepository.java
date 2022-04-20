@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 
 @Repository
-public interface AuditRepository extends PagingAndSortingRepository<AuditEvent, String>, AuditRepositoryCustom {
+public interface AuditRepository extends PagingAndSortingRepository<AuditEvent, String>, AuditRepositoryCustom, AuditRepositoryLatestEvents {
 
 
     AuditEvent findAuditDataByUuid(UUID uuid);
