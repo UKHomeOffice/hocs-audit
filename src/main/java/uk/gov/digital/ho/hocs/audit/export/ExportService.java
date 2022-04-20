@@ -75,7 +75,8 @@ public class ExportService {
 
         OutputStream buffer = new BufferedOutputStream(output);
         OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-        String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
+        String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().
+                get().getShortCode();
         switch (exportType) {
             case CASE_DATA:
                 caseDataExport(from, to, outputWriter, caseTypeCode, caseType, convert, convertHeader, zonedDateTimeConverter);
@@ -118,16 +119,16 @@ public class ExportService {
     }
 
     private Stream<AuditEvent> getAuditDataStream(boolean lastAudit, String[] events, LocalDate from, LocalDate to, String caseTypeCode){
-        if(lastAudit){
+        LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
+
+        if (lastAudit) {
             return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                    from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+                            from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
                     events, caseTypeCode);
         }
-        else{
-            return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX),
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
+                from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
                 events, caseTypeCode);
-        }
     }
 
     private void genericParseAndPrint(boolean lastAuditDataStream, String[] events, ExportType exportType, LocalDate from, LocalDate to, OutputStreamWriter outputWriter, String caseTypeCode, boolean convert, boolean convertHeader, final ZonedDateTimeConverter zonedDateTimeConverter, LinkedHashSet<String> caseDataHeaders, List<String> headers) throws IOException{
