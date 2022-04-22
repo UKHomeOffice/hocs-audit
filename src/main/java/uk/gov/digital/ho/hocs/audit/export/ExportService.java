@@ -17,7 +17,6 @@ import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
 import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
 
 import java.io.BufferedOutputStream;
@@ -550,37 +549,6 @@ public class ExportService {
             outputWriter.close();
             log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
             throw new IOException(e);
-        }
-    }
-
-    void userWithTeamsExport(OutputStream output) throws IOException{
-        log.info("Exporting USER_TEAMS_DATA to CSV", value(EVENT, CSV_EXPORT_START));
-        OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
-        List<String> headers = List.of("Username", "First Name", "Last Name", "Team Name", "Unit Name");
-
-        Set<UserWithTeamsDto> users = infoClient.getUsersWithTeams();
-
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
-            users.forEach((user) -> {
-                try {
-
-                    Map<String, List<String>> unitAndTeamNames = user.getUnitAndTeamNames();
-                    if (unitAndTeamNames.isEmpty()) {
-                        printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), "", "");
-                        outputWriter.flush();
-                    }
-                    for (var entry : unitAndTeamNames.entrySet()){
-                        for (String teamName: entry.getValue()){
-                            printer.printRecord(user.getUsername(), user.getFirstName(), user.getLastName(), teamName, entry.getKey());
-                        }
-                    }
-                } catch (IOException exception) {
-                    log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-                }
-            });
-        } catch (IOException exception) {
-            log.error("Unable to export users and teams", exception.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
         }
     }
 
