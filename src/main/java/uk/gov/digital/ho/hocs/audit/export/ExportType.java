@@ -8,6 +8,5 @@ public enum ExportType {
     CORRESPONDENTS,
     EXTENSIONS,
     INTERESTS,
-    TOPICS,
-    USER_TEAMS;
+    TOPICS
 }
