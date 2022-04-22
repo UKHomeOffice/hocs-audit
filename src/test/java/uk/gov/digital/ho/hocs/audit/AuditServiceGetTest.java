@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -51,6 +52,25 @@ public class AuditServiceGetTest {
         auditService.getAuditDataByCaseUUID(caseUUID, types);
 
         verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray);
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test
+    public void shouldGetAuditForCaseFromDate() {
+
+        UUID caseUUID = UUID.randomUUID();
+        String types = "TYPE1,TYPE2";
+        String[] typesArray = {"TYPE1","TYPE2"};
+        LocalDate from = LocalDate.of(2022,4,1);
+
+        ArrayList auditData = new ArrayList() {{
+            add(new AuditEvent(correlationID,raisingService,auditPayload,namespace,dateTime,auditType,userID));
+        }};
+
+        when(auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from)).thenReturn(auditData);
+        auditService.getAuditDataByCaseUUID(caseUUID, types, from);
+
+        verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from);
         verifyNoMoreInteractions(auditRepository);
     }
 }

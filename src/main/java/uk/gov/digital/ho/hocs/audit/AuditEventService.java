@@ -83,6 +83,12 @@ public class AuditEventService {
         return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
+    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types, LocalDate from) {
+        log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
+        String[] filterTypes = types.split(",");
+        return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
+    }
+
     @Transactional(readOnly = true)
     public List<AuditEvent> getAuditDataList(int page, int limit){
         log.info("Requesting all audits from last seven days");
