@@ -16,24 +16,6 @@ import java.util.stream.Stream;
 @Repository
 public interface AuditRepository extends PagingAndSortingRepository<AuditEvent, String>, AuditRepositoryCustom, AuditRepositoryLatestEvents {
 
-
-    AuditEvent findAuditDataByUuid(UUID uuid);
-
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.correlation_id = ?1 AND a.audit_timestamp > ?2 AND a.deleted = false", nativeQuery = true)
-    List<AuditEvent> findAuditDataByCorrelationID(String correlationID, LocalDateTime dateTime, Pageable pageRequest);
-
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.user_id = ?1 AND a.audit_timestamp > ?2 AND a.deleted = false", nativeQuery = true)
-    List<AuditEvent> findAuditDataByUserID(String userID, LocalDateTime dateTime, Pageable pageRequest);
-
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.user_id = ?1 AND a.deleted = false AND BETWEEN a.audit_timestamp = ?2 AND a.audit_timestamp = ?3", nativeQuery = true)
-    List<AuditEvent> findAuditDataByUserIDAndDateRange(String userID, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageRequest);
-
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp > ?1 AND a.deleted = false", nativeQuery = true)
-    List<AuditEvent> findAuditData(LocalDateTime dateTime, Pageable pageRequest);
-
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp > ?1 AND a.audit_timestamp < ?2 AND a.deleted = false", nativeQuery = true)
-    Stream<AuditEvent> findAuditDataByDateRange(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageRequest);
-
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
     List<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
