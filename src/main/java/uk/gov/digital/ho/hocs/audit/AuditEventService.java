@@ -166,7 +166,7 @@ public class AuditEventService {
                         namespace,
                         auditTimestamp,
                         type,
-                        userID, value(EVENT, INVALID_AUDIT_PALOAD_STORED));
+                        userID, value(EVENT, INVALID_AUDIT_PAYLOAD_STORED));
                 // Encode invalid json to base 64, otherwise it can be seen as nested invalid json
                 byte[] encodedPayload = Base64.getEncoder().encode(auditPayload.getBytes());
                 return "{\"invalid_json\":\"" + new String(encodedPayload) + "\"}";
