@@ -29,10 +29,11 @@ class CaseAuditEventResource {
         return ResponseEntity.ok(GetAuditListResponse.from(auditData));
     }
 
-    @GetMapping(value = "/audit/case/{caseUUID}", params = {"types", "from"}, produces =  APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAuditListResponse> getAuditsSince(@PathVariable UUID caseUUID, @RequestParam("types") String types, @RequestParam("from") LocalDate from) {
-        List<AuditEvent> auditData = auditEventService.getAuditDataByCaseUUID(caseUUID, types, from);
-        return ResponseEntity.ok(GetAuditListResponse.from(auditData));
+    @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeleteCaseAuditResponse> deleteCaseAudit(@PathVariable UUID caseUUID, @RequestBody DeleteCaseAuditDto request){
+        Integer auditCount = auditEventService.deleteCaseAudit(caseUUID, request.getDeleted());
+        return ResponseEntity.ok(DeleteCaseAuditResponse.from(caseUUID, request, auditCount));
     }
+
 
 }
