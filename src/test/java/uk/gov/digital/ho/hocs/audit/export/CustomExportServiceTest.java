@@ -8,12 +8,15 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
-import uk.gov.digital.ho.hocs.audit.application.RequestData;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewDto;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.ExportViewFieldDto;
+import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldDto;
+import uk.gov.digital.ho.hocs.audit.core.RequestData;
+import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
+import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +28,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustomExportServiceTest {
@@ -90,7 +99,7 @@ public class CustomExportServiceTest {
 
         verify(servletResponse).setContentType("text/csv;charset=UTF-8");
         verify(servletResponse).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + VIEW_DISPLAY_NAME_1 + "-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=" + VIEW_DISPLAY_NAME_1 + "-" + LocalDate.now() + ".csv");
         verify(servletResponse).getOutputStream();
         verify(infoClient).getExportView(VIEW_CODE_1);
         verify(auditRepository).getResultsFromView(VIEW_CODE_1);

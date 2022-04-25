@@ -8,14 +8,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.gov.digital.ho.hocs.audit.auditdetails.exception.EntityPermissionException;
+import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
+import uk.gov.digital.ho.hocs.audit.entrypoint.DataExportResource;
+import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
+import uk.gov.digital.ho.hocs.audit.service.ExportService;
+import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataExportResourceTest {
@@ -49,7 +58,7 @@ public class DataExportResourceTest {
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + "-" +
-                        LocalDate.now().toString() + ".csv");
+                        LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, true, null, null);
@@ -73,7 +82,7 @@ public class DataExportResourceTest {
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + exportType.toString().toLowerCase() + "-" +
-                        LocalDate.now().toString() + ".csv");
+                        LocalDate.now() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
         verify(exportService).auditExport(fromDate, toDate, servletOutputStream, caseType, exportType, false, true, null, null);
@@ -96,7 +105,7 @@ public class DataExportResourceTest {
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + caseType.toLowerCase() + "-" + somuType + "-" +
-                        LocalDate.now().toString() + ".csv");
+                        LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).auditSomuExport(fromDate, toDate, servletOutputStream, caseType, somuType, false, null, null);
@@ -113,7 +122,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=topics-" + LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).staticTopicExport(servletOutputStream, true);
@@ -132,7 +141,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=topics-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=topics-" + LocalDate.now() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
         verify(exportService).staticTopicExport(servletOutputStream, true);
@@ -150,7 +159,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=teams-" + LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).staticTeamExport(servletOutputStream, true);
@@ -169,7 +178,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=teams-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=teams-" + LocalDate.now() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
         verify(exportService).staticTeamExport(servletOutputStream, true);
@@ -187,7 +196,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=units_teams-" + LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).staticUnitsForTeamsExport(servletOutputStream, true);
@@ -205,7 +214,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=units_teams-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=units_teams-" + LocalDate.now() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
         verify(exportService).staticUnitsForTeamsExport(servletOutputStream, true);
@@ -222,7 +231,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=users-" + LocalDate.now() + ".csv");
         verify(response).setStatus(200);
         verify(response).getOutputStream();
         verify(exportService).staticUserExport(servletOutputStream, true);
@@ -241,7 +250,7 @@ public class DataExportResourceTest {
 
         verify(response).setContentType("text/csv");
         verify(response).setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=users-" + LocalDate.now().toString() + ".csv");
+                "attachment; filename=users-" + LocalDate.now() + ".csv");
         verify(response).setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         verify(response).getOutputStream();
         verify(exportService).staticUserExport(servletOutputStream, true);

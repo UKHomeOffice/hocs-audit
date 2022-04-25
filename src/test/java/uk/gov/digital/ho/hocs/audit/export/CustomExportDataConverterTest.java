@@ -5,19 +5,33 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.export.caseworkclient.dto.GetTopicResponse;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.ExportViewConstants;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
+import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
+import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetTopicResponse;
+import uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants;
+import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldAdapterDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.UnitDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
