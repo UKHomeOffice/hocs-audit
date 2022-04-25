@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import java.util.LinkedList;
 import java.util.List;

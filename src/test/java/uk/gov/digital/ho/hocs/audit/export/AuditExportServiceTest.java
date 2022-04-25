@@ -11,30 +11,54 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import uk.gov.digital.ho.hocs.audit.application.SpringConfiguration;
-import uk.gov.digital.ho.hocs.audit.application.ZonedDateTimeConverter;
-import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
-import uk.gov.digital.ho.hocs.audit.auditdetails.repository.AuditRepository;
-import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
-import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
-import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
-import uk.gov.digital.ho.hocs.audit.export.parsers.interests.BfInterestDataParser;
+import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.UnitDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
+import uk.gov.digital.ho.hocs.audit.core.config.SpringConfiguration;
+import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
+import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
+import uk.gov.digital.ho.hocs.audit.service.ExportService;
+import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverterFactory;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
+import uk.gov.digital.ho.hocs.audit.service.domain.parsers.DataParserFactory;
+import uk.gov.digital.ho.hocs.audit.service.domain.parsers.interests.BfInterestDataParser;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuditExportServiceTest {
@@ -66,21 +90,21 @@ public class AuditExportServiceTest {
     private ExportService exportService;
     private ExportService exportServiceTestHeaders;
     private ExportService exportServiceCaseNotesHeaders;
-    private SpringConfiguration configuration = new SpringConfiguration();
+    private final SpringConfiguration configuration = new SpringConfiguration();
     private ObjectMapper mapper;
-    private Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
+    private final Set<CaseTypeDto> caseTypes = new HashSet<CaseTypeDto>() {{
         add(new CaseTypeDto("DCU Ministerial", "a1", "MIN"));
         add(new CaseTypeDto("TEST", "a1", "BF"));
         add(new CaseTypeDto("TEST", "a1", "TEST"));
     }};
-    private LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
-    private LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
-    private String caseType = "MIN";
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final LocalDateTime from = LocalDateTime.of(2019, 1, 1, 0, 0);
+    private final LocalDateTime to = LocalDateTime.of(LocalDate.of(2019, 6, 1), LocalTime.MAX);
+    private final String caseType = "MIN";
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final ZonedDateTimeConverter defaultZonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
     private final MalformedDateConverter malformedDateConverter = new MalformedDateConverter();
 
-    private LinkedHashSet<String> fields = Stream.of(
+    private final LinkedHashSet<String> fields = Stream.of(
             "CopyNumberTen",
             "DateOfCorrespondence",
             "OGDDept",
@@ -551,7 +575,7 @@ public class AuditExportServiceTest {
     public void verifyHeadersAreSubstitutedWithCaseDataExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         exportService.caseDataExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", "MIN", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
@@ -560,7 +584,7 @@ public class AuditExportServiceTest {
     public void verifyHeadersAreSubstitutedWithAllocationsExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         exportService.allocationExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
@@ -569,7 +593,7 @@ public class AuditExportServiceTest {
     public void verifyHeadersAreSubstitutedWithCorrespondentExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         exportService.correspondentExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
@@ -578,7 +602,7 @@ public class AuditExportServiceTest {
     public void verifyHeadersAreSubstitutedWithExtensionExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         exportService.extensionExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
@@ -588,7 +612,7 @@ public class AuditExportServiceTest {
     public void verifyHeadersAreSubstitutedWithTopicExtract() throws IOException {
         OutputStream outputStream = new ByteArrayOutputStream();
         OutputStream buffer = new BufferedOutputStream(outputStream);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, "UTF-8");
+        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
         exportService.topicExport(LocalDate.MIN, LocalDate.MAX, outputWriter, "a1", true, defaultZonedDateTimeConverter);
         verify(passThroughHeaderConverter, times(1)).substitute(anyList());
     }
