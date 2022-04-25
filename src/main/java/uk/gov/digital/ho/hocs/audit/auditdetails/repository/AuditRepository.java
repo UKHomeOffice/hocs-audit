@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import uk.gov.digital.ho.hocs.audit.auditdetails.model.AuditEvent;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,8 @@ public interface AuditRepository extends PagingAndSortingRepository<AuditEvent, 
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp < 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
     List<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
+    @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?3 AND 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
+    List<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
 
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false ORDER BY a.audit_timestamp ASC", nativeQuery = true)
     Stream<AuditEvent> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
