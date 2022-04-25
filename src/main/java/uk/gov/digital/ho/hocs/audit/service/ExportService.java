@@ -170,7 +170,8 @@ public class ExportService {
                         parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                     }
                     parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
-                } catch (IOException e) {
+                }
+                catch(IOException e){
                     log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
                 }
                 printAudit(parsedAudit, outputWriter, printer);
@@ -390,7 +391,7 @@ public class ExportService {
             data.forEach((audit) -> {
                 try {
                     String[] auditRow = parseExtensionAuditPayload(audit, zonedDateTimeConverter);
-                    if (convert) {
+                    if (convert){
                         auditRow = exportDataConverter.convertData(auditRow, caseTypeCode);
                     }
                     auditRow = malformedDateConverter.correctDateFields(auditRow);
@@ -675,7 +676,7 @@ public class ExportService {
             data.forEach((audit) -> {
                 try {
                     String[] auditRow = parseAppealAuditPayload(audit, zonedDateTimeConverter);
-                    if (convert) {
+                    if (convert){
                         auditRow = exportDataConverter.convertData(auditRow, caseTypeCode);
                     }
                     auditRow = malformedDateConverter.correctDateFields(auditRow);
@@ -730,7 +731,7 @@ public class ExportService {
 
             data.forEach(audit -> {
                 try {
-                    printer.printRecord((Object[]) dataParser.parsePayload(audit));
+                    printer.printRecord((Object[])dataParser.parsePayload(audit));
                     outputWriter.flush();
                 } catch (IOException e) {
                     log.error("Unable to get record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
