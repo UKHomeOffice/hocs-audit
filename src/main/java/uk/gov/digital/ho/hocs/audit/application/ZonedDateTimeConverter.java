@@ -23,7 +23,7 @@ public class ZonedDateTimeConverter {
      * @param outputtedDateFormat the date format to output against.
      * @param timeZoneId the timezone to set against.
      */
-    public ZonedDateTimeConverter(final String outputtedDateFormat, final String timeZoneId) {
+    public ZonedDateTimeConverter(String outputtedDateFormat, String timeZoneId) {
         if (StringUtils.hasText(outputtedDateFormat)) {
             this.dateTimeFormatter = DateTimeFormatter.ofPattern(outputtedDateFormat);
         }
@@ -38,8 +38,8 @@ public class ZonedDateTimeConverter {
      * @param localDateTime the time you want to show the offset of.
      * @return the offsetted date time string
      */
-    public String convert(final LocalDateTime localDateTime) {
-        final ZonedDateTime zonedDateTime =
+    public String convert(LocalDateTime localDateTime) {
+        ZonedDateTime zonedDateTime =
                 localDateTime
                         .atZone(ZoneId.systemDefault())
                         .withZoneSameInstant(specifiedTimeZoneId);

@@ -20,7 +20,7 @@ public class SomuTypeDto {
     private String type;
 
     @JsonProperty("schema")
-    private String schema;
+    private SomuTypeSchema schema;
 
     @JsonProperty("active")
     private boolean active;

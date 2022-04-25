@@ -2,7 +2,6 @@ package uk.gov.digital.ho.hocs.audit.export;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
@@ -16,24 +15,46 @@ import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.export.converter.ExportDataConverterFactory;
 import uk.gov.digital.ho.hocs.audit.export.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.InfoClient;
-import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.*;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.SomuTypeDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.SomuTypeField;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.SomuTypeSchema;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TeamDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.TopicTeamDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UnitDto;
+import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.export.infoclient.dto.UserWithTeamsDto;
 import uk.gov.digital.ho.hocs.audit.export.parsers.DataParserFactory;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.application.LogEvent.*;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.CSV_EXPORT_COMPETE;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.CSV_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.CSV_EXPORT_START;
+import static uk.gov.digital.ho.hocs.audit.application.LogEvent.EVENT;
 
 @Slf4j
 @Service
@@ -42,7 +63,7 @@ public class ExportService {
     private final ObjectMapper mapper;
     private final AuditRepository auditRepository;
     private final InfoClient infoClient;
-    private final ExportDataConverterFactory exportDataConverterFactory;
+    public final ExportDataConverter exportDataConverter;
     private final HeaderConverter headerConverter;
     private final MalformedDateConverter malformedDateConverter;
     private final DataParserFactory dataParserFactory;
@@ -57,16 +78,19 @@ public class ExportService {
     public static final String[] APPEAL_EVENTS = {"APPEAL_CREATED", "APPEAL_UPDATED"};
     public static final String[] INTEREST_EVENTS = {"EXTERNAL_INTEREST_CREATED", "EXTERNAL_INTEREST_UPDATED"};
 
+    @PersistenceContext
+    EntityManager entityManager;
 
     public ExportService(AuditRepository auditRepository, ObjectMapper mapper, InfoClient infoClient, ExportDataConverterFactory exportDataConverterFactory,
                          HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter, DataParserFactory dataParserFactory) {
         this.auditRepository = auditRepository;
         this.mapper = mapper;
         this.infoClient = infoClient;
-        this.exportDataConverterFactory = exportDataConverterFactory;
         this.headerConverter = headerConverter;
         this.malformedDateConverter = malformedDateConverter;
         this.dataParserFactory = dataParserFactory;
+
+        this.exportDataConverter = exportDataConverterFactory.getInstance();
     }
 
     @Transactional(readOnly = true)
@@ -107,16 +131,6 @@ public class ExportService {
         }
     }
 
-    private void printAudit(String[] parsedAudit, OutputStreamWriter outputWriter, CSVPrinter printer) throws StreamBrokenException{
-        try{
-            if(parsedAudit != null){
-                printer.printRecord(parsedAudit);
-                outputWriter.flush();
-            }
-        } catch (IOException e) {
-            throw new StreamBrokenException(e);
-        }
-    }
 
     private Stream<AuditEvent> getAuditDataStream(boolean lastAudit, String[] events, LocalDate from, LocalDate to, String caseTypeCode){
         LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
@@ -233,48 +247,48 @@ public class ExportService {
     }
 
     @Transactional(readOnly = true)
-    public void auditSomuExport(LocalDate from, LocalDate to, OutputStream output, String caseType, String somuType, boolean convert, final String timestampFormat, final String timeZoneId) throws IOException {
-        final ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
-        OutputStream buffer = new BufferedOutputStream(output);
-        OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-        String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
-
+    public void auditSomuExport(LocalDate from, LocalDate to, HttpServletResponse response, String caseType, String somuType, boolean convert, String timestampFormat, String timeZoneId) {
         log.info("Exporting Case Data Somu to CSV", value(EVENT, CSV_EXPORT_START));
-        List<String> headers = Stream.of("timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid").collect(Collectors.toList());
+
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
-        SomuTypeSchema schema = mapper.readValue(somuTypeDto.getSchema(), SomuTypeSchema.class);
-        LinkedHashSet<SomuTypeField> somuFields = new LinkedHashSet<>(schema.getFields());
+        var headers = getSomuHeaders(somuTypeDto.getSchema());
 
-        headers.addAll(somuFields.stream().map(SomuTypeField::getExtractColumnLabel).collect(Collectors.toList()));
+        String caseTypeCode = infoClient.getCaseTypes().stream().filter(e -> e.getType().equals(caseType)).findFirst().get().getShortCode();
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
 
-        try (CSVPrinter printer = new CSVPrinter(outputWriter, CSVFormat.DEFAULT.withHeader(headers.toArray(new String[0])))) {
-            Stream<AuditEvent> data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode);
-            ExportDataConverter exportDataConverter = convert ? exportDataConverterFactory.getInstance() : null;
-            data.forEach((audit) -> {
-                String[] parsedAudit = null;
+        try (var writer = response.getWriter();
+             var printer = new CSVPrinter(writer, CSVFormat.Builder.create().setHeader(headers.toArray(String[]::new)).setAutoFlush(true).build());
+             var data = getAuditDataStream(false, SOMU_TYPE_EVENTS, from, to, caseTypeCode)
+        ) {
+            data.forEach(audit -> {
                 try {
-                    if (filterSomuIType(audit, somuTypeDto)) {
-                        parsedAudit = parseCaseDataSomuAuditPayload(audit, somuFields, zonedDateTimeConverter);
+                    if (isSomuIType(audit, somuTypeDto.getUuid())) {
+                        String[] parsedAudit = parseCaseDataSomuAuditPayload(audit, somuTypeDto.getSchema().getFields(), zonedDateTimeConverter);
                         if (convert) {
                             parsedAudit = exportDataConverter.convertData(parsedAudit, caseTypeCode);
                         }
                         parsedAudit = malformedDateConverter.correctDateFields(parsedAudit);
+                        printer.printRecord((Object) parsedAudit);
                     }
+                    entityManager.detach(audit);
                 } catch (Exception e) {
-                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
+                    log.error("Unable to parse record for audit {} for reason {}", audit.getUuid(), e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
                 }
-                printAudit(parsedAudit, outputWriter, printer);
             });
             log.info("Export SOMU_DATA to CSV Complete", value(EVENT, CSV_EXPORT_COMPETE));
-        }
-        catch (StreamBrokenException e) {
-            outputWriter.close();
-            log.error("Unable to export record for reason {}", e.throwable, value(LogEvent.EVENT, CSV_EXPORT_FAILURE));
-            throw new IOException(e);
+        } catch (IOException e) {
+            log.error("Unable to export record for reason {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
         }
     }
 
-    private String[] parseCaseDataSomuAuditPayload(AuditEvent audit, Set<SomuTypeField> headers, final ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    private List<String> getSomuHeaders(SomuTypeSchema somuTypeSchema) {
+        return Stream.concat(
+                Stream.of("timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid"),
+                somuTypeSchema.getFields().stream().map(SomuTypeField::getExtractColumnLabel)
+        ).collect(Collectors.toList());
+    }
+
+    private String[] parseCaseDataSomuAuditPayload(AuditEvent audit, Collection<SomuTypeField> headers, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         List<String> data = new ArrayList<>();
         AuditPayload.SomuItem somuData = mapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -290,9 +304,9 @@ public class ExportService {
         return data.toArray(new String[0]);
     }
 
-    private boolean filterSomuIType(AuditEvent auditEvent, SomuTypeDto somuTypeDto) throws IOException {
+    private boolean isSomuIType(AuditEvent auditEvent, UUID somuTypeUUID) throws IOException {
         AuditPayload.SomuItem somuItem = mapper.readValue(auditEvent.getAuditPayload(), AuditPayload.SomuItem.class);
-        return StringUtils.equals(somuItem.getSomuTypeUuid().toString(), somuTypeDto.getUuid().toString());
+        return somuItem.getSomuTypeUuid().equals(somuTypeUUID);
     }
 
     private String getSomuDataValue(Map<String,String> data, String key) {
