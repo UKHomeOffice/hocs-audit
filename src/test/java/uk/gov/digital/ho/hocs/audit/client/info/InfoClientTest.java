@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.ParameterizedTypeReference;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
@@ -29,7 +28,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -65,11 +63,11 @@ public class InfoClientTest {
     @Test
     public void getCaseTypes() {
         Set<CaseTypeDto> response = new HashSet<>(Collections.singletonList(new CaseTypeDto("Case Type 1", "C1", "C")));
-        when(restHelper.get(eq(BASE_URL), eq("/caseType"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/caseType"))).thenReturn(response);
         Set<CaseTypeDto> results = infoClient.getCaseTypes();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/caseType"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/caseType"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -78,11 +76,11 @@ public class InfoClientTest {
     @Test
     public void getUsers() {
         Set<UserDto> response = new HashSet<>(Collections.singletonList(new UserDto("1", "user1", "Bill", "Smith", "bill.smith@email.com")));
-        when(restHelper.get(eq(BASE_URL), eq("/users"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/users"))).thenReturn(response);
         Set<UserDto> results = infoClient.getUsers();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/users"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/users"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -90,23 +88,23 @@ public class InfoClientTest {
     @Test
     public void getSomuType() {
         SomuTypeDto response = new SomuTypeDto(UUID.randomUUID(), "caseType", "somuType", "{}", true);
-        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"))).thenReturn(response);
 
         SomuTypeDto result = infoClient.getSomuType("caseType", "somuType");
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/somuType/caseType/somuType"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/somuType/caseType/somuType"));
         verifyNoMoreInteractions(restHelper);
     }
 
     @Test
     public void getTopics() {
         Set<TopicDto> response = new HashSet<>(Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID(), true)));
-        when(restHelper.get(eq(BASE_URL), eq("/topics"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/topics"))).thenReturn(response);
         Set<TopicDto> results = infoClient.getTopics();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/topics"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/topics"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -114,23 +112,23 @@ public class InfoClientTest {
     @Test
     public void getTopicsWithTeams() {
         Set<TopicTeamDto> response = new HashSet<>(Collections.singletonList(new TopicTeamDto("Topic text", UUID.randomUUID(), null)));
-        when(restHelper.get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/topics/TEST/teams"))).thenReturn(response);
 
         Set<TopicTeamDto> results = infoClient.getTopicsWithTeams("TEST");
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/topics/TEST/teams"));
         verifyNoMoreInteractions(restHelper);
     }
 
     @Test
     public void getTeams() {
         Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
-        when(restHelper.get(eq(BASE_URL), eq("/team"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team"))).thenReturn(response);
         Set<TeamDto> results = infoClient.getTeams();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/team"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -138,11 +136,11 @@ public class InfoClientTest {
     @Test
     public void getAllTeams() {
         Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), false, null)));
-        when(restHelper.get(eq(BASE_URL), eq("/team/all"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team/all"))).thenReturn(response);
         Set<TeamDto> results = infoClient.getAllTeams();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team/all"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/team/all"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -151,12 +149,12 @@ public class InfoClientTest {
     public void getTeamsForUnit() {
         String unitUUID = UUID.randomUUID().toString();
         Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
-        when(restHelper.get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"))).thenReturn(response);
 
         Set<TeamDto> results = infoClient.getTeamsForUnit(unitUUID);
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"));
         verifyNoMoreInteractions(restHelper);
     }
 
@@ -164,11 +162,11 @@ public class InfoClientTest {
     public void getTeam() {
         UUID teamUUID = UUID.randomUUID();
         TeamDto response = new TeamDto("Team text", teamUUID, true, null);
-        when(restHelper.get(eq(BASE_URL), eq("/team/" + teamUUID), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team/" + teamUUID))).thenReturn(response);
         TeamDto result = infoClient.getTeam(teamUUID.toString());
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team/" + teamUUID), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/team/" + teamUUID));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -178,11 +176,11 @@ public class InfoClientTest {
     public void getUnitByTeam() {
         String unitUUID = UUID.randomUUID().toString();
         UnitDto response = new UnitDto("Unit diplay name", unitUUID, "UnitA");
-        when(restHelper.get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"))).thenReturn(response);
         UnitDto result = infoClient.getUnitByTeam(unitUUID);
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -190,11 +188,11 @@ public class InfoClientTest {
     @Test
     public void getUnits() {
         Set<UnitDto> response = new HashSet<>(Collections.singletonList(new UnitDto("Unit text", UUID.randomUUID().toString(), "U1")));
-        when(restHelper.get(eq(BASE_URL), eq("/unit"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/unit"))).thenReturn(response);
         Set<UnitDto> results = infoClient.getUnits();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/unit"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/unit"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -203,11 +201,11 @@ public class InfoClientTest {
     public void getCaseExportFields() {
         String caseType = "C1";
         Set<String> response = new LinkedHashSet<>(Arrays.asList("ExportField1", "ExportField2"));
-        when(restHelper.get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"))).thenReturn(response);
         Set<String> results = infoClient.getCaseExportFields(caseType);
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -215,11 +213,11 @@ public class InfoClientTest {
     @Test
     public void getExportViews() {
         List<ExportViewDto> response = buildExportViews();
-        when(restHelper.get(eq(BASE_URL), eq("/export"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/export"))).thenReturn(response);
         List<ExportViewDto> results = infoClient.getExportViews();
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/export"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/export"));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -227,22 +225,22 @@ public class InfoClientTest {
     @Test
     public void getExportView() {
         ExportViewDto response = buildExportView1();
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1))).thenReturn(response);
         ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1));
 
         verifyNoMoreInteractions(restHelper);
     }
 
     @Test
     public void getExportView_nullResult() {
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class))).thenReturn(null);
+        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1))).thenReturn(null);
         ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
 
         assertThat(results).isNull();
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -275,13 +273,13 @@ public class InfoClientTest {
         List<CaseTypeActionDto> caseTypeActionsList = new LinkedList<>();
         caseTypeActionsList.add(caseTypeAction1);
         caseTypeActionsList.add(caseTypeAction2);
-        when(restHelper.get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class))).thenReturn(caseTypeActionsList);
+        when(restHelper.get(eq(BASE_URL), eq("/caseType/actions"))).thenReturn(caseTypeActionsList);
 
 
         List<CaseTypeActionDto> results = infoClient.getCaseTypeActions();
 
         assertThat(results).isEqualTo(caseTypeActionsList);
-        verify(restHelper).get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class));
+        verify(restHelper).get(eq(BASE_URL), eq("/caseType/actions"));
 
         verifyNoMoreInteractions(restHelper);
     }
