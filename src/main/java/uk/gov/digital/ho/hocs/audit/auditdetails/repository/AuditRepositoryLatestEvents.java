@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 @Repository
 public interface AuditRepositoryLatestEvents {
 
-    @Query(value = "SELECT a.* FROM audit_event_latest_events a WHERE a.audit_timestamp >= ?1 AND a.type in ?2 AND a.case_type = ?3 AND a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC;", nativeQuery = true)
+    @Query(value = "SELECT a.* FROM audit_event_latest_events a WHERE a.audit_timestamp between ?1 and 'tomorrow' AND a.type in ?2 AND a.case_type = ?3 AND a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC", nativeQuery = true)
     Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of, String[] events, String caseType);
 
 }
