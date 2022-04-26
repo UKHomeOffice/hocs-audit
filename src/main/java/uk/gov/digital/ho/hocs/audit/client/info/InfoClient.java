@@ -45,7 +45,7 @@ public class InfoClient {
 
     @Cacheable(value = "getSomuType", unless = "#result == null")
     public SomuTypeDto getSomuType(String caseType, String somuType) {
-        return restHelper.get(rootUri, String.format("/somuType/%s/%s", caseType, somuType));
+        return restHelper.get(rootUri, String.format("/somuType/%s/%s", caseType, somuType), SomuTypeDto.class);
     }
 
     public Set<TopicDto> getTopics() {
@@ -69,11 +69,11 @@ public class InfoClient {
     }
 
     public TeamDto getTeam(String uuid) {
-        return restHelper.get(rootUri, String.format("/team/%s", uuid));
+        return restHelper.get(rootUri, String.format("/team/%s", uuid), TeamDto.class);
     }
 
     public UnitDto getUnitByTeam(String uuid) {
-        return restHelper.get(rootUri, String.format("/team/%s/unit", uuid));
+        return restHelper.get(rootUri, String.format("/team/%s/unit", uuid), UnitDto.class);
     }
 
     public Set<UnitDto> getUnits() {
@@ -89,7 +89,7 @@ public class InfoClient {
     }
 
     public ExportViewDto getExportView(String code) {
-        return restHelper.get(rootUri, String.format("/export/%s", code));
+        return restHelper.get(rootUri, String.format("/export/%s", code), ExportViewDto.class);
     }
 
     @Cacheable(value = "getEntitiesForList", unless = "#result == null")

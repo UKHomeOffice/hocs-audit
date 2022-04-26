@@ -41,8 +41,16 @@ public class RestHelper {
         return String.format("Basic %s", Base64.getEncoder().encodeToString(basicAuth.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public <R> R get(String rootUri, String endpoint) {
-        return get(rootUri, endpoint, new ParameterizedTypeReference<>() {});
+    public <R> R get(String rootUri, String endpoint, Class<R> type) {
+        try {
+            log.debug("Making GET request {}{}", rootUri, endpoint);
+            return restTemplate
+                    .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
+                    .getBody();
+        } catch (Exception e) {
+            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION), value(EXCEPTION, e));
+            throw e;
+        }
     }
 
     public <R> R get(String rootUri, String endpoint, ParameterizedTypeReference<R> type) {
