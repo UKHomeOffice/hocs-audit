@@ -72,7 +72,7 @@ public class AuditEvent implements Serializable {
 
     public AuditEvent(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         this.uuid = UUID.randomUUID();
-        this.correlationID = correlationID;
+        this.correlationID = correlationID == null ? UUID.randomUUID().toString() : correlationID;
         this.raisingService = raisingService;
         this.auditPayload = auditPayload;
         this.namespace = namespace;
