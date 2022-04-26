@@ -90,12 +90,12 @@ public class InfoClientTest {
     @Test
     public void getSomuType() {
         SomuTypeDto response = new SomuTypeDto(UUID.randomUUID(), "caseType", "somuType", "{}", true);
-        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), eq(SomuTypeDto.class))).thenReturn(response);
 
         SomuTypeDto result = infoClient.getSomuType("caseType", "somuType");
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/somuType/caseType/somuType"));
+        verify(restHelper).get(eq(BASE_URL), eq("/somuType/caseType/somuType"), eq(SomuTypeDto.class));
         verifyNoMoreInteractions(restHelper);
     }
 
@@ -164,11 +164,11 @@ public class InfoClientTest {
     public void getTeam() {
         UUID teamUUID = UUID.randomUUID();
         TeamDto response = new TeamDto("Team text", teamUUID, true, null);
-        when(restHelper.get(eq(BASE_URL), eq("/team/" + teamUUID))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team/" + teamUUID), eq(TeamDto.class))).thenReturn(response);
         TeamDto result = infoClient.getTeam(teamUUID.toString());
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team/" + teamUUID));
+        verify(restHelper).get(eq(BASE_URL), eq("/team/" + teamUUID), eq(TeamDto.class));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -178,11 +178,11 @@ public class InfoClientTest {
     public void getUnitByTeam() {
         String unitUUID = UUID.randomUUID().toString();
         UnitDto response = new UnitDto("Unit diplay name", unitUUID, "UnitA");
-        when(restHelper.get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"), eq(UnitDto.class))).thenReturn(response);
         UnitDto result = infoClient.getUnitByTeam(unitUUID);
 
         assertThat(result).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"));
+        verify(restHelper).get(eq(BASE_URL), eq("/team/" + unitUUID + "/unit"), eq(UnitDto.class));
 
         verifyNoMoreInteractions(restHelper);
     }
@@ -227,22 +227,22 @@ public class InfoClientTest {
     @Test
     public void getExportView() {
         ExportViewDto response = buildExportView1();
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class))).thenReturn(response);
         ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
 
         assertThat(results).isEqualTo(response);
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1));
+        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class));
 
         verifyNoMoreInteractions(restHelper);
     }
 
     @Test
     public void getExportView_nullResult() {
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1))).thenReturn(null);
+        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class))).thenReturn(null);
         ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
 
         assertThat(results).isNull();
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1));
+        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class));
 
         verifyNoMoreInteractions(restHelper);
     }
