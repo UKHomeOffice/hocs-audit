@@ -38,18 +38,9 @@ public class AuditEventService {
     }
 
     public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        String validAuditPayload = jsonValidator.validateAuditPayload(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
-        validateNotNull(auditEvent);
+        var auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);        validateNotNull(auditEvent);
         auditRepository.save(auditEvent);
-        log.debug("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}, event {}",
-                auditEvent.getUuid(),
-                auditEvent.getCaseUUID(),
-                auditEvent.getStageUUID(),
-                auditEvent.getCorrelationID(),
-                auditEvent.getRaisingService(),
-                auditEvent.getUserID(),
-                auditEvent.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
+        log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
         return auditEvent;
     }
 

@@ -80,6 +80,7 @@ public class InfoClient {
         return restHelper.get(rootUri, "/unit", new ParameterizedTypeReference<>() {});
     }
 
+    @Cacheable(value = "getCaseExportFields", unless = "#result == null")
     public LinkedHashSet<String> getCaseExportFields(String caseType) {
         return restHelper.get(rootUri, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<>() {});
     }

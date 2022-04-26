@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ExportDataConverterTest {
 
+    /*
+
     private static final String CASE_ID = UUID.randomUUID().toString();
     private static final String CASE_ID_NONE = UUID.randomUUID().toString();
     private static final String USER1_ID = UUID.randomUUID().toString();
@@ -281,4 +283,5 @@ public class ExportDataConverterTest {
                 new AbstractMap.SimpleEntry<>(ENTITY_2_SIMPLE_NAME, ENTITY_2_TITLE_WITH_COMMAS))
         );
     }
+    */
 }

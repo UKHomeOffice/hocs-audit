@@ -57,6 +57,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.awaitility:awaitility:4.2.0'
     testImplementation 'org.assertj:assertj-core:3.22.0'
+    testImplementation 'org.mockito:mockito-core:2.21.0'
     testImplementation 'junit:junit:4.13.2'
 }
 
@@ -68,4 +69,8 @@ dependencyManagement {
 
 jar {
     enabled = false
+}
+
+test {
+    useJUnitPlatform()
 }

@@ -14,9 +14,19 @@ import java.time.format.DateTimeFormatter;
 public class ZonedDateTimeConverter {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS";
+    private static final String DEFAULT_ZONE_ID = "Europe/London";
 
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
-    private ZoneId specifiedTimeZoneId = ZoneId.of("Europe/London");
+    private DateTimeFormatter dateTimeFormatter;
+    private ZoneId specifiedTimeZoneId;
+
+    /**
+     * Default constructor that initialises with a default format of
+     * `yyyy-MM-dd'T'HH:mm:ss.SSSSSS` and sets the default zone to
+     * Europe/London.
+     */
+    public ZonedDateTimeConverter() {
+        this(DEFAULT_DATE_FORMAT, DEFAULT_ZONE_ID);
+    }
 
     /**
      * Constructor that allows for a user specified date format.

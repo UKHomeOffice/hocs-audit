@@ -22,6 +22,7 @@ spring:
   flyway:
     locations: classpath:/db/migration/postgresql
     schemas: ${db.schema.name:audit}
+    baseline-on-migrate: true
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
