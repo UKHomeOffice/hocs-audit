@@ -39,6 +39,6 @@ public class CaseworkClient {
 
     @Cacheable (value = "getCaseReference", unless = "#result == null")
     public GetCaseReferenceResponse getCaseReference(String uuid) {
-        return restHelper.get(serviceBaseURL, String.format("/case/reference/%s", uuid), GetCaseReferenceResponse.class);
+        return restHelper.get(serviceBaseURL, String.format("/case/reference/%s", uuid));
     }
 }
