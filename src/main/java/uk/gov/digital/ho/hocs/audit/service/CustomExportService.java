@@ -50,7 +50,7 @@ public class CustomExportService {
         ExportViewDto exportViewDto = infoClient.getExportView(viewName);
 
         if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
-                !requestData.roles().contains(exportViewDto.getRequiredPermission())) {
+                !requestData.rolesList().contains(exportViewDto.getRequiredPermission())) {
             // TODO: remove the log and add to the entity permission error with suitable LogEvent
             log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.userId(), exportViewDto.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", viewName);

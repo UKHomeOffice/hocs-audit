@@ -9,19 +9,51 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
 public class RequestData implements HandlerInterceptor {
 
-    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
-    public static final String USER_ID_HEADER = "X-Auth-UserId";
-    public static final String USERNAME_HEADER = "X-Auth-Username";
-    public static final String USER_ROLES_HEADER = "X-Auth-Roles";
+    static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    static final String USER_ID_HEADER = "X-Auth-UserId";
+    static final String USERNAME_HEADER = "X-Auth-Username";
+    static final String GROUP_HEADER = "X-Auth-Groups";
+    static final String USER_ROLES_HEADER = "X-Auth-Roles";
 
     private static final String ANONYMOUS = "anonymous";
     private static final String BLANK = "";
 
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.equals("");
+    }
+
+    public void parseMessageHeaders(Map<String, String> headers) {
+        headers.forEach(MDC::put);
+        if (headers.containsKey(CORRELATION_ID_HEADER)) {
+            MDC.put(CORRELATION_ID_HEADER, headers.get(CORRELATION_ID_HEADER));
+        }
+
+        if (headers.containsKey(USER_ID_HEADER)) {
+            MDC.put(USER_ID_HEADER, headers.get(USER_ID_HEADER));
+        }
+
+        if (headers.containsKey(USERNAME_HEADER)) {
+            MDC.put(USERNAME_HEADER, headers.get(USERNAME_HEADER));
+        }
+
+        if (headers.containsKey(GROUP_HEADER)) {
+            MDC.put(GROUP_HEADER, headers.get(GROUP_HEADER));
+        }
+
+        if (headers.containsKey(USER_ROLES_HEADER)) {
+            MDC.put(USER_ROLES_HEADER, headers.get(USER_ROLES_HEADER));
+        }
+    }
+
+    public void clear() {
+        MDC.clear();
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -29,6 +61,7 @@ public class RequestData implements HandlerInterceptor {
         MDC.put(CORRELATION_ID_HEADER, initialiseCorrelationId(request));
         MDC.put(USER_ID_HEADER, initialiseUserId(request));
         MDC.put(USERNAME_HEADER, initialiseUserName(request));
+        MDC.put(GROUP_HEADER, initialiseGroups(request));
         MDC.put(USER_ROLES_HEADER, initialiseUserRoles(request));
         return true;
     }
@@ -40,9 +73,11 @@ public class RequestData implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        response.setHeader(USER_ID_HEADER, userId());
-        response.setHeader(USERNAME_HEADER, userId());
         response.setHeader(CORRELATION_ID_HEADER, correlationId());
+        response.setHeader(USER_ID_HEADER, userId());
+        response.setHeader(USERNAME_HEADER, username());
+        response.setHeader(GROUP_HEADER, groups());
+        response.setHeader(USER_ROLES_HEADER, roles());
         MDC.clear();
     }
 
@@ -59,6 +94,11 @@ public class RequestData implements HandlerInterceptor {
     private String initialiseUserName(HttpServletRequest request) {
         String username = request.getHeader(USERNAME_HEADER);
         return !isNullOrEmpty(username) ? username : ANONYMOUS;
+    }
+
+    private String initialiseGroups(HttpServletRequest request) {
+        String groups = request.getHeader(GROUP_HEADER);
+        return !isNullOrEmpty(groups) ? groups : BLANK;
     }
 
     private String initialiseUserRoles(HttpServletRequest request) {
@@ -79,12 +119,16 @@ public class RequestData implements HandlerInterceptor {
         return MDC.get(USERNAME_HEADER);
     }
 
-    public List<String> roles() {
-        return Arrays.asList(MDC.get(USER_ROLES_HEADER).split(","));
+    public String groups() {
+        return MDC.get(GROUP_HEADER);
     }
 
-    private static boolean isNullOrEmpty(String value) {
-        return value == null || value.equals("");
+    public String roles() {
+        return MDC.get(USER_ROLES_HEADER);
+    }
+
+    public List<String> rolesList() {
+        return Arrays.asList(MDC.get(USER_ROLES_HEADER).split(","));
     }
 
 }

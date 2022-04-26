@@ -76,7 +76,7 @@ public class CustomExportServiceTest {
     public void customExport_NoPermission() throws IOException {
         ExportViewDto exportViewDto = buildExportView1();
         when(infoClient.getExportView(VIEW_CODE_1)).thenReturn(exportViewDto);
-        when(requestData.roles()).thenReturn(new ArrayList<>());
+        when(requestData.rolesList()).thenReturn(new ArrayList<>());
 
         customExportService.customExport(servletResponse, VIEW_CODE_1, true);
 
@@ -89,7 +89,7 @@ public class CustomExportServiceTest {
         List<Object[]> outputData = buildOutputData();
         ExportViewDto exportViewDto = buildExportView1();
         when(infoClient.getExportView(VIEW_CODE_1)).thenReturn(exportViewDto);
-        when(requestData.roles()).thenReturn(new ArrayList<>(Collections.singletonList(PERMISSION_1)));
+        when(requestData.rolesList()).thenReturn(new ArrayList<>(Collections.singletonList(PERMISSION_1)));
         when(auditRepository.getResultsFromView(VIEW_CODE_1)).thenReturn(inputData);
         when(servletResponse.getOutputStream()).thenReturn(mock(ServletOutputStream.class));
         when(customExportDataConverter.getHeaders(exportViewDto)).thenReturn(Arrays.asList("Header1", "Header2", "Header3"));
@@ -106,7 +106,7 @@ public class CustomExportServiceTest {
         verify(auditRepository).getViewLastRefreshedDate(VIEW_CODE_1);
         verify(customExportDataConverter, times(2)).convertData(any(), any());
         verify(customExportDataConverter).initialiseAdapters();
-        verify(requestData).roles();
+        verify(requestData).rolesList();
         verify(customExportDataConverter).getHeaders(exportViewDto);
         verify(passThroughHeaderConverter).substitute(anyList());
 

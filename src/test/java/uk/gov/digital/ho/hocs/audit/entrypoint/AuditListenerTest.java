@@ -8,11 +8,13 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.digital.ho.hocs.audit.core.RequestData;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
 
 import javax.persistence.EntityManager;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,14 +38,17 @@ public class AuditListenerTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private RequestData requestData;
+
     @Test
     public void callsAuditServiceWithValidCreateCaseMessage() throws JsonProcessingException {
         UUID correlationId = UUID.randomUUID();
         String message = String.format("{ \"correlation_id\": \"%s\"}", correlationId);
 
-        AuditListener auditListener = new AuditListener(objectMapper, auditEventService);
+        AuditListener auditListener = new AuditListener(objectMapper, auditEventService, requestData);
 
-        auditListener.onAuditEvent(message);
+        auditListener.onAuditEvent(message, Map.of());
 
         verify(auditEventService)
                 .createAudit(any(), any(), eq(correlationId.toString()),
@@ -55,17 +60,17 @@ public class AuditListenerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void callsAuditServiceWithNullCreateCaseMessage() throws JsonProcessingException {
-        AuditListener auditListener = new AuditListener(objectMapper, auditEventService);
+        AuditListener auditListener = new AuditListener(objectMapper, auditEventService, requestData);
 
-        auditListener.onAuditEvent(null);
+        auditListener.onAuditEvent(null, Map.of());
     }
 
     @Test(expected = EntityCreationException.class)
     public void callsAuditServiceWithInvalidCreateCaseMessage() throws JsonProcessingException {
         String incorrectMessage = "{\"test\":1}";
-        AuditListener auditListener = new AuditListener(objectMapper, new AuditEventService(auditRepository, entityManager));
+        AuditListener auditListener = new AuditListener(objectMapper, new AuditEventService(auditRepository, entityManager), requestData);
 
-        auditListener.onAuditEvent(incorrectMessage);
+        auditListener.onAuditEvent(incorrectMessage, Map.of());
     }
 
 }
