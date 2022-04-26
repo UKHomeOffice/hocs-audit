@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_CREATED;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_DELETED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 
 @Service
@@ -51,25 +51,17 @@ public class AuditEventService {
         AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
         validateNotNull(auditEvent);
         auditRepository.save(auditEvent);
-        log.debug("Created Audit: UUID: {}, CaseUUID: {}, StageUUID: {}, Correlation ID: {}, Raised by: {}, By user: {}, at timestamp: {}, event {}",
-                auditEvent.getUuid(),
-                auditEvent.getCaseUUID(),
-                auditEvent.getStageUUID(),
-                auditEvent.getCorrelationID(),
-                auditEvent.getRaisingService(),
-                auditEvent.getUserID(),
-                auditEvent.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
+        log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
         return auditEvent;
     }
 
     public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted){
-        log.debug("Case {} setting deleted to {}", caseUUID, deleted);
         List<AuditEvent> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
         for (AuditEvent audit : audits) {
             audit.setDeleted(deleted);
             auditRepository.save(audit);
         }
-        log.info("Case {} set {} audits deleted to {}", caseUUID, audits.size(), deleted);
+        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
         return audits.size();
     }
 
@@ -81,9 +73,9 @@ public class AuditEventService {
     }
 
     @Transactional(readOnly = true)
-    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate from) {
-        log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
-        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
+    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate fromDate) {
+        log.debug("Requesting Audit for Case UUID: {} FromDate: {}", caseUUID, fromDate);
+        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, fromDate);
         return buildAuditListResponse(auditResponses);
     }
 

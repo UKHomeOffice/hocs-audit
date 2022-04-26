@@ -2,7 +2,7 @@ package uk.gov.digital.ho.hocs.audit.core;
 
 public enum LogEvent {
 
-    AUDIT_EVENT_CREATED,
+    AUDIT_EVENT_DELETED,
     AUDIT_EVENT_CREATION_FAILED,
     AUDIT_RECORD_NOT_FOUND,
     AUDIT_STARTUP_FAILURE,
