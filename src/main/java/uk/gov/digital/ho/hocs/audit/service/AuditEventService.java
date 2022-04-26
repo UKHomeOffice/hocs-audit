@@ -6,13 +6,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
+import uk.gov.digital.ho.hocs.audit.entrypoint.dto.GetAuditListResponse;
+import uk.gov.digital.ho.hocs.audit.entrypoint.dto.GetAuditResponse;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_CREATED;
@@ -26,11 +31,15 @@ public class AuditEventService {
 
     private final JsonValidator jsonValidator;
 
+    private final EntityManager entityManager;
+
     @Autowired
     public AuditEventService(AuditRepository auditRepository,
-                             JsonValidator jsonValidator) {
+                             JsonValidator jsonValidator,
+                             EntityManager entityManager) {
         this.auditRepository = auditRepository;
         this.jsonValidator = jsonValidator;
+        this.entityManager = entityManager;
     }
 
     public AuditEvent createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
@@ -65,16 +74,27 @@ public class AuditEventService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types) {
+    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes) {
         log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
-        String[] filterTypes = types.split(",");
-        return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
+        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
+        return buildAuditListResponse(auditResponses);
     }
 
-    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types, LocalDate from) {
+    @Transactional(readOnly = true)
+    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate from) {
         log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
-        String[] filterTypes = types.split(",");
-        return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
+        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
+        return buildAuditListResponse(auditResponses);
+    }
+
+    private GetAuditListResponse buildAuditListResponse(Stream<AuditEvent> auditEvents) {
+        var auditResponses = auditEvents.map(it -> {
+                    var response = GetAuditResponse.from(it);
+                    entityManager.detach(it);
+                    return response;
+                })
+                .collect(Collectors.toList());
+        return new GetAuditListResponse(auditResponses);
     }
 
     private static void validateNotNull(AuditEvent auditEvent) {

@@ -1,24 +1,40 @@
 package uk.gov.digital.ho.hocs.audit.repository;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
+import javax.persistence.QueryHint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.hibernate.annotations.QueryHints.READ_ONLY;
+import static org.hibernate.jpa.QueryHints.HINT_CACHEABLE;
+import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
+
 @Repository
 public interface AuditRepository extends CrudRepository<AuditEvent, String>, AuditRepositoryCustom, AuditRepositoryLatestEvents {
 
+    @QueryHints(value = {
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_CACHEABLE, value = "false"),
+            @QueryHint(name = READ_ONLY, value = "true")
+    })
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp < 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
-    List<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
+    Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
+    @QueryHints(value = {
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_CACHEABLE, value = "false"),
+            @QueryHint(name = READ_ONLY, value = "true")
+    })
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?3 AND 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
-    List<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
+    Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
 
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false ORDER BY a.audit_timestamp ASC", nativeQuery = true)
     Stream<AuditEvent> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);

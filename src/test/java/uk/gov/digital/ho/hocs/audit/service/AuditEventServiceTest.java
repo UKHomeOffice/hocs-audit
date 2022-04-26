@@ -10,10 +10,12 @@ import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
@@ -41,9 +43,12 @@ public class AuditEventServiceTest {
     @Mock
     private JsonValidator jsonValidator;
 
+    @Mock
+    private EntityManager entityManager;
+
     @Before
     public void setUp() {
-        this.auditService = new AuditEventService(auditRepository, jsonValidator);
+        this.auditService = new AuditEventService(auditRepository, jsonValidator, entityManager);
     }
 
     @Test
@@ -271,15 +276,12 @@ public class AuditEventServiceTest {
     public void shouldGetAuditForCase() {
 
         UUID caseUUID = UUID.randomUUID();
-        String types = "TYPE1,TYPE2";
         String[] typesArray = {"TYPE1", "TYPE2"};
 
-        ArrayList auditData = new ArrayList() {{
-            add(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
-        }};
+        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
         when(auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray)).thenReturn(auditData);
-        auditService.getAuditDataByCaseUUID(caseUUID, types);
+        auditService.getAuditDataByCaseUUID(caseUUID, typesArray);
 
         verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray);
         verifyNoMoreInteractions(auditRepository);
@@ -289,16 +291,13 @@ public class AuditEventServiceTest {
     public void shouldGetAuditForCaseFromDate() {
 
         UUID caseUUID = UUID.randomUUID();
-        String types = "TYPE1,TYPE2";
         String[] typesArray = {"TYPE1", "TYPE2"};
         LocalDate from = LocalDate.of(2022, 4, 1);
 
-        ArrayList auditData = new ArrayList() {{
-            add(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
-        }};
+        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
         when(auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from)).thenReturn(auditData);
-        auditService.getAuditDataByCaseUUID(caseUUID, types, from);
+        auditService.getAuditDataByCaseUUID(caseUUID, typesArray, from);
 
         verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from);
         verifyNoMoreInteractions(auditRepository);
