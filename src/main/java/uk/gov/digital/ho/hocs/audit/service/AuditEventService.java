@@ -12,7 +12,6 @@ import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,25 +35,21 @@ public class AuditEventService {
         this.entityManager = entityManager;
     }
 
-    public AuditEvent createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        return createAudit(null, null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    public void createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+        createAudit(null, null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
     }
 
-    public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    public void createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+        var auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         auditRepository.save(auditEvent);
         log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
-        return auditEvent;
     }
 
-    public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted){
-        List<AuditEvent> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
-        for (AuditEvent audit : audits) {
-            audit.setDeleted(deleted);
-            auditRepository.save(audit);
-        }
-        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
-        return audits.size();
+    @Transactional
+    public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted) {
+        var audits = auditRepository.updateAuditDataDeleted(caseUUID, deleted);
+        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits, caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
+        return audits;
     }
 
     @Transactional(readOnly = true)

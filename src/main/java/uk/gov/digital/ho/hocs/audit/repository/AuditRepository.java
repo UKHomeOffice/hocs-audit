@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.CrudRepository;
@@ -9,7 +10,6 @@ import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import javax.persistence.QueryHint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -42,6 +42,7 @@ public interface AuditRepository extends CrudRepository<AuditEvent, String>, Aud
     @Query(value = "SELECT DISTINCT ON (case_uuid, type) a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC;", nativeQuery = true)
     Stream<AuditEvent> findLastAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
 
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.case_uuid = ?1", nativeQuery = true)
-    List<AuditEvent> findAuditDataByCaseUUID(UUID caseUUID);
+    @Modifying
+    @Query(value = "UPDATE audit_event a SET a.deleted = ?2  WHERE a.case_uuid = ?1", nativeQuery = true)
+    int updateAuditDataDeleted(UUID caseUUID, boolean deleted);
 }

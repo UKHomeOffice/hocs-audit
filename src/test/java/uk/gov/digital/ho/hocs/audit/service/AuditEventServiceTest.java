@@ -12,7 +12,6 @@ import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -303,16 +302,12 @@ public class AuditEventServiceTest {
     public void deleteCaseAuditWhenTrueUpdatedToTrue() {
 
         UUID caseUUID = UUID.randomUUID();
-        AuditEvent auditEvent = new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID);
-        ArrayList auditDatas = new ArrayList() {{
-            add(auditEvent);
-        }};
-        when(auditRepository.findAuditDataByCaseUUID(caseUUID)).thenReturn(auditDatas);
+
+        when(auditRepository.updateAuditDataDeleted(caseUUID, true)).thenReturn(1);
 
         auditService.deleteCaseAudit(caseUUID, true);
 
-        verify(auditRepository).findAuditDataByCaseUUID(caseUUID);
-        verify(auditRepository).save(auditEvent);
+        verify(auditRepository).updateAuditDataDeleted(caseUUID, true);
         verifyNoMoreInteractions(auditRepository);
     }
 

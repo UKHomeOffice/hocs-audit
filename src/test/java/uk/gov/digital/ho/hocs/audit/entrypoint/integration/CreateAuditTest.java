@@ -12,8 +12,8 @@ import java.util.UUID;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -41,9 +41,9 @@ public class CreateAuditTest extends BaseAwsSqsIntegrationTest {
         UUID correlationId = UUID.randomUUID();
         String message = String.format("{ \"correlation_id\": \"%s\" }", correlationId);
 
-        when(auditEventService.createAudit(any(), any(), eq(correlationId.toString()),
+        doThrow(new NullPointerException("TEST")).when(auditEventService).createAudit(any(), any(), eq(correlationId.toString()),
                 any(), any(), any(),
-                any(), any(), any())).thenThrow(new NullPointerException("TEST"));
+                any(), any(), any());
 
         amazonSQSAsync.sendMessage(auditQueue, message);
 
