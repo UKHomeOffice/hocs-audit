@@ -20,6 +20,7 @@
     <springProfile name="!development">
         <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeCallerData>true</includeCallerData>
                 <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
                     <pattern>
                         {

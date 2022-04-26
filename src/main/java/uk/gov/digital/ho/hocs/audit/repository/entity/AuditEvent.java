@@ -3,7 +3,6 @@ package uk.gov.digital.ho.hocs.audit.repository.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +14,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Slf4j
 @Entity
 @Table(name = "audit_event")
 @NoArgsConstructor

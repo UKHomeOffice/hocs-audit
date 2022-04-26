@@ -1,9 +1,9 @@
 package uk.gov.digital.ho.hocs.audit.client.casework;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCorrespondentOutlineResponse;
@@ -12,20 +12,8 @@ import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetTopicsResponse;
 import uk.gov.digital.ho.hocs.audit.core.RestHelper;
 
-import java.util.Collections;
 import java.util.Set;
-import java.util.UUID;
 
-import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_CASE_REFERENCE_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_CASE_REFERENCE_SUCCESS;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_CORRESPONDENTS_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_CORRESPONDENTS_SUCCESS;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_TOPICS_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASEWORK_CLIENT_GET_TOPICS_SUCCESS;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
-
-@Slf4j
 @Component
 public class CaseworkClient {
 
@@ -34,48 +22,23 @@ public class CaseworkClient {
 
     @Autowired
     public CaseworkClient(RestHelper restHelper,
-                      @Value("${hocs.case-service}") String caseworkService) {
+                          @Value("${hocs.case-service}") String caseworkServiceUri) {
         this.restHelper = restHelper;
-        this.serviceBaseURL = caseworkService;
+        this.serviceBaseURL = caseworkServiceUri;
     }
 
-    public Set<GetCorrespondentOutlineResponse> getAllActiveCorrespondents(){
-
-        try {
-            GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents", GetCorrespondentOutlinesResponse.class);
-            Set<GetCorrespondentOutlineResponse> correspondents = response.getCorrespondents();
-            log.info("Got {} all active correspondents", correspondents.size(), value(EVENT, CASEWORK_CLIENT_GET_CORRESPONDENTS_SUCCESS));
-            return correspondents;
-        } catch (Exception e) {
-            log.error("Error retrieving all active correspondents: reason: {}, event: {}", e.getMessage(), value(EVENT, CASEWORK_CLIENT_GET_CORRESPONDENTS_FAILURE));
-            return Collections.emptySet();
-        }
+    public Set<GetCorrespondentOutlineResponse> getAllActiveCorrespondents() {
+        GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents", new ParameterizedTypeReference<>() {});
+        return response.getCorrespondents();
     }
 
     public Set<GetTopicResponse> getAllCaseTopics() {
-
-        try {
-            GetTopicsResponse response = restHelper.get(serviceBaseURL, "/topics", GetTopicsResponse.class);
-
-            Set<GetTopicResponse> topics = response.getTopics();
-            log.info("Got {} case topics", topics.size(), value(EVENT, CASEWORK_CLIENT_GET_TOPICS_SUCCESS));
-            return topics;
-        } catch (Exception e) {
-            log.error("Error retrieving case topics: reason: {}, event: {}", e.getMessage(), value(EVENT, CASEWORK_CLIENT_GET_TOPICS_FAILURE));
-            return Collections.emptySet();
-        }
+        GetTopicsResponse response = restHelper.get(serviceBaseURL, "/topics", new ParameterizedTypeReference<>() {});
+        return response.getTopics();
     }
 
     @Cacheable (value = "getCaseReference", unless = "#result == null")
     public GetCaseReferenceResponse getCaseReference(String uuid) {
-
-        try {
-            GetCaseReferenceResponse caseReferenceResponse = restHelper.get(serviceBaseURL, String.format("/case/reference/%s", uuid), GetCaseReferenceResponse.class);
-            log.info("Got {} case reference for uuid {}", caseReferenceResponse.getReference(), caseReferenceResponse.getUuid(), value(EVENT, CASEWORK_CLIENT_GET_CASE_REFERENCE_SUCCESS));
-            return caseReferenceResponse;
-        } catch (Exception e) {
-            log.error("Error retrieving case reference: reason: {}, event: {}", e.getMessage(), value(EVENT, CASEWORK_CLIENT_GET_CASE_REFERENCE_FAILURE));
-            return new GetCaseReferenceResponse(UUID.fromString(uuid), "");
-        }
+        return restHelper.get(serviceBaseURL, String.format("/case/reference/%s", uuid));
     }
 }
