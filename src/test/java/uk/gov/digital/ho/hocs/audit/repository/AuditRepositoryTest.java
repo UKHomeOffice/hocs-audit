@@ -67,9 +67,9 @@ public class AuditRepositoryTest {
 
         UUID caseUUID = UUID.fromString("3e5cf44f-e86a-4b21-891a-018e2343cda1");
 
-        List<AuditEvent> auditData = repository.findAuditDataByCaseUUID(caseUUID);
+        var auditData = repository.updateAuditDataDeleted(caseUUID, true);
 
-        assertThat(auditData).hasSize(5);
+        assertThat(auditData).isEqualTo(5);
     }
 
     private LinkedHashSet<AuditEvent> getCaseDataAuditData() {
