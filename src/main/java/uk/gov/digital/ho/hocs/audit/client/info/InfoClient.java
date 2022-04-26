@@ -131,6 +131,7 @@ public class InfoClient {
         return units;
     }
 
+    @Cacheable(value = "getCaseExportFields", unless = "#result == null")
     public LinkedHashSet<String> getCaseExportFields(String caseType) {
         LinkedHashSet<String> response = restHelper.get(serviceBaseURL, String.format("/schema/caseType/%s/reporting", caseType), new ParameterizedTypeReference<>() {
         });

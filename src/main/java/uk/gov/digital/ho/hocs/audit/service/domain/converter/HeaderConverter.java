@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Properties;
 
 @Slf4j
@@ -27,11 +25,10 @@ public class HeaderConverter {
         }
     }
 
-    public List<String> substitute(@NonNull List<String> headers) {
-        Objects.requireNonNull(headers, "headers list cannot be null");
-        List<String> convertedHeaders = new LinkedList<>();
-        headers.forEach(header -> convertedHeaders.add(headerProperties.getProperty(header, header)));
-        return convertedHeaders;
+    public String[] substitute(@NonNull String[] headers) {
+        return Arrays.stream(headers)
+                .map(header -> headerProperties.getProperty(header, header))
+                .toArray(String[]::new);
     }
 
 }

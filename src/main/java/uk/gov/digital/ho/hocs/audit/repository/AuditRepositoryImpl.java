@@ -46,9 +46,9 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
     }
 
     @Override
-    public int refreshMaterialisedView(@NonNull String viewName) {
+    public void refreshMaterialisedView(@NonNull String viewName) {
         checkViewNameIsAllowed(viewName);
 
-        return em.createNativeQuery(String.format("REFRESH MATERIALIZED VIEW %s", viewName)).executeUpdate();
+        em.createNativeQuery(String.format("REFRESH MATERIALIZED VIEW CONCURRENTLY %s", viewName)).executeUpdate();
     }
 }

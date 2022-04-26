@@ -46,7 +46,7 @@ public class CustomExportDataConverter {
         adapters = new HashMap<>();
     }
 
-    public List<String> getHeaders(ExportViewDto exportViewDto) {
+    public String[] getHeaders(ExportViewDto exportViewDto) {
         List<String> headers = new ArrayList<>();
 
         for (ExportViewFieldDto viewFieldDto : exportViewDto.getFields()) {
@@ -55,7 +55,7 @@ public class CustomExportDataConverter {
             }
         }
 
-        return headers;
+        return headers.toArray(String[]::new);
     }
 
     public Object[] convertData(Object[] input, List<ExportViewFieldDto> fields) {
