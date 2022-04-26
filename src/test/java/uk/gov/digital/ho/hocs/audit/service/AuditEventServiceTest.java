@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
@@ -41,14 +40,11 @@ public class AuditEventServiceTest {
     private AuditEventService auditService;
 
     @Mock
-    private JsonValidator jsonValidator;
-
-    @Mock
     private EntityManager entityManager;
 
     @Before
     public void setUp() {
-        this.auditService = new AuditEventService(auditRepository, jsonValidator, entityManager);
+        this.auditService = new AuditEventService(auditRepository, entityManager);
     }
 
     @Test

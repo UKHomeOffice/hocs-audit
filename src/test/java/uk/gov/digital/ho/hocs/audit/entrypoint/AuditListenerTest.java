@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
 
+import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +34,7 @@ public class AuditListenerTest {
     private AuditEventService auditEventService;
 
     @Mock
-    private JsonValidator jsonValidator;
+    private EntityManager entityManager;
 
     @Test
     public void callsAuditServiceWithValidCreateCaseMessage() throws JsonProcessingException {
@@ -63,7 +63,7 @@ public class AuditListenerTest {
     @Test(expected = EntityCreationException.class)
     public void callsAuditServiceWithInvalidCreateCaseMessage() throws JsonProcessingException {
         String incorrectMessage = "{\"test\":1}";
-        AuditListener auditListener = new AuditListener(objectMapper, new AuditEventService(auditRepository, jsonValidator));
+        AuditListener auditListener = new AuditListener(objectMapper, new AuditEventService(auditRepository, entityManager));
 
         auditListener.onAuditEvent(incorrectMessage);
     }

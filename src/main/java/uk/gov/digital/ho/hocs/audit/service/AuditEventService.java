@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
-import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.GetAuditListResponse;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.GetAuditResponse;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
@@ -29,16 +27,12 @@ public class AuditEventService {
 
     private final AuditRepository auditRepository;
 
-    private final JsonValidator jsonValidator;
-
     private final EntityManager entityManager;
 
     @Autowired
     public AuditEventService(AuditRepository auditRepository,
-                             JsonValidator jsonValidator,
                              EntityManager entityManager) {
         this.auditRepository = auditRepository;
-        this.jsonValidator = jsonValidator;
         this.entityManager = entityManager;
     }
 
@@ -47,9 +41,7 @@ public class AuditEventService {
     }
 
     public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        String validAuditPayload = jsonValidator.validateAuditPayload(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
-        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, validAuditPayload, namespace, auditTimestamp, type, userID);
-        validateNotNull(auditEvent);
+        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         auditRepository.save(auditEvent);
         log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
         return auditEvent;
@@ -87,25 +79,5 @@ public class AuditEventService {
                 })
                 .collect(Collectors.toList());
         return new GetAuditListResponse(auditResponses);
-    }
-
-    private static void validateNotNull(AuditEvent auditEvent) {
-        String correlationID = auditEvent.getCorrelationID();
-        String raisingService = auditEvent.getRaisingService();
-        String namespace = auditEvent.getNamespace();
-        LocalDateTime auditTimestamp = auditEvent.getAuditTimestamp();
-        String type = auditEvent.getType();
-        String userID = auditEvent.getUserID();
-
-        if (correlationID == null || raisingService == null || namespace == null || auditTimestamp == null || type == null || userID == null) {
-            throw new EntityCreationException("Cannot create Audit - null input(%s, %s, %s, %s, %s, %s, %s)",
-                    correlationID,
-                    raisingService,
-                    auditEvent.getAuditPayload(),
-                    namespace,
-                    auditTimestamp,
-                    type,
-                    userID);
-        }
     }
 }
