@@ -8,6 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -21,10 +22,6 @@ public class RequestData implements HandlerInterceptor {
 
     private static final String ANONYMOUS = "anonymous";
     private static final String BLANK = "";
-
-    private static boolean isNullOrEmpty(String value) {
-        return value == null || value.equals("");
-    }
 
     public void parseMessageHeaders(Map<String, String> headers) {
         if (headers.containsKey(CORRELATION_ID_HEADER)) {
@@ -80,29 +77,29 @@ public class RequestData implements HandlerInterceptor {
 
     private String initialiseCorrelationId(HttpServletRequest request) {
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
-        return !isNullOrEmpty(correlationId) ? correlationId : UUID.randomUUID().toString();
+        return Objects.toString(correlationId, UUID.randomUUID().toString());
     }
 
     private String initialiseUserId(HttpServletRequest request) {
         String userId = request.getHeader(USER_ID_HEADER);
-        return !isNullOrEmpty(userId) ? userId : ANONYMOUS;
+        return Objects.toString(userId, ANONYMOUS);
+
     }
 
     private String initialiseUserName(HttpServletRequest request) {
         String username = request.getHeader(USERNAME_HEADER);
-        return !isNullOrEmpty(username) ? username : ANONYMOUS;
+        return Objects.toString(username, ANONYMOUS);
     }
 
     private String initialiseGroups(HttpServletRequest request) {
         String groups = request.getHeader(GROUP_HEADER);
-        return !isNullOrEmpty(groups) ? groups : BLANK;
+        return Objects.toString(groups, BLANK);
     }
 
     private String initialiseUserRoles(HttpServletRequest request) {
         String userRoles = request.getHeader(USER_ROLES_HEADER);
-        return !isNullOrEmpty(userRoles) ? userRoles : BLANK;
+        return Objects.toString(userRoles, BLANK);
     }
-
 
     public String getCorrelationId() {
         return MDC.get(CORRELATION_ID_HEADER);
