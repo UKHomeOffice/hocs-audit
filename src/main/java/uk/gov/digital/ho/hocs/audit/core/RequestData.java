@@ -29,7 +29,6 @@ public class RequestData implements HandlerInterceptor {
     }
 
     public void parseMessageHeaders(Map<String, String> headers) {
-        headers.forEach(MDC::put);
         if (headers.containsKey(CORRELATION_ID_HEADER)) {
             MDC.put(CORRELATION_ID_HEADER, headers.get(CORRELATION_ID_HEADER));
         }
