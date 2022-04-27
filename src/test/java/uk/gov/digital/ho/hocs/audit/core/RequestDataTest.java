@@ -35,11 +35,11 @@ public class RequestDataTest {
     public void shouldDefaultRequestData() {
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.correlationId()).isNotNull();
-        assertThat(requestData.userId()).isEqualTo("anonymous");
-        assertThat(requestData.username()).isEqualTo("anonymous");
-        assertThat(requestData.groups()).isEmpty();
-        assertThat(requestData.roles()).isEmpty();
+        assertThat(requestData.getCorrelationId()).isNotNull();
+        assertThat(requestData.getUserId()).isEqualTo("anonymous");
+        assertThat(requestData.getUsername()).isEqualTo("anonymous");
+        assertThat(requestData.getGroups()).isEmpty();
+        assertThat(requestData.getRoles()).isEmpty();
 
     }
 
@@ -49,7 +49,7 @@ public class RequestDataTest {
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.correlationId()).isEqualTo("some correlation id");
+        assertThat(requestData.getCorrelationId()).isEqualTo("some correlation id");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class RequestDataTest {
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.userId()).isEqualTo("some user id");
+        assertThat(requestData.getUserId()).isEqualTo("some user id");
     }
 
     @Test
@@ -67,7 +67,7 @@ public class RequestDataTest {
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.username()).isEqualTo("some username");
+        assertThat(requestData.getUsername()).isEqualTo("some username");
     }
 
     @Test
@@ -76,7 +76,7 @@ public class RequestDataTest {
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.groups()).isEqualTo("some groups");
+        assertThat(requestData.getGroups()).isEqualTo("some groups");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class RequestDataTest {
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.username()).isEqualTo("some roles");
+        assertThat(requestData.getUsername()).isEqualTo("some roles");
     }
 
     @Test
@@ -97,7 +97,7 @@ public class RequestDataTest {
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.correlationId()).isEqualTo(correlationId.toString());
+        assertThat(requestData.getCorrelationId()).isEqualTo(correlationId.toString());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class RequestDataTest {
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.userId()).isEqualTo(userId.toString());
+        assertThat(requestData.getUserId()).isEqualTo(userId.toString());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class RequestDataTest {
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.username()).isEqualTo(userName);
+        assertThat(requestData.getUsername()).isEqualTo(userName);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class RequestDataTest {
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.groups()).isEqualTo(groups);
+        assertThat(requestData.getGroups()).isEqualTo(groups);
     }
 
     @Test
@@ -145,11 +145,11 @@ public class RequestDataTest {
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.roles()).isEqualTo(roles);
+        assertThat(requestData.getRoles()).isEqualTo(roles);
     }
 
     @Test
     public void shouldGetUserUUIDNotNull() {
-        assertThat(requestData.userId()).isNotNull();
+        assertThat(requestData.getUserId()).isNotNull();
     }
 }

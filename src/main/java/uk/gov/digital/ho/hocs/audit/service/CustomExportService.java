@@ -19,6 +19,7 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -50,9 +51,9 @@ public class CustomExportService {
         ExportViewDto exportViewDto = infoClient.getExportView(viewName);
 
         if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
-                !requestData.rolesList().contains(exportViewDto.getRequiredPermission())) {
+                !Arrays.asList(requestData.getRoles().split(",")).contains(exportViewDto.getRequiredPermission())) {
             // TODO: remove the log and add to the entity permission error with suitable LogEvent
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.userId(), exportViewDto.getRequiredPermission());
+            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.getUserId(), exportViewDto.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", viewName);
         }
 

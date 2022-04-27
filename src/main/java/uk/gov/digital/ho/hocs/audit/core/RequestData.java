@@ -7,8 +7,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -72,11 +70,11 @@ public class RequestData implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        response.setHeader(CORRELATION_ID_HEADER, correlationId());
-        response.setHeader(USER_ID_HEADER, userId());
-        response.setHeader(USERNAME_HEADER, username());
-        response.setHeader(GROUP_HEADER, groups());
-        response.setHeader(USER_ROLES_HEADER, roles());
+        response.setHeader(CORRELATION_ID_HEADER, getCorrelationId());
+        response.setHeader(USER_ID_HEADER, getUserId());
+        response.setHeader(USERNAME_HEADER, getUsername());
+        response.setHeader(GROUP_HEADER, getGroups());
+        response.setHeader(USER_ROLES_HEADER, getRoles());
         MDC.clear();
     }
 
@@ -106,28 +104,24 @@ public class RequestData implements HandlerInterceptor {
     }
 
 
-    public String correlationId() {
+    public String getCorrelationId() {
         return MDC.get(CORRELATION_ID_HEADER);
     }
 
-    public String userId() {
+    public String getUserId() {
         return MDC.get(USER_ID_HEADER);
     }
 
-    public String username() {
+    public String getUsername() {
         return MDC.get(USERNAME_HEADER);
     }
 
-    public String groups() {
+    public String getGroups() {
         return MDC.get(GROUP_HEADER);
     }
 
-    public String roles() {
+    public String getRoles() {
         return MDC.get(USER_ROLES_HEADER);
-    }
-
-    public List<String> rolesList() {
-        return Arrays.asList(MDC.get(USER_ROLES_HEADER).split(","));
     }
 
 }
