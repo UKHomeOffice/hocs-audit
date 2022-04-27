@@ -39,7 +39,7 @@ class CaseAuditEventResource {
         return ResponseEntity.ok(auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes, fromDate));
     }
 
-    @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeleteCaseAuditResponse> deleteCaseAudit(@PathVariable UUID caseUUID, @RequestBody DeleteCaseAuditDto request) {
         Integer auditCount = auditEventService.deleteCaseAudit(caseUUID, request.getDeleted());
         return ResponseEntity.ok(DeleteCaseAuditResponse.from(caseUUID, request, auditCount));
