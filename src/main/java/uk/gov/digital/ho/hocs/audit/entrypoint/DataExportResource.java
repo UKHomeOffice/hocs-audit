@@ -40,7 +40,7 @@ public class DataExportResource {
         this.somuExportService = somuExportService;
     }
 
-    @GetMapping(value = "/export/{caseType}", params = {"fromDate", "exportType"}, produces = "text/csv")
+    @GetMapping(value = "/export/{caseType}", params = {"fromDate", "exportType"}, produces = "text/csv;charset=UTF-8")
     public @ResponseBody
     void getDataExport(@RequestParam("fromDate") LocalDate fromDate,
                        @RequestParam(name = "toDate", defaultValue = "#{T(java.time.LocalDate).now()}") LocalDate toDate,
@@ -55,6 +55,7 @@ public class DataExportResource {
 
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=" + getFileName(caseType, exportType));
+        response.setCharacterEncoding("UTF-8");
 
         var service = dynamicExportServices.get(exportType);
 
