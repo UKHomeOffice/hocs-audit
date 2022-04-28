@@ -113,6 +113,6 @@ public class CorrespondentExportService extends DynamicExportService {
         uuidToName.putAll(caseworkClient.getAllActiveCorrespondents().stream()
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseworkClient);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
     }
 }

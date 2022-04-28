@@ -98,6 +98,6 @@ public class InterestExportService extends DynamicExportService {
             entities.forEach(e -> entityListItemToName.put(e.getSimpleName(), e.getData().getTitle()));
         }
 
-        return new ExportDataConverter(uuidToName, entityListItemToName, caseworkClient);
+        return new ExportDataConverter(uuidToName, entityListItemToName, caseType, auditRepository);
     }
 }

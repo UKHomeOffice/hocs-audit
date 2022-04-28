@@ -101,6 +101,6 @@ public class AppealExportService extends DynamicExportService {
         uuidToName.putAll(infoClient.getCaseTypeActions().stream()
                 .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseworkClient);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
     }
 }
