@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_CREATED;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_DELETED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 
 @Service
@@ -45,13 +45,12 @@ public class AuditEventService {
     }
 
     public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted){
-        log.debug("Case {} setting deleted to {}", caseUUID, deleted);
         List<AuditEvent> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
         for (AuditEvent audit : audits) {
             audit.setDeleted(deleted);
             auditRepository.save(audit);
         }
-        log.info("Case {} set {} audits deleted to {}", caseUUID, audits.size(), deleted);
+        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
         return audits.size();
     }
 
@@ -62,10 +61,10 @@ public class AuditEventService {
         return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
-    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types, LocalDate from) {
-        log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
+    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String types, LocalDate fromDate) {
+        log.debug("Requesting Audit for Case UUID: {} FromDate: {}", caseUUID, fromDate);
         String[] filterTypes = types.split(",");
-        return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
+        return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, fromDate);
     }
 
     private static void validateNotNull(AuditEvent auditEvent) {
