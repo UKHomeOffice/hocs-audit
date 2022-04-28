@@ -1,43 +1,58 @@
 package uk.gov.digital.ho.hocs.audit.service;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
+import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = "classpath:export/cleandown.sql", config = @SqlConfig(transactionMode = ISOLATED), executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@RunWith(MockitoJUnitRunner.class)
 public class AuditEventServiceTest {
 
-    private final String correlationID = "CORRELATION_ID";
-    private final String raisingService = "RAISING_SERVICE";
-    private final String auditPayload = "{\"Test1\":\"Value1\"}";
-    private final String namespace = "NAMESPACE";
+    private final String correlationID = "correlationIDTest";
+    private final String raisingService = "testRaisingService";
+    private final String auditPayload = "{\"name1\":\"value1\",\"name2\":\"value2\"}";
+    private final String namespace = "namespaceEventOccurredIn";
     private final LocalDateTime dateTime = LocalDateTime.now();
-    private final String auditType = "TYPE";
-    private final String userID = "USER";
+    private final String auditType = "testAuditType";
+    private final String userID = "testUser";
 
-    @Autowired
-    private AuditEventService auditService;
-
-    @Autowired
+    @Mock
     private AuditRepository auditRepository;
 
+    @Mock
+    private AuditEventService auditService;
+
+    @Mock
+    private JsonValidator jsonValidator;
+
+    @Mock
+    private EntityManager entityManager;
+
+    @Before
+    public void setUp() {
+        this.auditService = new AuditEventService(auditRepository, jsonValidator, entityManager);
+    }
+
     @Test
-    public void shouldCreateAudit() {
+    public void shouldCreateAuditWithValidParams() {
         auditService.createAudit(correlationID,
                 raisingService,
                 auditPayload,
@@ -46,12 +61,24 @@ public class AuditEventServiceTest {
                 auditType,
                 userID);
 
-        Assertions.assertEquals(1, auditRepository.count());
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenCorrelationnIDIsNullException() {
+        auditService.createAudit(null,
+                raisingService,
+                auditPayload,
+                namespace,
+                dateTime,
+                auditType,
+                userID);
     }
 
     @Test
-    public void shouldNotCreateWithNullCorrelationId() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenCorrelationnIDIsNull() {
+        try {
             auditService.createAudit(null,
                     raisingService,
                     auditPayload,
@@ -59,12 +86,26 @@ public class AuditEventServiceTest {
                     dateTime,
                     auditType,
                     userID);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenRaisingServiceIsNullException() {
+        auditService.createAudit(correlationID,
+                null,
+                auditPayload,
+                namespace,
+                dateTime,
+                auditType,
+                userID);
     }
 
     @Test
-    public void shouldNotCreateWithNullRaisingService() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenRaisingServiceIsNull() {
+        try {
             auditService.createAudit(correlationID,
                     null,
                     auditPayload,
@@ -72,12 +113,27 @@ public class AuditEventServiceTest {
                     dateTime,
                     auditType,
                     userID);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenNamespaceIsNullException() {
+        auditService.createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                null,
+                dateTime,
+                auditType,
+                userID);
     }
 
     @Test
-    public void shouldNotCreateWithNullNamespace() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenNamespaceIsNull() {
+        try {
             auditService.createAudit(correlationID,
                     raisingService,
                     auditPayload,
@@ -85,12 +141,26 @@ public class AuditEventServiceTest {
                     dateTime,
                     auditType,
                     userID);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenTimestampIsNullException() {
+        auditService.createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                null,
+                auditType,
+                userID);
     }
 
     @Test
-    public void shouldNotCreateWithNullTimestamp() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenTimestampIsNull() {
+        try {
             auditService.createAudit(correlationID,
                     raisingService,
                     auditPayload,
@@ -98,12 +168,27 @@ public class AuditEventServiceTest {
                     null,
                     auditType,
                     userID);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenTypeIsNullException() {
+        auditService.createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                dateTime,
+                null,
+                userID);
     }
 
     @Test
-    public void shouldNotCreateWithNullType() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenTypeIsNull() {
+        try {
+
             auditService.createAudit(correlationID,
                     raisingService,
                     auditPayload,
@@ -111,12 +196,27 @@ public class AuditEventServiceTest {
                     dateTime,
                     null,
                     userID);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
+    }
+
+    @Test(expected = EntityCreationException.class)
+    public void shouldNotCreateAuditWhenUserIDIsNullException() {
+
+        auditService.createAudit(correlationID,
+                raisingService,
+                auditPayload,
+                namespace,
+                dateTime,
+                auditType,
+                null);
     }
 
     @Test
-    public void shouldNotCreateWithNullUser() {
-        Assertions.assertThrows(EntityCreationException.class, () -> {
+    public void shouldNotCreateAuditWhenUserIDIsNull() {
+        try {
             auditService.createAudit(correlationID,
                     raisingService,
                     auditPayload,
@@ -124,33 +224,38 @@ public class AuditEventServiceTest {
                     dateTime,
                     auditType,
                     null);
-        });
+        } catch (EntityCreationException e) {
+            //Do Nothing
+        }
+        verifyNoMoreInteractions(auditRepository);
     }
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsInvalid() {
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                            raisingService,
-                            "\"Test\" \"Test\"",
-                            namespace,
-                            dateTime,
-                            auditType,
-                            userID);
-                });
+        auditService.createAudit(correlationID,
+                raisingService,
+                "\"Test name\" \"Test value\"",
+                namespace,
+                dateTime,
+                auditType,
+                userID);
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
+        verifyNoMoreInteractions(auditRepository);
+
     }
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsEmpty() {
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-                    auditService.createAudit(correlationID,
-                            raisingService,
-                            "",
-                            namespace,
-                            dateTime,
-                            auditType,
-                            userID);
-                });
+        auditService.createAudit(correlationID,
+                raisingService,
+                "",
+                namespace,
+                dateTime,
+                auditType,
+                userID);
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
+        verifyNoMoreInteractions(auditRepository);
+
     }
 
     @Test
@@ -162,49 +267,57 @@ public class AuditEventServiceTest {
                 dateTime,
                 auditType,
                 userID);
+        verify(auditRepository, times(1)).save(any(AuditEvent.class));
+        verifyNoMoreInteractions(auditRepository);
 
-        Assertions.assertEquals(1, auditRepository.count());
     }
 
     @Test
     public void shouldGetAuditForCase() {
-        UUID caseUuid = UUID.randomUUID();
 
-        // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        UUID caseUUID = UUID.randomUUID();
+        String[] typesArray = {"TYPE1", "TYPE2"};
 
-        var audits = auditService.getAuditDataByCaseUUID(caseUuid, auditType);
+        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
-        Assertions.assertEquals(1, audits.size());
+        when(auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray)).thenReturn(auditData);
+        auditService.getAuditDataByCaseUUID(caseUUID, typesArray);
+
+        verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray);
+        verifyNoMoreInteractions(auditRepository);
     }
 
     @Test
-    public void shouldGetAuditForCaseWithBefore() {
-        UUID caseUuid = UUID.randomUUID();
+    public void shouldGetAuditForCaseFromDate() {
 
-        // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        UUID caseUUID = UUID.randomUUID();
+        String[] typesArray = {"TYPE1", "TYPE2"};
+        LocalDate from = LocalDate.of(2022, 4, 1);
 
-        var audits = auditService.getAuditDataByCaseUUID(caseUuid, auditType, LocalDate.now().minusDays(1));
+        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
-        Assertions.assertEquals(1, audits.size());
+        when(auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from)).thenReturn(auditData);
+        auditService.getAuditDataByCaseUUID(caseUUID, typesArray, from);
+
+        verify(auditRepository, times(1)).findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from);
+        verifyNoMoreInteractions(auditRepository);
     }
 
     @Test
-    public void deleteCaseAuditShouldMarkAsDeleted() {
-        UUID caseUuid = UUID.randomUUID();
+    public void deleteCaseAuditWhenTrueUpdatedToTrue() {
 
-        // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        UUID caseUUID = UUID.randomUUID();
+        AuditEvent auditEvent = new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID);
+        ArrayList auditDatas = new ArrayList() {{
+            add(auditEvent);
+        }};
+        when(auditRepository.findAuditDataByCaseUUID(caseUUID)).thenReturn(auditDatas);
 
-        auditService.deleteCaseAudit(caseUuid, true);
+        auditService.deleteCaseAudit(caseUUID, true);
 
-        var audits = auditRepository.findAuditDataByCaseUUID(caseUuid);
-        Assertions.assertEquals(1, audits.size());
-        Assertions.assertTrue(audits.get(0).getDeleted());
+        verify(auditRepository).findAuditDataByCaseUUID(caseUUID);
+        verify(auditRepository).save(auditEvent);
+        verifyNoMoreInteractions(auditRepository);
     }
 
 }
