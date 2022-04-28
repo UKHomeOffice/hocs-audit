@@ -1,10 +1,9 @@
 package uk.gov.digital.ho.hocs.audit.client.info;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
@@ -35,11 +34,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
 public class InfoClientTest {
 
-
-    @Mock
+    @MockBean
     private RestHelper restHelper;
 
     private InfoClient infoClient;
@@ -57,7 +55,7 @@ public class InfoClientTest {
     private static final String FIELD_NAME_D = "FieldD";
 
 
-    @Before
+    @BeforeEach
     public void before() {
         infoClient = new InfoClient(restHelper, BASE_URL);
     }

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-@AllArgsConstructor()
+@AllArgsConstructor
 @Getter
 public class TopicDto {
 

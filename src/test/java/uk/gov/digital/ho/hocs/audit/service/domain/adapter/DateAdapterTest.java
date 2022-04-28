@@ -1,13 +1,10 @@
 package uk.gov.digital.ho.hocs.audit.service.domain.adapter;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants.GROUPED_DATE_REGEX;
 
-@RunWith (SpringRunner.class)
 public class DateAdapterTest {
 
     String TEXT_DATA = "ABC-12-EE";
