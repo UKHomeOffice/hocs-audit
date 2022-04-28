@@ -89,6 +89,6 @@ public class CaseNoteExportService extends DynamicExportService {
         Map<String, String> uuidToName = new HashMap<>(infoClient.getUsers().stream()
                 .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseworkClient);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
     }
 }

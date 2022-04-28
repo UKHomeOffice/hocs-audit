@@ -90,6 +90,6 @@ public class TopicExportService extends DynamicExportService {
                         topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText())
                 );
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseworkClient);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
     }
 }

@@ -8,7 +8,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeField;
@@ -55,18 +54,16 @@ public class SomuExportService {
     protected final ObjectMapper objectMapper;
     protected final AuditRepository auditRepository;
     protected final InfoClient infoClient;
-    protected final CaseworkClient caseworkClient;
     private final MalformedDateConverter malformedDateConverter;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public SomuExportService(ObjectMapper objectMapper, AuditRepository auditRepository,
-                             InfoClient infoClient, CaseworkClient caseworkClient, MalformedDateConverter malformedDateConverter) {
+                             InfoClient infoClient, MalformedDateConverter malformedDateConverter) {
         this.objectMapper = objectMapper;
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
-        this.caseworkClient = caseworkClient;
         this.malformedDateConverter = malformedDateConverter;
     }
 
@@ -77,7 +74,7 @@ public class SomuExportService {
             throws IOException {
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         Stream<AuditEvent> data = getData(from, to, caseType);
-        ExportDataConverter dataConverter = getDataConverter(convert);
+        ExportDataConverter dataConverter = getDataConverter(convert, caseType);
 
         printData(writer, zonedDateTimeConverter, dataConverter, somuTypeDto, data);
     }
@@ -128,7 +125,7 @@ public class SomuExportService {
         return data.toArray(new String[0]);
     }
 
-    private ExportDataConverter getDataConverter(boolean convert) {
+    private ExportDataConverter getDataConverter(boolean convert, String caseType) {
         if (!convert) {
             return new ExportDataConverter();
         }
@@ -136,7 +133,7 @@ public class SomuExportService {
         Map<String, String> uuidToName = new HashMap<>(infoClient.getUsers().stream()
                 .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseworkClient);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
 
     }
 
@@ -186,6 +183,6 @@ public class SomuExportService {
 
         return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                         from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
-                SomuExportService.EVENTS, getCaseTypeCode(caseType));
+                EVENTS, getCaseTypeCode(caseType));
     }
 }

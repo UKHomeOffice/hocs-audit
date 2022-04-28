@@ -1,37 +1,44 @@
 package uk.gov.digital.ho.hocs.audit.service.domain.converter;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
-import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCaseReferenceResponse;
 import uk.gov.digital.ho.hocs.audit.core.utils.UuidStringChecker;
+import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.entity.CaseReference;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Slf4j
 public class ExportDataConverter {
 
-    private final CaseworkClient caseworkClient;
     private final Map<String, String> uuidToName;
+    private final Map<String, String> caseUUIDToCaseRef;
     private final Map<String, String> entityListItemToName;
     private final boolean convert;
 
     public ExportDataConverter(Map<String, String> uuidToName,
-                               Map<String, String> entityListItemToName, CaseworkClient caseworkClient) {
-        this(true, uuidToName, entityListItemToName, caseworkClient);
+                               Map<String, String> entityListItemToName,
+                               String caseType,
+                               AuditRepository auditRepository) {
+        this(true, uuidToName, entityListItemToName, caseType, auditRepository);
     }
 
     public ExportDataConverter() {
-        this(false, null, null, null);
+        this(false, null, null, null, null);
     }
 
     private ExportDataConverter(boolean convert, Map<String, String> uuidToName,
-                                Map<String, String> entityListItemToName, CaseworkClient caseworkClient) {
+                                Map<String, String> entityListItemToName,
+                                String caseType,
+                                AuditRepository auditRepository) {
         this.convert = convert;
         this.uuidToName = uuidToName;
         this.entityListItemToName = entityListItemToName;
-        this.caseworkClient = caseworkClient;
+
+        if (convert) {
+            this.caseUUIDToCaseRef = auditRepository.getCaseReferencesForType(caseType).collect(Collectors.toMap(CaseReference::getCaseUUID, CaseReference::getCaseReference));
+        } else {
+            this.caseUUIDToCaseRef = null;
+        }
     }
 
     public String convertValue(String value) {
@@ -47,19 +54,12 @@ public class ExportDataConverter {
     }
 
     public String convertCaseUuid(UUID value) {
+        var uuidString = value.toString();
+
         if (!convert) {
-            return value.toString();
+            return uuidString;
         }
 
-        GetCaseReferenceResponse caseReferenceResponse = caseworkClient.getCaseReference(value.toString());
-
-        String referenceNotFound = "REFERENCE NOT FOUND";
-        if (StringUtils.hasText(caseReferenceResponse.getReference()) &&
-                // if the reference is not found, the uuid does not refer to a case, and can pass through
-                !caseReferenceResponse.getReference().equals(referenceNotFound)) {
-            return caseReferenceResponse.getReference();
-        }
-
-        return value.toString();
+        return caseUUIDToCaseRef.getOrDefault(uuidString, uuidString);
     }
 }
