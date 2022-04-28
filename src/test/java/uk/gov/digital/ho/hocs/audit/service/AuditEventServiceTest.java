@@ -14,8 +14,8 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
@@ -278,7 +278,7 @@ public class AuditEventServiceTest {
         UUID caseUUID = UUID.randomUUID();
         String[] typesArray = {"TYPE1", "TYPE2"};
 
-        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
+        var auditData = List.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
         when(auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, typesArray)).thenReturn(auditData);
         auditService.getAuditDataByCaseUUID(caseUUID, typesArray);
@@ -294,7 +294,7 @@ public class AuditEventServiceTest {
         String[] typesArray = {"TYPE1", "TYPE2"};
         LocalDate from = LocalDate.of(2022, 4, 1);
 
-        var auditData = Stream.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
+        var auditData = List.of(new AuditEvent(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID));
 
         when(auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, typesArray, from)).thenReturn(auditData);
         auditService.getAuditDataByCaseUUID(caseUUID, typesArray, from);
