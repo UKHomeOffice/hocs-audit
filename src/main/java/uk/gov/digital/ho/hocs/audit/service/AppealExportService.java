@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
@@ -75,6 +76,7 @@ public class AppealExportService extends DynamicExportService {
         };    }
 
     @Override
+    @Transactional(readOnly = true)
     public void export(LocalDate from, LocalDate to, PrintWriter writer, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
