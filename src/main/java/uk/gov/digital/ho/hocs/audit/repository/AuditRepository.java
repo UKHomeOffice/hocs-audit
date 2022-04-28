@@ -22,7 +22,7 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 public interface AuditRepository extends JpaRepository<AuditEvent, String>, AuditRepositoryCustom {
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "100"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -30,7 +30,7 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "100"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -38,7 +38,7 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -46,7 +46,7 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     Stream<AuditEvent> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -57,7 +57,7 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     List<AuditEvent> findAuditDataByCaseUUID(UUID caseUUID);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -65,7 +65,7 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of, String[] events, String caseType);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "10000"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
