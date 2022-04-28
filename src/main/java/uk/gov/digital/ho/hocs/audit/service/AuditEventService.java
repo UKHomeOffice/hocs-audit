@@ -3,7 +3,6 @@ package uk.gov.digital.ho.hocs.audit.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityCreationException;
 import uk.gov.digital.ho.hocs.audit.core.utils.JsonValidator;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.GetAuditListResponse;
@@ -73,18 +72,14 @@ public class AuditEventService {
         return audits.size();
     }
 
-    @Transactional(readOnly = true)
-    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes) {
+    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes) {
         log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
-        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
-        return buildAuditListResponse(auditResponses);
+        return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
-    @Transactional(readOnly = true)
-    public GetAuditListResponse getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate from) {
+    public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate from) {
         log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
-        var auditResponses = auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
-        return buildAuditListResponse(auditResponses);
+        return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, from);
     }
 
     private GetAuditListResponse buildAuditListResponse(Stream<AuditEvent> auditEvents) {

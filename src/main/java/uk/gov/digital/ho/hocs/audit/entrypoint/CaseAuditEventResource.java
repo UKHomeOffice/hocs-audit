@@ -32,13 +32,15 @@ class CaseAuditEventResource {
     @GetMapping(value = "/audit/case/{caseUUID}", params = {"types"}, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID, @RequestParam("types") String types) {
         var filterTypes = types.split(",");
-        return ResponseEntity.ok(auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes));
+        var auditEvents = auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes);
+        return ResponseEntity.ok(GetAuditListResponse.from(auditEvents));
     }
 
     @GetMapping(value = "/audit/case/{caseUUID}", params = {"types", "fromDate"}, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID, @RequestParam("types") String types, @RequestParam("fromDate") LocalDate fromDate) {
         var filterTypes = types.split(",");
-        return ResponseEntity.ok(auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes, fromDate));
+        var auditEvents = auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes);
+        return ResponseEntity.ok(GetAuditListResponse.from(auditEvents));
     }
 
     @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

@@ -22,20 +22,16 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 public interface AuditRepository extends JpaRepository<AuditEvent, String>, AuditRepositoryCustom {
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "100"),
-            @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp < 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
-    Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
+    List<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "100"),
-            @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
     @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?3 AND 'tomorrow' AND a.case_uuid = ?1 AND a.type IN ?2 AND a.deleted = false", nativeQuery = true)
-    Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
+    List<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
 
     @QueryHints(value = {
             @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
