@@ -18,7 +18,7 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 public interface AuditRepositoryLatestEvents {
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -26,7 +26,7 @@ public interface AuditRepositoryLatestEvents {
     Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of, String[] events, String caseType);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })

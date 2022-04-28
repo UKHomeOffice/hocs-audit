@@ -21,7 +21,7 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 public interface AuditRepository extends CrudRepository<AuditEvent, String>, AuditRepositoryCustom, AuditRepositoryLatestEvents {
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -29,7 +29,7 @@ public interface AuditRepository extends CrudRepository<AuditEvent, String>, Aud
     Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesIn(UUID caseUUID, String[] types);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -37,7 +37,7 @@ public interface AuditRepository extends CrudRepository<AuditEvent, String>, Aud
     Stream<AuditEvent> findAuditDataByCaseUUIDAndTypesInAndFrom(UUID caseUUID, String[] types, LocalDate from);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
@@ -45,7 +45,7 @@ public interface AuditRepository extends CrudRepository<AuditEvent, String>, Aud
     Stream<AuditEvent> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
 
     @QueryHints(value = {
-            @QueryHint(name = HINT_FETCH_SIZE, value = "1"),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "1000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
