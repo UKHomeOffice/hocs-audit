@@ -14,10 +14,10 @@ import java.util.Set;
 
 import static org.mockito.BDDMockito.given;
 
-public class AllocationExportServiceTest extends BaseExportServiceTest{
+public class CaseNoteExportServiceTest extends BaseExportServiceTest{
 
     @Autowired
-    private AllocationExportService allocationExportService;
+    private CaseNoteExportService caseNoteExportService;
 
     private ZonedDateTimeConverter zonedDateTimeConverter;
 
@@ -31,7 +31,7 @@ public class AllocationExportServiceTest extends BaseExportServiceTest{
 
     @Test
     public void shouldReturnExport() throws IOException {
-        allocationExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1),
+        caseNoteExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1),
                 printWriter, "TEST", false, false, zonedDateTimeConverter);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
@@ -41,7 +41,7 @@ public class AllocationExportServiceTest extends BaseExportServiceTest{
         Assertions.assertEquals(7, headers.length);
 
         var rows = getCsvDataRows(result);
-        Assertions.assertEquals(2, rows.size());
+        Assertions.assertEquals(1, rows.size());
     }
 
 

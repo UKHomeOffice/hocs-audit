@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.core.LogEvent;
 import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
@@ -39,11 +40,11 @@ public abstract class DynamicExportService {
     protected final AuditRepository auditRepository;
     protected final InfoClient infoClient;
     protected final CaseworkClient caseworkClient;
-    private final HeaderConverter headerConverter;
-    private final MalformedDateConverter malformedDateConverter;
+    protected final HeaderConverter headerConverter;
+    protected final MalformedDateConverter malformedDateConverter;
 
     @PersistenceContext
-    private EntityManager entityManager;
+    protected EntityManager entityManager;
 
     protected DynamicExportService(ObjectMapper objectMapper, AuditRepository auditRepository,
                                 InfoClient infoClient, CaseworkClient caseworkClient,
@@ -56,33 +57,32 @@ public abstract class DynamicExportService {
         this.malformedDateConverter = malformedDateConverter;
     }
 
-    String getCaseTypeCode(String caseType) {
+    CaseTypeDto getCaseTypeCode(String caseType) {
         return infoClient.getCaseTypes()
                 .stream()
                 .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
                 .findFirst()
-                .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType))
-                .getShortCode();
+                .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType));
     }
 
     protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
-                             ExportDataConverter exportDataConverter, boolean convertHeader, String caseType,
+                             ExportDataConverter exportDataConverter, boolean convertHeader,
                              Stream<AuditEvent> data) {
         var headers = getConvertedHeaders(getHeaders(), convertHeader);
 
-        printData(writer, zonedDateTimeConverter, exportDataConverter, caseType, headers, data);
+        printData(writer, zonedDateTimeConverter, exportDataConverter, headers, data);
     }
 
     protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
-                             ExportDataConverter exportDataConverter, boolean convertHeader, String caseType,
+                             ExportDataConverter exportDataConverter, boolean convertHeader,
                              Stream<AuditEvent> data, String[] headers) {
         var convertedHeaders = getConvertedHeaders(headers, convertHeader);
 
-        printData(writer, zonedDateTimeConverter, exportDataConverter, caseType, convertedHeaders, data);
+        printData(writer, zonedDateTimeConverter, exportDataConverter, convertedHeaders, data);
     }
 
     protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
-                           ExportDataConverter exportDataConverter, String caseType, String[] headers,
+                           ExportDataConverter exportDataConverter, String[] headers,
                            Stream<AuditEvent> data) {
         try (var printer =
                      new CSVPrinter(writer, CSVFormat.Builder.create()
@@ -91,7 +91,7 @@ public abstract class DynamicExportService {
                              .build())) {
             data.forEach(audit -> {
                 try {
-                    String[] parsedData = parseData(audit, caseType, zonedDateTimeConverter, exportDataConverter);
+                    String[] parsedData = parseData(audit, zonedDateTimeConverter, exportDataConverter);
                     entityManager.detach(audit);
 
                     parsedData = malformedDateConverter.correctDateFields(parsedData);
@@ -116,8 +116,7 @@ public abstract class DynamicExportService {
 
     public abstract ExportType getExportType();
 
-    protected abstract String[] parseData(AuditEvent audit, String caseType,
-                                          ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter)
+    protected abstract String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter)
             throws JsonProcessingException;
 
     @Transactional(readOnly = true)
@@ -128,8 +127,8 @@ public abstract class DynamicExportService {
 
     protected abstract String[] getHeaders();
 
-    protected abstract ExportDataConverter getDataConverter(boolean convert, String caseType);
+    protected abstract ExportDataConverter getDataConverter(boolean convert, CaseTypeDto caseType);
 
-    protected abstract Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseType, String[] events);
+    protected abstract Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events);
 
 }

@@ -17,9 +17,9 @@ public class ExportDataConverter {
 
     public ExportDataConverter(Map<String, String> uuidToName,
                                Map<String, String> entityListItemToName,
-                               String caseType,
+                               String caseTypeCode,
                                AuditRepository auditRepository) {
-        this(true, uuidToName, entityListItemToName, caseType, auditRepository);
+        this(true, uuidToName, entityListItemToName, caseTypeCode, auditRepository);
     }
 
     public ExportDataConverter() {
@@ -28,14 +28,14 @@ public class ExportDataConverter {
 
     private ExportDataConverter(boolean convert, Map<String, String> uuidToName,
                                 Map<String, String> entityListItemToName,
-                                String caseType,
+                                String caseTypeCode,
                                 AuditRepository auditRepository) {
         this.convert = convert;
         this.uuidToName = uuidToName;
         this.entityListItemToName = entityListItemToName;
 
         if (convert) {
-            this.caseUUIDToCaseRef = auditRepository.getCaseReferencesForType(caseType).collect(Collectors.toMap(CaseReference::getCaseUUID, CaseReference::getCaseReference));
+            this.caseUUIDToCaseRef = auditRepository.getCaseReferencesForType(caseTypeCode).collect(Collectors.toMap(CaseReference::getCaseUUID, CaseReference::getCaseReference));
         } else {
             this.caseUUIDToCaseRef = null;
         }
@@ -50,7 +50,11 @@ public class ExportDataConverter {
             return uuidToName.getOrDefault(value, value);
         }
 
-        return entityListItemToName.getOrDefault(value, value).replace(",", "");
+        if (entityListItemToName.containsKey(value)) {
+            return entityListItemToName.get(value).replace(",", "");
+        }
+
+        return value;
     }
 
     public String convertCaseUuid(UUID value) {
