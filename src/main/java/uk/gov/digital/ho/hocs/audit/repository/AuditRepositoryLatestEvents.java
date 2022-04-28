@@ -17,5 +17,4 @@ public interface AuditRepositoryLatestEvents {
     @Query(value = "SELECT audit_payload->>'reference' AS caseReference, case_uuid::TEXT as caseUuid FROM audit_event_latest_events WHERE type = 'CASE_CREATED' AND case_type = ?1", nativeQuery = true)
     Stream<CaseReference> getCaseReferencesForType(String caseType);
 
-
 }
