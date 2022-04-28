@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.EntityDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
@@ -45,7 +46,7 @@ public class InterestExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, String caseType, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
+    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
         AuditPayload.Interest interestData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Interest.class);
 
         return new String[] {
@@ -59,20 +60,22 @@ public class InterestExportService extends DynamicExportService {
     }
 
     @Override
-    protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseType, String[] events) {
+    protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
         LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
 
         return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                         from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
-                events, getCaseTypeCode(caseType));
+                events, caseTypeCode);
     }
 
     @Override
     public void export(LocalDate from, LocalDate to, PrintWriter writer, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
-        var dataConverter = getDataConverter(convert, caseType);
-        var data = getData(from, to, caseType, EVENTS);
+        var caseTypeCode = getCaseTypeCode(caseType);
 
-        printData(writer, zonedDateTimeConverter, dataConverter, convertHeader, caseType, data);
+        var dataConverter = getDataConverter(convert, caseTypeCode);
+        var data = getData(from, to, caseTypeCode.getShortCode(), EVENTS);
+
+        printData(writer, zonedDateTimeConverter, dataConverter, convertHeader, data);
     }
 
     @Override
@@ -83,7 +86,7 @@ public class InterestExportService extends DynamicExportService {
     }
 
     @Override
-    protected ExportDataConverter getDataConverter(boolean convert, String caseType) {
+    protected ExportDataConverter getDataConverter(boolean convert, CaseTypeDto caseType) {
         if (!convert) {
             return new ExportDataConverter();
         }
@@ -93,11 +96,11 @@ public class InterestExportService extends DynamicExportService {
 
         Map<String, String> entityListItemToName = new HashMap<>();
 
-        for (String listName : ENTITY_LISTS.getOrDefault(caseType, new String[0])) {
+        for (String listName : ENTITY_LISTS.getOrDefault(caseType.getType(), new String[0])) {
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
             entities.forEach(e -> entityListItemToName.put(e.getSimpleName(), e.getData().getTitle()));
         }
 
-        return new ExportDataConverter(uuidToName, entityListItemToName, caseType, auditRepository);
+        return new ExportDataConverter(uuidToName, entityListItemToName, caseType.getShortCode(), auditRepository);
     }
 }

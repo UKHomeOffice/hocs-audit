@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
@@ -39,12 +40,12 @@ public class AppealExportService extends DynamicExportService {
     }
 
     @Override
-    protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseType, String[] events) {
+    protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
         LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
 
         return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
                         from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
-                events, getCaseTypeCode(caseType));
+                events, caseTypeCode);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class AppealExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, String caseType, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
+    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
         AuditPayload.Appeal appealData =
                 objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Appeal.class);
 
@@ -75,10 +76,12 @@ public class AppealExportService extends DynamicExportService {
 
     @Override
     public void export(LocalDate from, LocalDate to, PrintWriter writer, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
-        var dataConverter = getDataConverter(convert, caseType);
-        var data = getData(from, to, caseType, EVENTS);
+        var caseTypeDto = getCaseTypeCode(caseType);
 
-        printData(writer, zonedDateTimeConverter, dataConverter, convertHeader, caseType, data);
+        var dataConverter = getDataConverter(convert, caseTypeDto);
+        var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
+
+        printData(writer, zonedDateTimeConverter, dataConverter, convertHeader, data);
     }
 
     @Override
@@ -89,7 +92,7 @@ public class AppealExportService extends DynamicExportService {
     }
 
     @Override
-    protected ExportDataConverter getDataConverter(boolean convert, String caseType) {
+    protected ExportDataConverter getDataConverter(boolean convert, CaseTypeDto caseType) {
         if (!convert) {
             return new ExportDataConverter();
         }
@@ -101,6 +104,6 @@ public class AppealExportService extends DynamicExportService {
         uuidToName.putAll(infoClient.getCaseTypeActions().stream()
                 .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
+        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
 }

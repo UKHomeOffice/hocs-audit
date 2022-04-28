@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.service;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -11,10 +12,11 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
@@ -30,6 +32,18 @@ public abstract class BaseExportServiceTest {
     @MockBean
     protected CaseworkClient caseworkClient;
 
+    protected ByteArrayOutputStream outputStream;
+    protected PrintWriter printWriter;
+
+    /*
+     * Method name cannot be overridden in derived classes to ensure execution.
+     */
+    @BeforeEach
+    public void setupStream() {
+        outputStream = new ByteArrayOutputStream();
+        printWriter = new PrintWriter(outputStream);
+    }
+
     protected List<CSVRecord> getCsvDataRows(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
         CSVParser csvParser = new CSVParser(reader,
@@ -37,11 +51,13 @@ public abstract class BaseExportServiceTest {
         return csvParser.getRecords();
     }
 
-    protected Map<String, Integer> getCsvHeaderRow(String csvBody) throws IOException {
+    protected String[] getCsvHeaderRow(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
         CSVParser csvParser = new CSVParser(reader,
                 CSVFormat.EXCEL.builder().setSkipHeaderRecord(true).setTrim(true).build().withHeader());
-        return csvParser.getHeaderMap();
+
+        return csvParser.getHeaderMap()
+                .keySet().toArray(String[]::new);
     }
 
 }
