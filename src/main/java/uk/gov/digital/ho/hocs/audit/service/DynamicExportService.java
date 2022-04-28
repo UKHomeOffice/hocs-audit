@@ -22,8 +22,11 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConver
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
@@ -65,27 +68,29 @@ public abstract class DynamicExportService {
                 .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType));
     }
 
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader,
                              Stream<AuditEvent> data) {
         var headers = getConvertedHeaders(getHeaders(), convertHeader);
 
-        printData(writer, zonedDateTimeConverter, exportDataConverter, headers, data);
+        printData(outputStream, zonedDateTimeConverter, exportDataConverter, headers, data);
     }
 
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader,
                              Stream<AuditEvent> data, String[] headers) {
         var convertedHeaders = getConvertedHeaders(headers, convertHeader);
 
-        printData(writer, zonedDateTimeConverter, exportDataConverter, convertedHeaders, data);
+        printData(outputStream, zonedDateTimeConverter, exportDataConverter, convertedHeaders, data);
     }
 
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
-                           ExportDataConverter exportDataConverter, String[] headers,
-                           Stream<AuditEvent> data) {
-        try (var printer =
-                     new CSVPrinter(writer, CSVFormat.Builder.create()
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
+                             ExportDataConverter exportDataConverter, String[] headers,
+                             Stream<AuditEvent> data) {
+        try (OutputStream buffer = new BufferedOutputStream(outputStream);
+             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer =
+                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
                              .setHeader(headers)
                              .setAutoFlush(true)
                              .build())) {
@@ -120,7 +125,7 @@ public abstract class DynamicExportService {
             throws JsonProcessingException;
 
     @Transactional(readOnly = true)
-    public abstract void export(LocalDate from, LocalDate to, PrintWriter writer,
+    public abstract void export(LocalDate from, LocalDate to, OutputStream outputStream,
                                 String caseType, boolean convert, boolean convertHeader,
                                 ZonedDateTimeConverter zonedDateTimeConverter)
             throws IOException;

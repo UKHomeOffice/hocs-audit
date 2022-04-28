@@ -51,7 +51,7 @@ public class StaticExportResource {
                     "attachment; filename=" + getFilename("topics"));
 
             log.info("Exporting topics to CSV", value(EVENT, CSV_EXPORT_START));
-            staticTopicService.export(response.getWriter(), convertHeader);
+            staticTopicService.export(response.getOutputStream(), convertHeader);
             log.info("Completed export of topics to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
@@ -68,7 +68,7 @@ public class StaticExportResource {
                     "attachment; filename=" + getFileName(caseType, "topics_teams"));
 
             log.info("Exporting topics and teams to CSV", value(EVENT, CSV_EXPORT_START));
-            staticTopicAndTeamService.export(response.getWriter(), caseType, convertHeader);
+            staticTopicAndTeamService.export(response.getOutputStream(), caseType, convertHeader);
             log.info("Completed export of topics and teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
@@ -84,7 +84,7 @@ public class StaticExportResource {
                     "attachment; filename=" + getFilename("teams"));
 
             log.info("Exporting teams to CSV", value(EVENT, CSV_EXPORT_START));
-            staticTeamService.export(response.getWriter(), convertHeader);
+            staticTeamService.export(response.getOutputStream(), convertHeader);
             log.info("Completed export of teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static team list for reason {}", ex.toString());
@@ -100,7 +100,7 @@ public class StaticExportResource {
                     "attachment; filename=" + getFilename("units_teams"));
 
             log.info("Exporting units with teams to CSV", value(EVENT, CSV_EXPORT_START));
-            staticUnitAndTeamService.export(response.getWriter(), convertHeader);
+            staticUnitAndTeamService.export(response.getOutputStream(), convertHeader);
             log.info("Completed export of units with teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static units for teams list for reason {}", ex.toString());
@@ -116,7 +116,7 @@ public class StaticExportResource {
                     "attachment; filename=" + getFilename("users"));
 
             log.info("Exporting users to CSV", value(EVENT, CSV_EXPORT_START));
-            staticUserService.export(response.getWriter(), convertHeader);
+            staticUserService.export(response.getOutputStream(), convertHeader);
             log.info("Completed export of users to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
             log.error("Error exporting CSV file for static user list for reason {}", ex.toString());
