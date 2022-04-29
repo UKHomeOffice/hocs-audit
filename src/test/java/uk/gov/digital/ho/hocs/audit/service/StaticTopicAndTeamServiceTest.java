@@ -28,7 +28,7 @@ public class StaticTopicAndTeamServiceTest extends BaseExportServiceTest{
 
         given(infoClient.getTopicsWithTeams("TEST")).willReturn(Set.of(topicTeamDto));
 
-        staticTopicAndTeamService.export(printWriter, "TEST",false);
+        staticTopicAndTeamService.export(outputStream, "TEST", false);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

@@ -25,7 +25,7 @@ public class StaticTeamServiceTest extends BaseExportServiceTest{
         TeamDto teamDto = new TeamDto("TEST1", UUID.randomUUID(), true, UUID.randomUUID().toString());
         given(infoClient.getTeams()).willReturn(Set.of(teamDto));
 
-        staticTeamService.export(printWriter, false);
+        staticTeamService.export(outputStream, false);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

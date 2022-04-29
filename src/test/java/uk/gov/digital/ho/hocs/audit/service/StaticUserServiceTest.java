@@ -27,7 +27,7 @@ public class StaticUserServiceTest extends BaseExportServiceTest{
 
         given(infoClient.getUsers()).willReturn(Set.of(userDto));
 
-        staticUserService.export(printWriter, false);
+        staticUserService.export(outputStream, false);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);
