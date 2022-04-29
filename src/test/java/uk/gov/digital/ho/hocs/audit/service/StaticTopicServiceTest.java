@@ -26,7 +26,7 @@ public class StaticTopicServiceTest extends BaseExportServiceTest{
 
         given(infoClient.getTopics()).willReturn(Set.of(topicDto));
 
-        staticTopicService.export(printWriter, false);
+        staticTopicService.export(outputStream, false);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

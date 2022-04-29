@@ -32,7 +32,7 @@ public class AppealExportServiceTest extends BaseExportServiceTest{
     @Test
     public void shouldReturnExport() throws IOException {
         appealExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1),
-                printWriter, "TEST", false, false, zonedDateTimeConverter);
+                outputStream, "TEST", false, false, zonedDateTimeConverter);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

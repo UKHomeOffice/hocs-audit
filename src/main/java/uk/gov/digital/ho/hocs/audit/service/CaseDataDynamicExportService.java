@@ -17,8 +17,11 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -37,7 +40,7 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
 
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader, CaseTypeDto caseType,
                              Stream<AuditEvent> data) {
         var additionalHeaders = getAdditionalHeaders(caseType);
@@ -48,14 +51,16 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
             headerConverter.substitute(concatenatedHeaders);
         }
 
-        printData(writer, zonedDateTimeConverter, exportDataConverter, concatenatedHeaders, additionalHeaders, data);
+        printData(outputStream, zonedDateTimeConverter, exportDataConverter, concatenatedHeaders, additionalHeaders, data);
     }
 
-    private void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter,
-                             ExportDataConverter exportDataConverter, String[] headers,
-                             String[] additionalHeaders, Stream<AuditEvent> data) {
-        try (var printer =
-                     new CSVPrinter(writer, CSVFormat.Builder.create()
+    private void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
+                           ExportDataConverter exportDataConverter, String[] headers,
+                           String[] additionalHeaders, Stream<AuditEvent> data) {
+        try (OutputStream buffer = new BufferedOutputStream(outputStream);
+             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer =
+                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
                              .setHeader(headers)
                              .setAutoFlush(true)
                              .build())) {
@@ -77,10 +82,12 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
     }
 
     @Override
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter, boolean convertHeader, Stream<AuditEvent> data, String[] headers) { }
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter, boolean convertHeader, Stream<AuditEvent> data, String[] headers) {
+    }
 
     @Override
-    protected void printData(PrintWriter writer, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter, String[] headers, Stream<AuditEvent> data) { }
+    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter, String[] headers, Stream<AuditEvent> data) {
+    }
 
     @Override
     protected String[] parseData(AuditEvent audit,

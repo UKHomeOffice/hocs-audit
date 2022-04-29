@@ -53,7 +53,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
     public void shouldReturnLatestCaseDataReport() throws IOException {
         LocalDate from = LocalDate.of(2020, 1, 1);
         caseDataExportService.export(from, LocalDate.now().plusDays(1),
-                printWriter, "TEST", false, false, zonedDateTimeConverter);
+                outputStream, "TEST", false, false, zonedDateTimeConverter);
 
         // Verify that the latest table is used with future dates
         verify(auditRepository).findAuditEventLatestEventsAfterDate(LocalDateTime.of(from, LocalTime.MIN), CaseDataExportService.EVENTS, "a1");
@@ -80,7 +80,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         LocalDate from = LocalDate.of(2020, 1, 1);
         LocalDate to = LocalDate.now().minusWeeks(1);
 
-        caseDataExportService.export(from, to, printWriter,
+        caseDataExportService.export(from, to, outputStream,
                 "TEST", false, false, zonedDateTimeConverter);
 
         verify(auditRepository).findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), LocalDateTime.of(to, LocalTime.MAX), CaseDataExportService.EVENTS, "a1");
@@ -104,7 +104,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
 
     @Test
     public void shouldReturnConvertedExport() throws IOException {
-        caseDataExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now(), printWriter,
+        caseDataExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now(), outputStream,
                 "TEST", true, true, zonedDateTimeConverter);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);

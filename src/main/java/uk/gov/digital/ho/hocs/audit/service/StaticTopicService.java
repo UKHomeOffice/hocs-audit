@@ -9,8 +9,11 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.TopicDto;
 import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
@@ -30,11 +33,13 @@ public class StaticTopicService {
         this.infoClient = infoClient;
     }
 
-    public void export(PrintWriter writer, boolean convertHeader) throws IOException {
+    public void export(OutputStream outputStream, boolean convertHeader) throws IOException {
         var headers = getHeaders(convertHeader);
 
-        try (var printer =
-                     new CSVPrinter(writer, CSVFormat.Builder.create()
+        try (OutputStream buffer = new BufferedOutputStream(outputStream);
+             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer =
+                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
                              .setHeader(headers)
                              .setAutoFlush(true)
                              .build())) {
