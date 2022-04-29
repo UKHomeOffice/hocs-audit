@@ -16,6 +16,7 @@ import uk.gov.digital.ho.hocs.audit.service.SomuExportService;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +51,11 @@ public class DataExportResource {
                        @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader,
                        @RequestParam(name = "timestampFormat", required = false) String timestampFormat,
                        @RequestParam(name = "timeZoneId", required = false) String timeZoneId,
-                       HttpServletResponse response) {
+                       HttpServletResponse response) throws IOException {
         ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(timestampFormat, timeZoneId);
 
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + getFileName(caseType, exportType));
-        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFileName(caseType, exportType));
 
         var service = dynamicExportServices.get(exportType);
 
@@ -65,10 +65,10 @@ public class DataExportResource {
 
         try {
             log.info("Exporting {} to CSV", exportType, value(EVENT, CSV_EXPORT_START));
-            service.export(fromDate, toDate, response.getWriter(), caseType, convert, convertHeader, zonedDateTimeConverter);
+            service.export(fromDate, toDate, response.getOutputStream(), caseType, convert, convertHeader, zonedDateTimeConverter);
             log.info("Completed export of {} to CSV", exportType, value(EVENT, CSV_EXPORT_COMPLETE));
         } catch (Exception ex) {
-            log.error("Error exporting CSV file for case type {} and export type {} for reason {}", caseType, exportType.toString(), ex.toString());
+            log.error("Error exporting CSV file for case type {} and export type {} for reason {}", caseType, exportType, ex.toString());
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }

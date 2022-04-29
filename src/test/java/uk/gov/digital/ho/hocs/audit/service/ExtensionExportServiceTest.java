@@ -33,7 +33,7 @@ public class ExtensionExportServiceTest extends BaseExportServiceTest {
     public void shouldReturnExport() throws IOException {
 
         extensionExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1),
-                printWriter, "TEST", false, false, zonedDateTimeConverter);
+                outputStream, "TEST", false, false, zonedDateTimeConverter);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

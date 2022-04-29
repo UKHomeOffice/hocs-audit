@@ -30,7 +30,7 @@ public class StaticUnitAndTeamServiceTest extends BaseExportServiceTest{
         given(infoClient.getUnits()).willReturn(Set.of(unitDto, unit2Dto));
         given(infoClient.getTeamsForUnit(unitDto.getUuid())).willReturn(Set.of(teamDto));
 
-        staticUnitAndTeamService.export(printWriter, false);
+        staticUnitAndTeamService.export(outputStream, false);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);

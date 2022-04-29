@@ -19,7 +19,7 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -60,7 +60,7 @@ public class AllocationExportService extends DynamicExportService {
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, PrintWriter writer,
+    public void export(LocalDate from, LocalDate to, OutputStream outputStream,
                        String caseType, boolean convert, boolean convertHeader,
                        ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
@@ -68,7 +68,7 @@ public class AllocationExportService extends DynamicExportService {
         var dataConverter = getDataConverter(convert, caseTypeDto);
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
 
-        printData(writer, zonedDateTimeConverter, dataConverter, convertHeader, data);
+        printData(outputStream, zonedDateTimeConverter, dataConverter, convertHeader, data);
     }
 
     public ExportDataConverter getDataConverter(boolean convert, CaseTypeDto caseType) {
