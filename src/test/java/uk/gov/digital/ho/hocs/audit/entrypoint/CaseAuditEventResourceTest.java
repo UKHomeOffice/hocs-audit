@@ -1,51 +1,59 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.DeleteCaseAuditDto;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.DeleteCaseAuditResponse;
-import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
+import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseAuditEventResourceTest {
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = "classpath:export/cleandown.sql", config = @SqlConfig(transactionMode = ISOLATED), executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+public class CaseAuditEventResourceTest extends BaseExportResourceTest {
 
-    @Mock
-    private AuditEventService auditService;
+    private AuditEvent auditEvent;
 
-    private final UUID caseUUID = UUID.randomUUID();
+    @Autowired
+    private AuditRepository auditRepository;
 
-    private CaseAuditEventResource auditResource;
+    @BeforeEach
+    public void setup() {
+        auditEvent = new AuditEvent(UUID.randomUUID(), UUID.randomUUID(), "TEST", "TEST",
+                "{}", "TEST", LocalDateTime.now(), "TEST", "TEST");
 
-    @Before
-    public void setUp() {
-        auditResource = new CaseAuditEventResource(auditService);
+        auditRepository.save(auditEvent);
     }
-
 
     @Test
     public void shouldDeleteCaseAudit() {
         DeleteCaseAuditDto deleteCaseAuditDto = new DeleteCaseAuditDto("1", true);
-        when(auditService.deleteCaseAudit(caseUUID, true)).thenReturn(2);
+        HttpEntity<DeleteCaseAuditDto> httpEntity = new HttpEntity<>(deleteCaseAuditDto, null);
 
-        ResponseEntity<DeleteCaseAuditResponse> response = auditResource.deleteCaseAudit(caseUUID, deleteCaseAuditDto);
+        ResponseEntity<DeleteCaseAuditResponse> result = restTemplate.exchange(getExportUri("/audit/case/%s/delete", auditEvent.getCaseUUID()),
+                POST, httpEntity, DeleteCaseAuditResponse.class);
 
-        verify(auditService).deleteCaseAudit(caseUUID, true);
-        verifyNoMoreInteractions(auditService);
-        assertThat(response).isNotNull();
-        assertThat(response.getBody().getAuditCount()).isEqualTo(2);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+
+        var resultBody = result.getBody();
+
+        Assertions.assertNotNull(resultBody);
+        Assertions.assertEquals(auditEvent.getCaseUUID(), resultBody.getCaseUUID());
+        Assertions.assertEquals(1, resultBody.getAuditCount());
     }
 
 }

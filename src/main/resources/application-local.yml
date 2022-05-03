@@ -8,5 +8,9 @@ aws:
       url: http://${localstack.host}:${aws.sqs.config.port}
     audit:
       url: ${aws.sqs.config.url}/queue/${aws.queue.audit.name}
+    audit-dlq:
+      name: audit-queue-dlq
+      url: ${aws.sqs.config.url}/queue/${aws.sqs.audit-dlq.name}
+
 
 postgresViewAllowList: allow1,allow2

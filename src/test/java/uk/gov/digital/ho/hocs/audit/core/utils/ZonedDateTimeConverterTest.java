@@ -1,16 +1,12 @@
 package uk.gov.digital.ho.hocs.audit.core.utils;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.zone.ZoneRulesException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
 public class ZonedDateTimeConverterTest {
 
     @Test
@@ -25,8 +21,8 @@ public class ZonedDateTimeConverterTest {
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12", convertedDateTime);
     }
 
     @Test
@@ -36,13 +32,13 @@ public class ZonedDateTimeConverterTest {
 
         LocalDateTime localDateTime =
                 LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12T00:00:00.000000", convertedDateTime);
     }
 
     @Test
@@ -57,13 +53,15 @@ public class ZonedDateTimeConverterTest {
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12T00:00:00.000000", convertedDateTime);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldThrowExceptionIfTimestampFormatInvalid() {
-        new ZonedDateTimeConverter("INVALID", null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new ZonedDateTimeConverter("INVALID", null);
+        });
     }
 
     @Test
@@ -78,8 +76,8 @@ public class ZonedDateTimeConverterTest {
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12T01:00:00.000000");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12T01:00:00.000000", convertedDateTime);
     }
 
     @Test
@@ -94,8 +92,8 @@ public class ZonedDateTimeConverterTest {
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12T00:00:00.000000", convertedDateTime);
     }
 
     @Test
@@ -110,13 +108,14 @@ public class ZonedDateTimeConverterTest {
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
-        assertThat(convertedDateTime).isNotNull();
-        assertThat(convertedDateTime).isEqualTo("2020-12-12T00:00:00.000000");
+        Assertions.assertNotNull(convertedDateTime);
+        Assertions.assertEquals("2020-12-12T00:00:00.000000", convertedDateTime);
     }
 
-    @Test(expected = ZoneRulesException.class)
+    @Test
     public void shouldThrowExceptionIfZoneIdInvalid() {
-        new ZonedDateTimeConverter(null, "INVALID");
+        Assertions.assertThrows(ZoneRulesException.class, () ->
+                new ZonedDateTimeConverter(null, "INVALID"));
     }
 
 }

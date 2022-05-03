@@ -1,21 +1,17 @@
 package uk.gov.digital.ho.hocs.audit.core.utils;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
 public class LocalDateTimeAttributeConverterTest {
 
     private LocalDateTimeAttributeConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.converter = new LocalDateTimeAttributeConverter();
     }
@@ -31,9 +27,9 @@ public class LocalDateTimeAttributeConverterTest {
         );
         Timestamp convertedDate = converter.convertToDatabaseColumn(date);
 
-        assertThat(convertedDate).isNotNull();
-        assertThat(convertedDate).isInstanceOf(Timestamp.class);
-        assertThat(convertedDate.toString()).isEqualTo("2018-01-01 00:01:00.0");
+        Assertions.assertNotNull(convertedDate);
+        Assertions.assertInstanceOf(Timestamp.class, convertedDate);
+        Assertions.assertEquals("2018-01-01 00:01:00.0", convertedDate.toString());
     }
 
     @Test
@@ -41,9 +37,9 @@ public class LocalDateTimeAttributeConverterTest {
         Timestamp date = new Timestamp(1514764860000L);
         LocalDateTime convertedDate = converter.convertToEntityAttribute(date);
 
-        assertThat(convertedDate).isNotNull();
-        assertThat(convertedDate).isInstanceOf(LocalDateTime.class);
-        assertThat(convertedDate.toString()).isEqualTo("2018-01-01T00:01");
+        Assertions.assertNotNull(convertedDate);
+        Assertions.assertInstanceOf(LocalDateTime.class, convertedDate);
+        Assertions.assertEquals("2018-01-01T00:01", convertedDate.toString());
     }
 
 }

@@ -1,284 +1,164 @@
 package uk.gov.digital.ho.hocs.audit.service.domain.converter;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCaseReferenceResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.entity.CaseReference;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
 
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
 public class ExportDataConverterTest {
 
-    private static final String CASE_ID = UUID.randomUUID().toString();
-    private static final String CASE_ID_NONE = UUID.randomUUID().toString();
-    private static final String USER1_ID = UUID.randomUUID().toString();
-    private static final String USER1_USERNAME = "user-Jim";
-    private static final String UNIT1_ID = UUID.randomUUID().toString();
-    private static final String AUDIT_RECORD_ID = UUID.randomUUID().toString();
-    private static final String UNIT1_DISPLAY_NAME = "Unit 1";
-    private static final String TOPIC1_ID = UUID.randomUUID().toString();
-    private static final String TOPIC1_TEXT = "Topic 1";
-    private static final String TEAM1_ID = UUID.randomUUID().toString();
-    private static final String TEAM1_DISPLAY_NAME = "Team 1";
-    private static final String CORR1_ID = UUID.randomUUID().toString();
-    private static final String CORR1_FULLNAME = "Bob Smith";
-    private static final String CASE_REF = "REF/1234567/890";
-    private static final String CASE_REF_NONE = "";
-    private static final String REFERENCE_NOT_FOUND = "REFERENCE NOT FOUND";
-    private static final String CASE_TYPE_SHORT_CODE = "x1";
-    private static final String ENTITY_1_SIMPLE_NAME = "aaaa_bbbb_cccc";
-    private static final String ENTITY_1_TITLE = "aaaa bbbb / (cccc)";
-    private static final String ENTITY_2_SIMPLE_NAME = "dddd_eeee_ffff";
-    private static final String ENTITY_2_TITLE_WITH_COMMAS = "dddd, eeee, (ffff)";
+    @MockBean
+    private AuditRepository auditRepository;
 
-    private static final Map<String, String> UUID_TO_NAME = buildUuidToNameMap();
-    private static final Map<String, String> MPAM_CODE_TO_NAME = buildMpamCodeToNameMap();
+    @Test
+    public void convertConstructorCallsForCaseReferences() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-    @Mock
-    private CaseworkClient caseworkClient;
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-    private ExportDataConverter converter;
-
-    @Before
-    public void before() {
-        when(caseworkClient.getCaseReference(CASE_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID), CASE_REF));
-        when(caseworkClient.getCaseReference(CASE_ID_NONE)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), CASE_REF_NONE));
-        when(caseworkClient.getCaseReference(AUDIT_RECORD_ID)).thenReturn(new GetCaseReferenceResponse(UUID.fromString(CASE_ID_NONE), REFERENCE_NOT_FOUND));
-
-        converter = new ExportDataConverter(UUID_TO_NAME, MPAM_CODE_TO_NAME, caseworkClient);
+        Mockito.verify(auditRepository).getCaseReferencesForType("TEST");
+        Assertions.assertNotNull(converter);
     }
 
     @Test
-    public void convertDataHandlesEmptyArray() {
+    public void convertCaseUuidReturnsReference() {
+        UUID caseUuid = UUID.randomUUID();
 
-        String[] testResult = converter.convertData(new String[] {}, CASE_TYPE_SHORT_CODE);
+        CaseReference caseReference = new CaseReference() {
+            @Override
+            public String getCaseReference() {
+                return "TEST_REF";
+            }
 
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(0);
+            @Override
+            public String getCaseUUID() {
+                return caseUuid.toString();
+            }
+        };
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of(caseReference));
+
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals("TEST_REF", converter.convertCaseUuid(caseUuid));
     }
 
     @Test
-    public void convertDataWhenNothingToConvertThenNothingConverted() {
+    public void convertCaseUuidWithNonExistentReturnsUuid() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testData = { "a", "b", "c", "d", AUDIT_RECORD_ID};
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
+        Assertions.assertNotNull(converter);
 
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(5);
-        assertThat(testResult[0]).isEqualTo(testData[0]);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
-        assertThat(testResult[4]).isEqualTo(testData[4]);
+        UUID queryUuid = UUID.randomUUID();
+        Assertions.assertEquals(queryUuid.toString(), converter.convertCaseUuid(queryUuid));
     }
 
     @Test
-    public void convertDataWhenUserUuidThenUsername() {
+    public void convertValueReturnsFromUuidMap() {
+        UUID randomUuid = UUID.randomUUID();
+        Map<String, String> uuidMap =
+                Map.of(randomUuid.toString(), "TEST");
 
-        String[] testData = { USER1_ID, "b", "c", "d" };
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
+        var converter =
+                new ExportDataConverter(uuidMap, Collections.emptyMap(), "TEST", auditRepository);
 
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(USER1_USERNAME);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals("TEST", converter.convertValue(randomUuid.toString()));
     }
 
     @Test
-    public void convertDataWhenUnitUuidThenUnitDisplayName() {
+    public void convertValueReturnsFromNormalMap() {
+        Map<String, String> entityMap =
+                Map.of("TEST", "This,Test");
 
-        String[] testData = { "a", UNIT1_ID, "c", "d" };
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), entityMap, "TEST", auditRepository);
 
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(testData[0]);
-        assertThat(testResult[1]).isEqualTo(UNIT1_DISPLAY_NAME);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals("ThisTest", converter.convertValue("TEST"));
     }
 
     @Test
-    public void convertDataWhenTopicUuidThenTopicText() {
+    public void convertValueReturnsInputWithNonExistantValue() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testData = { "a", "b", TOPIC1_ID, "d" };
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(testData[0]);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(TOPIC1_TEXT);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals("This,Test", converter.convertValue("This,Test"));
     }
 
     @Test
-    public void convertDataWhenTeamUuidThenTeamDisplayName() {
+    public void convertCaseUuidWithNonExistentReturnsReturnsUuid() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testData = { "a", "b", "c", TEAM1_ID };
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
+        Assertions.assertNotNull(converter);
 
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(testData[0]);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(TEAM1_DISPLAY_NAME);
+        UUID queryUuid = UUID.randomUUID();
+        Assertions.assertEquals(queryUuid.toString(), converter.convertCaseUuid(queryUuid));
     }
 
     @Test
-    public void convertDataWhenCorrespondentUuidThenCorrespondentFullname() {
+    public void convertCaseUuidWithNullReturnsUuid() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testData = { "a", CORR1_ID, "c", "d" };
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(testData[0]);
-        assertThat(testResult[1]).isEqualTo(CORR1_FULLNAME);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
+        Assertions.assertNotNull(converter);
+        Assertions.assertNull(converter.convertCaseUuid(null));
     }
 
     @Test
-    public void convertDataWhenUuidsThenAllReplaced() {
+    public void convertValueWithNullReturnsUuid() {
+        given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        String[] testData = { USER1_ID, UNIT1_ID, TOPIC1_ID, TEAM1_ID, CORR1_ID };
+        var converter =
+                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
 
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(5);
-        assertThat(testResult[0]).isEqualTo(USER1_USERNAME);
-        assertThat(testResult[1]).isEqualTo(UNIT1_DISPLAY_NAME);
-        assertThat(testResult[2]).isEqualTo(TOPIC1_TEXT);
-        assertThat(testResult[3]).isEqualTo(TEAM1_DISPLAY_NAME);
-        assertThat(testResult[4]).isEqualTo(CORR1_FULLNAME);
-    }
-
-
-    @Test
-    public void convertCaseRefLookup() {
-
-        String[] testData = { CASE_ID };
-
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(1);
-        assertThat(testResult[0]).isEqualTo(CASE_REF);
-        verify(caseworkClient).getCaseReference(CASE_ID);
+        Assertions.assertNotNull(converter);
+        Assertions.assertNull(converter.convertValue(null));
     }
 
     @Test
-    public void convertCaseRefNonLookup() {
+    public void nonConversionConvertCaseUuidReturnsValue() {
+        var converter = new ExportDataConverter();
 
-        String[] testData = { CASE_ID_NONE };
-
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(1);
-        assertThat(testResult[0]).isEqualTo(CASE_ID_NONE); // leaves the data as is
-        verify(caseworkClient).getCaseReference(CASE_ID_NONE);
-
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals("TEST", converter.convertValue("TEST"));
     }
 
     @Test
-    public void convertMpamEntityCode() {
+    public void nonConversionConvertCaseUuidReturnsUuid() {
+        var converter = new ExportDataConverter();
+        var queryUuid = UUID.randomUUID();
 
-        String[] testData = { ENTITY_1_SIMPLE_NAME, "b", "c", "d" };
-
-        String[] testResult = converter.convertData(testData, "b5");
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo("aaaa bbbb / (cccc)");
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
+        Assertions.assertNotNull(converter);
+        Assertions.assertEquals(queryUuid.toString(), converter.convertCaseUuid(queryUuid));
     }
 
-    @Test
-    public void convertMpamEntityCodeWhenTitleContainsCommasThenTitleIsSanitised() {
-
-        String[] testData = { ENTITY_2_SIMPLE_NAME, "b", "c", "d" };
-
-        String[] testResult = converter.convertData(testData, "b5");
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo("dddd eeee (ffff)");
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
-    }
-
-    @Test
-    public void convertMpamEntityCodeWhenNotMpamThenNoConversion() {
-
-        String[] testData = { ENTITY_1_SIMPLE_NAME, "b", "c", "d" };
-
-        String[] testResult = converter.convertData(testData, CASE_TYPE_SHORT_CODE);
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(ENTITY_1_SIMPLE_NAME);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
-    }
-
-    @Test
-    public void convertMpamEntityCodeWhenCodeNotFoundThenNoConversion() {
-
-        String invalidCode = "simple_name2";
-        String[] testData = { invalidCode, "b", "c", "d" };
-
-        String[] testResult = converter.convertData(testData, "b5");
-
-        assertThat(testResult).isNotNull();
-        assertThat(testResult.length).isEqualTo(4);
-        assertThat(testResult[0]).isEqualTo(invalidCode);
-        assertThat(testResult[1]).isEqualTo(testData[1]);
-        assertThat(testResult[2]).isEqualTo(testData[2]);
-        assertThat(testResult[3]).isEqualTo(testData[3]);
-    }
-
-    private static Map<String, String> buildUuidToNameMap() {
-        return new HashMap<>(
-                Map.ofEntries(
-                    new AbstractMap.SimpleEntry<>(USER1_ID, USER1_USERNAME),
-                    new AbstractMap.SimpleEntry<>(TEAM1_ID, TEAM1_DISPLAY_NAME),
-                    new AbstractMap.SimpleEntry<>(UNIT1_ID, UNIT1_DISPLAY_NAME),
-                    new AbstractMap.SimpleEntry<>(TOPIC1_ID, TOPIC1_TEXT),
-                    new AbstractMap.SimpleEntry<>(CORR1_ID, CORR1_FULLNAME))
-        );
-    }
-
-    private static Map<String, String> buildMpamCodeToNameMap() {
-        return new HashMap<>(Map.ofEntries(
-                new AbstractMap.SimpleEntry<>(ENTITY_1_SIMPLE_NAME, ENTITY_1_TITLE),
-                new AbstractMap.SimpleEntry<>(ENTITY_2_SIMPLE_NAME, ENTITY_2_TITLE_WITH_COMMAS))
-        );
-    }
 }

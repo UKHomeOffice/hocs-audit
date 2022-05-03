@@ -1,10 +1,9 @@
 package uk.gov.digital.ho.hocs.audit.core;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
 public class RequestDataTest
 {
     @Mock
@@ -22,7 +21,7 @@ public class RequestDataTest
 
     private RequestData requestData;
 
-    @Before
+    @BeforeEach
     public void setup() {
         requestData = new RequestData();
     }
