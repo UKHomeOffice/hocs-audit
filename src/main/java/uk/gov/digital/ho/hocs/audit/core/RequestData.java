@@ -7,29 +7,43 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
 public class RequestData implements HandlerInterceptor {
 
-    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
-    public static final String USER_ID_HEADER = "X-Auth-UserId";
-    public static final String USERNAME_HEADER = "X-Auth-Username";
-    public static final String USER_ROLES_HEADER = "X-Auth-Roles";
+    static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    static final String USER_ID_HEADER = "X-Auth-UserId";
+    static final String USERNAME_HEADER = "X-Auth-Username";
+    static final String GROUP_HEADER = "X-Auth-Groups";
+    static final String USER_ROLES_HEADER = "X-Auth-Roles";
 
     private static final String ANONYMOUS = "anonymous";
     private static final String BLANK = "";
 
+    public void parseMessageHeaders(Map<String, String> headers) {
+        MDC.clear();
+        MDC.put(CORRELATION_ID_HEADER, initialiseCorrelationId(headers.get(CORRELATION_ID_HEADER)));
+        MDC.put(USER_ID_HEADER, initialiseCorrelationId(headers.get(USER_ID_HEADER)));
+        MDC.put(USERNAME_HEADER, initialiseCorrelationId(headers.get(USERNAME_HEADER)));
+        MDC.put(GROUP_HEADER, initialiseCorrelationId(headers.get(GROUP_HEADER)));
+        MDC.put(USER_ROLES_HEADER, initialiseCorrelationId(headers.get(USER_ROLES_HEADER)));
+    }
+
+    public void clear() {
+        MDC.clear();
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         MDC.clear();
-        MDC.put(CORRELATION_ID_HEADER, initialiseCorrelationId(request));
-        MDC.put(USER_ID_HEADER, initialiseUserId(request));
-        MDC.put(USERNAME_HEADER, initialiseUserName(request));
-        MDC.put(USER_ROLES_HEADER, initialiseUserRoles(request));
+        MDC.put(CORRELATION_ID_HEADER, initialiseCorrelationId(request.getHeader(CORRELATION_ID_HEADER)));
+        MDC.put(USER_ID_HEADER, initialiseUserId(request.getHeader(USER_ID_HEADER)));
+        MDC.put(USERNAME_HEADER, initialiseUserName(request.getHeader(USERNAME_HEADER)));
+        MDC.put(GROUP_HEADER, initialiseGroups(request.getHeader(GROUP_HEADER)));
+        MDC.put(USER_ROLES_HEADER, initialiseUserRoles(request.getHeader(USER_ROLES_HEADER)));
         return true;
     }
 
@@ -40,51 +54,52 @@ public class RequestData implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        response.setHeader(USER_ID_HEADER, userId());
-        response.setHeader(USERNAME_HEADER, userId());
-        response.setHeader(CORRELATION_ID_HEADER, correlationId());
+        response.setHeader(CORRELATION_ID_HEADER, getCorrelationId());
+        response.setHeader(USER_ID_HEADER, getUserId());
+        response.setHeader(USERNAME_HEADER, getUsername());
+        response.setHeader(GROUP_HEADER, getGroups());
+        response.setHeader(USER_ROLES_HEADER, getRoles());
         MDC.clear();
     }
 
-    private String initialiseCorrelationId(HttpServletRequest request) {
-        String correlationId = request.getHeader(CORRELATION_ID_HEADER);
-        return !isNullOrEmpty(correlationId) ? correlationId : UUID.randomUUID().toString();
+    private String initialiseCorrelationId(String value) {
+        return Objects.requireNonNullElse(value, UUID.randomUUID().toString());
     }
 
-    private String initialiseUserId(HttpServletRequest request) {
-        String userId = request.getHeader(USER_ID_HEADER);
-        return !isNullOrEmpty(userId) ? userId : ANONYMOUS;
+    private String initialiseUserId(String value) {
+        return Objects.requireNonNullElse(value, ANONYMOUS);
     }
 
-    private String initialiseUserName(HttpServletRequest request) {
-        String username = request.getHeader(USERNAME_HEADER);
-        return !isNullOrEmpty(username) ? username : ANONYMOUS;
+    private String initialiseUserName(String value) {
+        return Objects.requireNonNullElse(value, ANONYMOUS);
     }
 
-    private String initialiseUserRoles(HttpServletRequest request) {
-        String userRoles = request.getHeader(USER_ROLES_HEADER);
-        return !isNullOrEmpty(userRoles) ? userRoles : BLANK;
+    private String initialiseGroups(String value) {
+        return Objects.requireNonNullElse(value, BLANK);
     }
 
+    private String initialiseUserRoles(String value) {
+        return Objects.requireNonNullElse(value, BLANK);
+    }
 
-    public String correlationId() {
+    public String getCorrelationId() {
         return MDC.get(CORRELATION_ID_HEADER);
     }
 
-    public String userId() {
+    public String getUserId() {
         return MDC.get(USER_ID_HEADER);
     }
 
-    public String username() {
+    public String getUsername() {
         return MDC.get(USERNAME_HEADER);
     }
 
-    public List<String> roles() {
-        return Arrays.asList(MDC.get(USER_ROLES_HEADER).split(","));
+    public String getGroups() {
+        return MDC.get(GROUP_HEADER);
     }
 
-    private static boolean isNullOrEmpty(String value) {
-        return value == null || value.equals("");
+    public String getRoles() {
+        return MDC.get(USER_ROLES_HEADER);
     }
 
 }
