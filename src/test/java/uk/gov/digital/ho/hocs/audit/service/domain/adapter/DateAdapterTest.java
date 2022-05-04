@@ -2,7 +2,9 @@ package uk.gov.digital.ho.hocs.audit.service.domain.adapter;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants.GROUPED_DATE_REGEX;
 
 public class DateAdapterTest {
@@ -17,26 +19,27 @@ public class DateAdapterTest {
 
     @Test
     public void shouldFindMalformedDatesButNotNonDates() {
-        assertThat(TEXT_DATA.matches(GROUPED_DATE_REGEX)).isFalse();
-        assertThat(SIMILAR_DATE.matches(GROUPED_DATE_REGEX)).isFalse();
-        assertThat(VALID_DATE.matches(GROUPED_DATE_REGEX)).isTrue();
+        assertFalse(TEXT_DATA.matches(GROUPED_DATE_REGEX));
+        assertFalse(SIMILAR_DATE.matches(GROUPED_DATE_REGEX));
+        assertTrue(VALID_DATE.matches(GROUPED_DATE_REGEX));
 
-        assertThat(MALFORMED_DATE_D.matches(GROUPED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_M.matches(GROUPED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_Y.matches(GROUPED_DATE_REGEX)).isTrue();
-        assertThat(MALFORMED_DATE_YMD.matches(GROUPED_DATE_REGEX)).isTrue();
+        assertTrue(MALFORMED_DATE_D.matches(GROUPED_DATE_REGEX));
+        assertTrue(MALFORMED_DATE_M.matches(GROUPED_DATE_REGEX));
+        assertTrue(MALFORMED_DATE_Y.matches(GROUPED_DATE_REGEX));
+        assertTrue(MALFORMED_DATE_YMD.matches(GROUPED_DATE_REGEX));
     }
 
     @Test
     public void shouldConvertDates() {
         DateAdapter dateAdapter = new DateAdapter();
-        assertThat(dateAdapter.convert(TEXT_DATA)).isEqualTo(TEXT_DATA);
-        assertThat(dateAdapter.convert(SIMILAR_DATE)).isEqualTo(SIMILAR_DATE);
-        assertThat(dateAdapter.convert(VALID_DATE)).isEqualTo("2021-02-28");
-        assertThat(dateAdapter.convert(MALFORMED_DATE_Y)).isEqualTo("2021-01-22");
-        assertThat(dateAdapter.convert(MALFORMED_DATE_M)).isEqualTo("2022-02-23");
-        assertThat(dateAdapter.convert(MALFORMED_DATE_D)).isEqualTo("2023-03-24");
-        assertThat(dateAdapter.convert(MALFORMED_DATE_YMD)).isEqualTo("2024-04-25");
+
+        assertEquals(TEXT_DATA, dateAdapter.convert(TEXT_DATA));
+        assertEquals(SIMILAR_DATE, dateAdapter.convert(SIMILAR_DATE));
+        assertEquals("2021-02-28", dateAdapter.convert(VALID_DATE));
+        assertEquals("2021-01-22", dateAdapter.convert(MALFORMED_DATE_Y));
+        assertEquals("2022-02-23", dateAdapter.convert(MALFORMED_DATE_M));
+        assertEquals("2023-03-24", dateAdapter.convert(MALFORMED_DATE_D));
+        assertEquals("2024-04-25", dateAdapter.convert(MALFORMED_DATE_YMD));
     }
 
     @Test
@@ -52,14 +55,10 @@ public class DateAdapterTest {
                     zeroYear = "0" + yearString;
                     zeroMonth = "0" + monthString;
                     zeroDay = "0" + dayString;
-                    assertThat(dateAdapter.convert(zeroYear + "-" + zeroMonth + "-" + zeroDay)).isEqualTo(
-                    yearString + "-" + monthString + "-" + dayString);
-                    assertThat(dateAdapter.convert(yearString + "-" + zeroMonth + "-" + zeroDay)).isEqualTo(
-                    yearString + "-" + monthString + "-" + dayString);
-                    assertThat(dateAdapter.convert(yearString + "-" + monthString + "-" + zeroDay)).isEqualTo(
-                    yearString + "-" + monthString + "-" + dayString);
-                    assertThat(dateAdapter.convert(yearString + "-" + monthString + "-" + dayString)).isEqualTo(
-                    yearString + "-" + monthString + "-" + dayString);
+                    assertEquals(yearString + "-" + monthString + "-" + dayString, dateAdapter.convert(zeroYear + "-" + zeroMonth + "-" + zeroDay));
+                    assertEquals(yearString + "-" + monthString + "-" + dayString, dateAdapter.convert(yearString + "-" + zeroMonth + "-" + zeroDay));
+                    assertEquals(yearString + "-" + monthString + "-" + dayString, dateAdapter.convert(yearString + "-" + monthString + "-" + zeroDay));
+                    assertEquals(yearString + "-" + monthString + "-" + dayString, dateAdapter.convert(yearString + "-" + monthString + "-" + dayString));
                 }
             }
         }
