@@ -12,7 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -37,12 +39,11 @@ public class RequestDataTest
     public void shouldDefaultRequestData() {
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getCorrelationId()).isNotNull();
-        assertThat(requestData.getUserId()).isEqualTo("anonymous");
-        assertThat(requestData.getUsername()).isEqualTo("anonymous");
-        assertThat(requestData.getGroups()).isEmpty();
-        assertThat(requestData.getRoles()).isEmpty();
-
+        assertNotNull(requestData.getCorrelationId());
+        assertEquals("anonymous", requestData.getUserId());
+        assertEquals("anonymous", requestData.getUsername());
+        assertTrue(requestData.getGroups().isEmpty());
+        assertTrue(requestData.getRoles().isEmpty());
     }
 
     @Test
@@ -51,7 +52,7 @@ public class RequestDataTest
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getCorrelationId()).isEqualTo("some correlation id");
+        assertEquals("some correlation id", requestData.getCorrelationId());
     }
 
     @Test
@@ -60,7 +61,7 @@ public class RequestDataTest
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getUserId()).isEqualTo("some user id");
+        assertEquals("some user id", requestData.getUserId());
     }
 
     @Test
@@ -69,7 +70,7 @@ public class RequestDataTest
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getUsername()).isEqualTo("some username");
+        assertEquals("some username", requestData.getUsername());
     }
 
     @Test
@@ -78,7 +79,7 @@ public class RequestDataTest
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getGroups()).isEqualTo("some groups");
+        assertEquals("some groups", requestData.getGroups());
     }
 
     @Test
@@ -87,7 +88,7 @@ public class RequestDataTest
 
         requestData.preHandle(mockHttpServletRequest, mockHttpServletResponse, mockHandler);
 
-        assertThat(requestData.getRoles()).isEqualTo("some roles");
+        assertEquals("some roles", requestData.getRoles());
     }
 
     @Test
@@ -99,7 +100,7 @@ public class RequestDataTest
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.getCorrelationId()).isEqualTo(correlationId.toString());
+        assertEquals(correlationId.toString(), requestData.getCorrelationId());
     }
 
     @Test
@@ -111,7 +112,7 @@ public class RequestDataTest
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.getUserId()).isEqualTo(userId.toString());
+        assertEquals(userId.toString(), requestData.getUserId());
     }
 
     @Test
@@ -123,7 +124,7 @@ public class RequestDataTest
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.getUsername()).isEqualTo(userName);
+        assertEquals(userName, requestData.getUsername());
     }
 
     @Test
@@ -135,7 +136,7 @@ public class RequestDataTest
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.getGroups()).isEqualTo(groups);
+        assertEquals(groups, requestData.getGroups());
     }
 
     @Test
@@ -147,12 +148,12 @@ public class RequestDataTest
 
         requestData.parseMessageHeaders(headers);
 
-        assertThat(requestData.getRoles()).isEqualTo(roles);
+        assertEquals(roles, requestData.getRoles());
     }
 
     @Test
     public void shouldGetUserUUIDNotNull() {
         requestData.parseMessageHeaders(Map.of());
-        assertThat(requestData.getUserId()).isNotNull();
+        assertNotNull(requestData.getUserId());
     }
 }
