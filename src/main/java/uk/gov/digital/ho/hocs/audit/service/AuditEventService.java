@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_CREATED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.AUDIT_EVENT_DELETED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 
@@ -34,7 +33,7 @@ public class AuditEventService {
     public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
         AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         auditRepository.save(auditEvent);
-        log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp(), value(EVENT, AUDIT_EVENT_CREATED));
+        log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
         return auditEvent;
     }
 
