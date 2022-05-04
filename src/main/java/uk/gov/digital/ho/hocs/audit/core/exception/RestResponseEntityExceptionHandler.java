@@ -29,13 +29,13 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNCAUGHT_EXCEPTION;
 public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityCreationException.class)
-    public ResponseEntity handle(EntityCreationException e) {
+    public ResponseEntity<String> handle(EntityCreationException e) {
         log.error("EntityCreationException", value(EVENT, AUDIT_EVENT_CREATION_FAILED), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity handle(EntityNotFoundException e) {
+    public ResponseEntity<String> handle(EntityNotFoundException e) {
         log.error("EntityNotFoundException", value(EVENT, AUDIT_RECORD_NOT_FOUND), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
@@ -47,7 +47,7 @@ public class RestResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(EntityPermissionException.class)
-    public ResponseEntity handle(EntityPermissionException e) {
+    public ResponseEntity<String> handle(EntityPermissionException e) {
         log.error("EntityPermissionException", value(EVENT, UNAUTHORISED_ACCESS), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), UNAUTHORIZED);
     }
