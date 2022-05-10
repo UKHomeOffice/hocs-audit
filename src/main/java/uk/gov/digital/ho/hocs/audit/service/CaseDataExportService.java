@@ -91,7 +91,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType,
                        boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
@@ -154,7 +154,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
         if (peggedTo.equals(LocalDate.now())) {
             return auditRepository.findAuditEventLatestEventsAfterDate(LocalDateTime.of(
-                    from, LocalTime.MIN), events, caseTypeCode);
+                    from, LocalTime.MIN), LocalDateTime.now(), events, caseTypeCode);
         }
         return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
                 from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
