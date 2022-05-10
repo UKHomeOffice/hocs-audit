@@ -57,8 +57,13 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
-    @Query(value = "SELECT a.* FROM audit_event_latest_events a WHERE a.audit_timestamp between ?1 and 'tomorrow' AND a.type in ?2 AND a.case_type = ?3 AND a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC", nativeQuery = true)
-    Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of, String[] events, String caseType);
+    @Query(value = "SELECT a.* FROM audit_event_latest_events a " +
+            "WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND " +
+            "a.type IN ?3 AND " +
+            "a.case_type = ?4 AND " +
+            "a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC " +
+            "FOR UPDATE", nativeQuery = true)
+    Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of, LocalDateTime to, String[] events, String caseType);
 
     @QueryHints(value = {
             @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),

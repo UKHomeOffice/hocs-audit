@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -56,7 +58,9 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
                 outputStream, "TEST", false, false, zonedDateTimeConverter);
 
         // Verify that the latest table is used with future dates
-        verify(auditRepository).findAuditEventLatestEventsAfterDate(LocalDateTime.of(from, LocalTime.MIN), CaseDataExportService.EVENTS, "a1");
+        verify(auditRepository).findAuditEventLatestEventsAfterDate(eq(LocalDateTime.of(from, LocalTime.MIN)),
+                any(LocalDateTime.class),
+                eq(CaseDataExportService.EVENTS), eq("a1"));
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);
