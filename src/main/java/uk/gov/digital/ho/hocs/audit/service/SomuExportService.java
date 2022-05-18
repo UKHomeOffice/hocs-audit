@@ -177,7 +177,7 @@ public class SomuExportService {
 
     private String[] getHeaders(List<SomuTypeField> somuTypeFields) {
         String[] headers = new String[]{
-                "timestamp", "event", "userId", "caseReference", "somuItemUuid", "somuTypeUuid"
+                "timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid"
         };
 
         return Stream.concat(Arrays.stream(headers), somuTypeFields.stream().map(SomuTypeField::getExtractColumnLabel))
