@@ -77,7 +77,7 @@ public class SomuExportService {
             throws IOException {
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         Stream<AuditEvent> data = getData(from, to, caseType);
-        ExportDataConverter dataConverter = getDataConverter(convert, caseType);
+        ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType));
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, somuTypeDto, data);
     }
