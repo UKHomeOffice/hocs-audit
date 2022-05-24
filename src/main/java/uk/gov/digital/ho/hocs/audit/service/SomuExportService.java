@@ -185,10 +185,10 @@ public class SomuExportService {
     }
 
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseType) {
-        LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
 
         return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
+                        from, LocalTime.MIN), peggedTo,
                 EVENTS, getCaseTypeCode(caseType));
     }
 }
