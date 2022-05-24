@@ -8,6 +8,7 @@ import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
@@ -80,6 +81,8 @@ public class AllocationExportService extends DynamicExportService {
 
         uuidToName.putAll(infoClient.getUsers().stream()
                 .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        uuidToName.putAll(infoClient.getAllTeams().stream()
+                .collect(Collectors.toMap(team -> team.getUuid().toString(), TeamDto::getDisplayName)));
         uuidToName.putAll(infoClient.getCaseTypeActions().stream()
                 .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
