@@ -96,8 +96,8 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
                        boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
-        var dataConverter = getDataConverter(convert, caseTypeDto);
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
+        var dataConverter = getDataConverter(convert, caseTypeDto);
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, convertHeader, caseTypeDto, data);
     }
@@ -112,7 +112,6 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     @Override
     protected String[] getAdditionalHeaders(CaseTypeDto caseType) {
-        // TODO: Add endpoint for getting by case type code instead
         return infoClient.getCaseExportFields(caseType.getType()).toArray(String[]::new);
     }
 
@@ -150,14 +149,14 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
 
-        if (peggedTo.equals(LocalDate.now())) {
+        if (peggedTo.toLocalDate().equals(LocalDate.now())) {
             return auditRepository.findAuditEventLatestEventsAfterDate(LocalDateTime.of(
                     from, LocalTime.MIN), LocalDateTime.now(), events, caseTypeCode);
         }
         return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
+                from, LocalTime.MIN), peggedTo,
                 events, caseTypeCode);
     }
 }

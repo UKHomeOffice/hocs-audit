@@ -64,10 +64,10 @@ public class ExtensionExportService extends DynamicExportService {
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
 
         return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
+                        from, LocalTime.MIN), peggedTo,
                 events, caseTypeCode);
     }
 
@@ -76,8 +76,8 @@ public class ExtensionExportService extends DynamicExportService {
     public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
-        var dataConverter = getDataConverter(convert, caseTypeDto);
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
+        var dataConverter = getDataConverter(convert, caseTypeDto);
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, convertHeader, data);
     }
