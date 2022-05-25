@@ -8,5 +8,6 @@ public enum ExportType {
     CORRESPONDENTS,
     EXTENSIONS,
     INTERESTS,
-    TOPICS
+    TOPICS,
+    SUSPENSIONS
 }
