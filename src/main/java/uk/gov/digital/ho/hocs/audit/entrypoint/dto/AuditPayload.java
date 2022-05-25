@@ -200,4 +200,11 @@ public interface AuditPayload {
 
     }
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Suspension {
+        private LocalDate dateSuspensionApplied;
+        private LocalDate dateSuspensionRemoved;
+    }
+
 }
