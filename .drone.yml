@@ -31,7 +31,7 @@ steps:
       - clone
 
   - name: test project
-    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.2
+    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.5
     environment:
       DB_HOST: "postgres"
       LOCALSTACK_HOST: "localstack"
@@ -176,7 +176,7 @@ steps:
       - clone
 
   - name: test project
-    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.2
+    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.5
     environment:
       DB_HOST: "postgres"
       LOCALSTACK_HOST: "localstack"
