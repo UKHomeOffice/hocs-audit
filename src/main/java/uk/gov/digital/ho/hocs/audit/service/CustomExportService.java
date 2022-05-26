@@ -112,6 +112,7 @@ public class CustomExportService {
                 .getResultsFromView(exportViewCode);
     }
 
+    @Transactional
     public void refreshMaterialisedView(String viewName) {
         log.info("Refreshing materialise view '{}', event {}", viewName, value(EVENT, REFRESH_MATERIALISED_VIEW));
         auditRepository.refreshMaterialisedView(viewName);
