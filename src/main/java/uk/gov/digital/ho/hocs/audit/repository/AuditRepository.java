@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
@@ -49,9 +50,6 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     @Query(value = "SELECT DISTINCT ON (case_uuid, type) a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.case_type = ?4 AND a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC;", nativeQuery = true)
     Stream<AuditEvent> findLastAuditDataByDateRangeAndEvents(LocalDateTime dateFrom, LocalDateTime dateTo, String[] types, String caseType);
 
-    @Query(value = "SELECT a.* FROM audit_event a WHERE a.case_uuid = ?1", nativeQuery = true)
-    List<AuditEvent> findAuditDataByCaseUUID(UUID caseUUID);
-
     @QueryHints(value = {
             @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
@@ -72,4 +70,8 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
     })
     @Query(value = "SELECT audit_payload->>'reference' AS caseReference, cast(case_uuid AS VARCHAR(36)) as caseUuid FROM audit_event_latest_events WHERE type = 'CASE_CREATED' AND case_type = ?1", nativeQuery = true)
     Stream<CaseReference> getCaseReferencesForType(String caseType);
+
+    @Modifying
+    @Query(value = "UPDATE audit_event SET deleted = true where case_uuid = ?1", nativeQuery = true)
+    void deleteAuditEventsByCaseUuid(UUID caseUuid);
 }

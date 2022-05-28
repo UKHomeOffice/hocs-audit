@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.service;
 
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,9 +200,12 @@ public class AuditEventServiceTest {
         auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
                 dateTime, auditType, userID);
 
-        auditService.deleteCaseAudit(caseUuid, true);
+        auditService.deleteCaseAudit(caseUuid);
 
-        var audits = auditRepository.findAuditDataByCaseUUID(caseUuid);
+        auditRepository.deleteAuditEventsByCaseUuid(caseUuid);
+
+        var audits = auditService.getAuditDataByCaseUUID(caseUuid, Arrays.array(auditType));
+
         Assertions.assertEquals(1, audits.size());
         Assertions.assertTrue(audits.get(0).getDeleted());
     }

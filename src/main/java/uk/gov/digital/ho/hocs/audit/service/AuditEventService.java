@@ -37,14 +37,9 @@ public class AuditEventService {
         return auditEvent;
     }
 
-    public Integer deleteCaseAudit(UUID caseUUID, Boolean deleted) {
-        List<AuditEvent> audits = auditRepository.findAuditDataByCaseUUID(caseUUID);
-        for (AuditEvent audit : audits) {
-            audit.setDeleted(deleted);
-            auditRepository.save(audit);
-        }
-        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
-        return audits.size();
+    public void deleteCaseAudit(UUID caseUUID) {
+        auditRepository.deleteAuditEventsByCaseUuid(caseUUID);
+        log.info("Deleted audit lines for caseUUID: {}", caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
     }
 
     public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes) {
