@@ -30,31 +30,31 @@ public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityCreationException.class)
     public ResponseEntity<String> handle(EntityCreationException e) {
-        log.error("EntityCreationException", value(EVENT, AUDIT_EVENT_CREATION_FAILED), value(EXCEPTION, e));
+        log.error("EntityCreationException", value(EVENT, AUDIT_EVENT_CREATION_FAILED), value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handle(EntityNotFoundException e) {
-        log.error("EntityNotFoundException", value(EVENT, AUDIT_RECORD_NOT_FOUND), value(EXCEPTION, e));
+        log.error("EntityNotFoundException", value(EVENT, AUDIT_RECORD_NOT_FOUND), value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
 
     @ExceptionHandler(AuditExportException.class)
     public ResponseEntity<String> handle(AuditExportException e) {
-        log.error("AuditExportException", value(EVENT, CSV_EXPORT_FAILURE), value(EXCEPTION, e));
+        log.error("AuditExportException", value(EVENT, CSV_EXPORT_FAILURE), value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityPermissionException.class)
     public ResponseEntity<String> handle(EntityPermissionException e) {
-        log.error("EntityPermissionException", value(EVENT, UNAUTHORISED_ACCESS), value(EXCEPTION, e));
+        log.error("EntityPermissionException", value(EVENT, UNAUTHORISED_ACCESS), value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), UNAUTHORIZED);
     }
 
     @ExceptionHandler(InvalidExportTypeException.class)
     public ResponseEntity<String> handle(InvalidExportTypeException e) {
-        log.error("InvalidExportTypeException", value(EVENT, INVALID_PARAMETER_SPECIFIED), value(EXCEPTION, e));
+        log.error("InvalidExportTypeException", value(EVENT, INVALID_PARAMETER_SPECIFIED), value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
 
