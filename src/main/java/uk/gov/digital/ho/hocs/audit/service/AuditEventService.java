@@ -48,12 +48,10 @@ public class AuditEventService {
     }
 
     public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes) {
-        log.debug("Requesting Audit for Case UUID: {} ", caseUUID);
         return auditRepository.findAuditDataByCaseUUIDAndTypesIn(caseUUID, filterTypes);
     }
 
     public List<AuditEvent> getAuditDataByCaseUUID(UUID caseUUID, String[] filterTypes, LocalDate fromDate) {
-        log.debug("Requesting Audit for Case UUID: {} FromDate: {}", caseUUID, fromDate);
         return auditRepository.findAuditDataByCaseUUIDAndTypesInAndFrom(caseUUID, filterTypes, fromDate);
     }
 
