@@ -25,6 +25,7 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,13 +51,15 @@ public class CaseNoteExportService extends DynamicExportService {
         AuditPayload.CaseNote caseNote =
                 objectMapper.readValue(audit.getAuditPayload(), AuditPayload.CaseNote.class);
 
+        String caseNoteText = Objects.toString(caseNote.getText(), "");
+
         return new String[]{
                 zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
                 audit.getType(),
                 exportDataConverter.convertValue(audit.getUserID()),
                 exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
                 caseNote.getCaseNoteType(),
-                caseNote.getText().substring(0, Math.min(caseNote.getText().length(), EXCEL_MAX_CELL_SIZE - 1))
+                caseNoteText.substring(0, Math.min(caseNoteText.length(), EXCEL_MAX_CELL_SIZE - 1))
         };
     }
 
