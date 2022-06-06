@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
 import uk.gov.digital.ho.hocs.audit.core.RequestData;
+import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
@@ -20,14 +21,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CUSTOM_ROW_EXPORT_FAILURE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_EXPORT_PERMISSION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REFRESH_MATERIALISED_VIEW;
@@ -69,7 +68,6 @@ public class CustomExportService {
                      .setAutoFlush(true)
                      .setNullString("")
                      .build())) {
-            AtomicBoolean connected = new AtomicBoolean(true);
 
             retrieveAuditData(exportViewDto.getCode())
                     .parallel()
@@ -83,16 +81,12 @@ public class CustomExportService {
 
                         return converted;
                     })
-                    .takeWhile(c -> connected.get())
                     .forEachOrdered(converted -> {
                         try {
                             printer.printRecord(converted);
-                        } catch (IOException e) {
-                            connected.set(false);
-                            // Is this an Error or a Warning?
-                            // If we stop the extract here it feels 'exceptional'
-                            // and we can get rid of the AtomicBoolean
-                            log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
+                        }
+                        catch (IOException e) {
+                            throw new AuditExportException(e, CUSTOM_ROW_EXPORT_FAILURE, "Unable to export Custom Data for %s", viewName);
                         }
                     });
             log.info("Completed {} to CSV", viewName, value(EVENT, CSV_EXPORT_COMPLETE));
@@ -118,10 +112,6 @@ public class CustomExportService {
     public void refreshMaterialisedView(String viewName) {
         log.info("Refreshing materialise view '{}', event {}", viewName, value(EVENT, REFRESH_MATERIALISED_VIEW));
         auditRepository.refreshMaterialisedView(viewName);
-    }
-
-    public LocalDate getViewLastRefreshedDate(String viewName) {
-        return auditRepository.getViewLastRefreshedDate(viewName);
     }
 
 

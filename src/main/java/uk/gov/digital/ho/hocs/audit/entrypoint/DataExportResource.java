@@ -62,7 +62,7 @@ public class DataExportResource {
         try {
             service.export(fromDate, toDate, response.getOutputStream(), caseType, convert, convertHeader, zonedDateTimeConverter);
         } catch (IOException e) {
-            throw new AuditExportException(e, DYNAMIC_EXPORT_FAILURE, "Unable to export Dynamic Data");
+            throw new AuditExportException(e, DYNAMIC_EXPORT_FAILURE, "Unable to export Dynamic Data for %s", exportType);
         }
     }
 

@@ -8,9 +8,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CUSTOM_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.utils.FileNameHelper.getFilename;
 
 @Slf4j
 @RestController
@@ -26,8 +31,13 @@ public class CustomExportResource {
     public void getCustomDataExport(HttpServletResponse response,
                              @PathVariable("viewName") String viewName,
                              @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(viewName));
-        customExportService.export(response, viewName, convertHeader);
+        try {
+            setResponseHeaders(response,getFilename(viewName));
+            customExportService.export(response, viewName, convertHeader);
+        }
+        catch (IOException e) {
+            throw new AuditExportException(e, CUSTOM_EXPORT_FAILURE, "Unable to export Custom row for %s", viewName);
+        }
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -37,8 +47,10 @@ public class CustomExportResource {
         response.setStatus(HttpStatus.OK.value());
     }
 
-    public String getFilename(String viewName) {
-        return String.format("%s-%s.csv", viewName, customExportService.getViewLastRefreshedDate(viewName).toString());
+    private void setResponseHeaders(HttpServletResponse response, String filename) throws IOException {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=" + filename);
+        response.setStatus(HttpStatus.OK.value());
+        response.flushBuffer();
     }
 
 }

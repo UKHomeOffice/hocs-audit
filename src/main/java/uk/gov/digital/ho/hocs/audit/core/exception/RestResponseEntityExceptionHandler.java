@@ -19,7 +19,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXCEPTION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_PARAMETER_SPECIFIED;
@@ -29,7 +28,6 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REST_HELPER_GET_FORBIDD
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REST_HELPER_GET_NOT_FOUND;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REST_HELPER_GET_UNAUTHORIZED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REST_HELPER_POST_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNAUTHORISED_ACCESS;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNCAUGHT_EXCEPTION;
 
 @ControllerAdvice
@@ -67,19 +65,19 @@ public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(AuditExportException.class)
     public ResponseEntity<String> handle(AuditExportException e) {
-        log.error("AuditExportException: {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE), value(EXCEPTION, e));
+        log.error("AuditExportException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(EntityPermissionException.class)
     public ResponseEntity<String> handle(EntityPermissionException e) {
-        log.error("EntityPermissionException: {}", e.getMessage(), value(EVENT, UNAUTHORISED_ACCESS), value(EXCEPTION, e));
+        log.error("EntityPermissionException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), UNAUTHORIZED);
     }
 
     @ExceptionHandler(InvalidExportTypeException.class)
     public ResponseEntity<String> handle(InvalidExportTypeException e) {
-        log.error("InvalidExportTypeException: {}", e.getMessage(), value(EVENT, INVALID_PARAMETER_SPECIFIED), value(EXCEPTION, e));
+        log.error("InvalidExportTypeException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
 
