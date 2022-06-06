@@ -73,7 +73,7 @@ public class StaticExportResource {
     public void getTeams(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            setResponseHeaders(response, getFilename("units_teams"));
+            setResponseHeaders(response, getFilename("teams"));
             staticTeamService.export(response.getOutputStream(), convertHeader);
         } catch (IOException e) {
             throw new AuditExportException(e, TEAM_EXPORT_FAILURE, "Unable to export Teams");
