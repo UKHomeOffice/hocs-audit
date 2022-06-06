@@ -56,7 +56,7 @@ public class CaseNoteExportService extends DynamicExportService {
                 exportDataConverter.convertValue(audit.getUserID()),
                 exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
                 caseNote.getCaseNoteType(),
-                caseNote.getText().substring(0, Math.min(caseNote.getText().length(), EXCEL_MAX_CELL_SIZE - 1))
+                caseNote.getText().substring(0, Math.min(caseNote.getText() == null ? 0 : caseNote.getText().length(), EXCEL_MAX_CELL_SIZE - 1))
         };
     }
 
