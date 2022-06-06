@@ -14,11 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static net.logstash.logback.argument.StructuredArguments.value;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXCEPTION;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REST_CLIENT_EXCEPTION;
 
 @Slf4j
 @Component
@@ -42,27 +38,17 @@ public class RestHelper {
     }
 
     public <R> R get(String rootUri, String endpoint, Class<R> type) {
-        try {
-            log.debug("Making GET request {}{}", rootUri, endpoint);
-            return restTemplate
-                    .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
-                    .getBody();
-        } catch (Exception e) {
-            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION), value(EXCEPTION, e));
-            throw e;
-        }
+       log.debug("Making GET request {}{}", rootUri, endpoint);
+       return restTemplate
+               .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
+               .getBody();
     }
 
     public <R> R get(String rootUri, String endpoint, ParameterizedTypeReference<R> type) {
-        try {
-            log.debug("Making GET request {}{}", rootUri, endpoint);
-            return restTemplate
-                    .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
-                    .getBody();
-        } catch (Exception e) {
-            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION), value(EXCEPTION, e));
-            throw e;
-        }
+        log.debug("Making GET request {}{}", rootUri, endpoint);
+        return restTemplate
+                .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
+                .getBody();
     }
 
     private HttpEntity<?> getAuthenticatedEntity() {

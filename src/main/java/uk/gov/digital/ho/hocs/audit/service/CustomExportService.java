@@ -18,7 +18,6 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -26,8 +25,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_EXPORT_PERMISSION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REFRESH_MATERIALISED_VIEW;
 
 @Slf4j
@@ -50,27 +52,23 @@ public class CustomExportService {
 
     @Transactional(readOnly = true)
     public void export(HttpServletResponse response, String viewName, boolean convertHeader) throws IOException {
+        log.info("Exporting {} to CSV", viewName, value(EVENT, CSV_EXPORT_START));
         ExportViewDto exportViewDto = infoClient.getExportView(viewName);
 
         if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
                 !requestData.getRoles().contains(exportViewDto.getRequiredPermission())) {
-            // TODO: remove the log and add to the entity permission error with suitable LogEvent
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.getUserId(), exportViewDto.getRequiredPermission());
-            throw new EntityPermissionException("No permission to view %s", viewName);
+            throw new EntityPermissionException(INVALID_EXPORT_PERMISSION, "No permission to view %s for user %s", viewName, requestData.getUserId());
         }
-
-        String[] headers = getHeaders(exportViewDto, convertHeader);
 
         customExportDataConverter.initialiseAdapters();
 
-        try (OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .setNullString("")
-                             .build())) {
+        try (var buffer = new BufferedOutputStream(response.getOutputStream());
+             var outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer = new CSVPrinter(outputWriter, CSVFormat.Builder.create()
+                     .setHeader(getHeaders(exportViewDto, convertHeader))
+                     .setAutoFlush(true)
+                     .setNullString("")
+                     .build())) {
             AtomicBoolean connected = new AtomicBoolean(true);
 
             retrieveAuditData(exportViewDto.getCode())
@@ -91,9 +89,13 @@ public class CustomExportService {
                             printer.printRecord(converted);
                         } catch (IOException e) {
                             connected.set(false);
+                            // Is this an Error or a Warning?
+                            // If we stop the extract here it feels 'exceptional'
+                            // and we can get rid of the AtomicBoolean
                             log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
                         }
                     });
+            log.info("Completed {} to CSV", viewName, value(EVENT, CSV_EXPORT_COMPLETE));
         }
     }
 

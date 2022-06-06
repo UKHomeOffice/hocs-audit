@@ -25,10 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_RECORD_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASE_DATA_DYNAMIC_ROW_EXPORT_FAILURE;
 
 @Slf4j
 @Service
@@ -42,7 +39,7 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader, CaseTypeDto caseType,
-                             Stream<AuditEvent> data) {
+                             Stream<AuditEvent> data) throws IOException {
         var additionalHeaders = getAdditionalHeaders(caseType);
         var concatenatedHeaders = Stream.concat(Arrays.stream(getHeaders()), Arrays.stream(additionalHeaders))
                 .toArray(String[]::new);
@@ -56,15 +53,14 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
 
     private void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                            ExportDataConverter exportDataConverter, String[] headers,
-                           String[] additionalHeaders, Stream<AuditEvent> data) {
-        try (OutputStream buffer = new BufferedOutputStream(outputStream);
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .setNullString("")
-                             .build())) {
+                           String[] additionalHeaders, Stream<AuditEvent> data) throws IOException {
+        try (var buffer = new BufferedOutputStream(outputStream);
+             var outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer = new CSVPrinter(outputWriter, CSVFormat.Builder.create()
+                     .setHeader(headers)
+                     .setAutoFlush(true)
+                     .setNullString("")
+                     .build())) {
             data.forEach(audit -> {
                 try {
                     String[] parsedData = parseData(audit, zonedDateTimeConverter, exportDataConverter, additionalHeaders);
@@ -74,11 +70,9 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for audit {} for reason {}", CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
+                    throw new AuditExportException(e, CASE_DATA_DYNAMIC_ROW_EXPORT_FAILURE, "Unable to export case data for audit event %s", audit.getUuid());
                 }
             });
-        } catch (IOException e) {
-            log.error("Unable to export record for reason {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
         }
     }
 

@@ -87,6 +87,8 @@ public class CustomExportDataConverter {
         for (ExportViewFieldAdapterDto adapterDto : adaptersDtos) {
             ExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
 
+            // Why can we carry on if we can't convert the value,
+            // but can't continue if we don't pass an adaptor?
             if (adapterToUse != null) {
                 try {
                     result = adapterToUse.convert(result);

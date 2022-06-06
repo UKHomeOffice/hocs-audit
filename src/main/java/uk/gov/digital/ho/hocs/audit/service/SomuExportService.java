@@ -13,7 +13,6 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeField;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeSchema;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
-import uk.gov.digital.ho.hocs.audit.core.LogEvent;
 import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
@@ -42,11 +41,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_RECORD_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_CASE_TYPE_SPECIFIED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.JSON_PARSE_EXCEPTION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.NON_EXISTENT_VARIABLE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.SOMU_ROW_EXPORT_FAILURE;
 
 @Slf4j
 @Service
@@ -73,29 +74,27 @@ public class SomuExportService {
     @Transactional(readOnly = true)
     public void export(LocalDate from, LocalDate to, OutputStream outputStream,
                        String caseType, String somuType, boolean convert,
-                       ZonedDateTimeConverter zonedDateTimeConverter)
-            throws IOException {
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting {}:{} to CSV", caseType, somuType, value(EVENT, CSV_EXPORT_START));
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         Stream<AuditEvent> data = getData(from, to, caseType);
         ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType));
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, somuTypeDto, data);
+        log.info("Completed export of {}:{} to CSV", caseType, somuType, value(EVENT, CSV_EXPORT_COMPLETE));
     }
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter,
-                             SomuTypeDto somuType, Stream<AuditEvent> data) throws JsonProcessingException {
-        List<SomuTypeField> somuTypeFields = getSomuFields(somuType);
-        String[] headers = getHeaders(somuTypeFields);
-
-        try (
-                OutputStream buffer = new BufferedOutputStream(outputStream);
-                OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8); var printer =
-                        new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                                .setHeader(headers)
-                                .setAutoFlush(true)
-                                .setNullString("")
-                                .build())) {
-            data.forEach(audit -> {
+                             SomuTypeDto somuType, Stream<AuditEvent> data) throws IOException {
+        var somuTypeFields = getSomuFields(somuType);
+        try (var buffer = new BufferedOutputStream(outputStream);
+             var outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
+             var printer = new CSVPrinter(outputWriter, CSVFormat.Builder.create()
+                     .setHeader(getHeaders(somuTypeFields))
+                     .setAutoFlush(true)
+                     .setNullString("")
+                     .build())) {
+             data.forEach(audit -> {
                 try {
                     if (filterSomuType(audit, somuType)) {
                         String[] parsedData = parseData(audit, somuTypeFields, zonedDateTimeConverter, exportDataConverter);
@@ -105,11 +104,9 @@ public class SomuExportService {
                         printer.printRecord((Object[]) parsedData);
                     }
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for audit {} for reason {}", CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
+                    throw new AuditExportException(e, SOMU_ROW_EXPORT_FAILURE, "Unable to export somu data for audit event %s", audit.getUuid());
                 }
             });
-        } catch (IOException e) {
-            log.error("Unable to export record for reason {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
         }
     }
 
@@ -171,7 +168,9 @@ public class SomuExportService {
                 .stream()
                 .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
                 .findFirst()
-                .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType))
+                .orElseThrow(() ->
+                        new AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified caseType {}", caseType)
+                )
                 .getShortCode();
     }
 

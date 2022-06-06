@@ -1,12 +1,12 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.service.StaticTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticTopicAndTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticTopicService;
@@ -14,14 +14,17 @@ import uk.gov.digital.ho.hocs.audit.service.StaticUnitAndTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticUserService;
 
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
 
-import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+import java.io.IOException;
 
-@Slf4j
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.TEAM_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.TOPIC_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.TOPIC_TEAM_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNIT_TEAM_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.USER_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.utils.FileNameHelper.getFileName;
+import static uk.gov.digital.ho.hocs.audit.core.utils.FileNameHelper.getFilename;
+
 @RestController
 public class StaticExportResource {
 
@@ -47,15 +50,10 @@ public class StaticExportResource {
     public void getTopics(HttpServletResponse response,
                           @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("topics"));
-
-            log.info("Exporting topics to CSV", value(EVENT, CSV_EXPORT_START));
+            setResponseHeaders(response, getFilename("topics"));
             staticTopicService.export(response.getOutputStream(), convertHeader);
-            log.info("Completed export of topics to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (IOException e) {
+            throw new AuditExportException(e, TOPIC_EXPORT_FAILURE, "Unable to export Topics");
         }
     }
 
@@ -64,15 +62,10 @@ public class StaticExportResource {
                                    @PathVariable("caseType") String caseType,
                                    @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFileName(caseType, "topics_teams"));
-
-            log.info("Exporting topics and teams to CSV", value(EVENT, CSV_EXPORT_START));
+            setResponseHeaders(response, getFileName(caseType, "topics_teams"));
             staticTopicAndTeamService.export(response.getOutputStream(), caseType, convertHeader);
-            log.info("Completed export of topics and teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for static topic list for reason {}", ex.toString());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (IOException e) {
+            throw new AuditExportException(e, TOPIC_TEAM_EXPORT_FAILURE, "Unable to export Units and Teams");
         }
     }
 
@@ -80,15 +73,10 @@ public class StaticExportResource {
     public void getTeams(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("teams"));
-
-            log.info("Exporting teams to CSV", value(EVENT, CSV_EXPORT_START));
+            setResponseHeaders(response, getFilename("units_teams"));
             staticTeamService.export(response.getOutputStream(), convertHeader);
-            log.info("Completed export of teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for static team list for reason {}", ex.toString());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (IOException e) {
+            throw new AuditExportException(e, TEAM_EXPORT_FAILURE, "Unable to export Teams");
         }
     }
 
@@ -96,15 +84,10 @@ public class StaticExportResource {
     public void getUnitsForTeams(HttpServletResponse response,
                                  @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("units_teams"));
-
-            log.info("Exporting units with teams to CSV", value(EVENT, CSV_EXPORT_START));
+            setResponseHeaders(response, getFilename("units_teams"));
             staticUnitAndTeamService.export(response.getOutputStream(), convertHeader);
-            log.info("Completed export of units with teams to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for static units for teams list for reason {}", ex.toString());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (IOException e) {
+            throw new AuditExportException(e, UNIT_TEAM_EXPORT_FAILURE, "Unable to export Units and Teams");
         }
     }
 
@@ -112,23 +95,16 @@ public class StaticExportResource {
     public void getUsers(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("users"));
-
-            log.info("Exporting users to CSV", value(EVENT, CSV_EXPORT_START));
+            setResponseHeaders(response, getFilename("users"));
             staticUserService.export(response.getOutputStream(), convertHeader);
-            log.info("Completed export of users to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
-        } catch (Exception ex) {
-            log.error("Error exporting CSV file for static user list for reason {}", ex.toString());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } catch (IOException e) {
+            throw new AuditExportException(e, USER_EXPORT_FAILURE, "Unable to export Users");
         }
     }
 
-    private String getFileName(String caseType, String export) {
-        return String.format("%s-%s-%s.csv", caseType.toLowerCase(), export, LocalDate.now());
-    }
-
-    private String getFilename(String export) {
-        return String.format("%s-%s.csv", export, LocalDate.now());
+    private void setResponseHeaders(HttpServletResponse response, String filename) throws IOException {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=" + filename);
+        response.setStatus(HttpStatus.OK.value());
+        response.flushBuffer();
     }
 }

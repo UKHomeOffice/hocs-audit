@@ -2,6 +2,7 @@ package uk.gov.digital.ho.hocs.audit.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
@@ -29,6 +30,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+
+@Slf4j
 @Service
 public class InterestExportService extends DynamicExportService {
 
@@ -72,12 +79,14 @@ public class InterestExportService extends DynamicExportService {
     @Override
     @Transactional(readOnly = true)
     public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+        log.info("Exporting interest to CSV", value(EVENT, CSV_EXPORT_START));
         var caseTypeCode = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeCode.getShortCode(), EVENTS);
         var dataConverter = getDataConverter(convert, caseTypeCode);
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, convertHeader, data);
+        log.info("Completed interest to CSV", value(EVENT, CSV_EXPORT_COMPLETE));
     }
 
     @Override

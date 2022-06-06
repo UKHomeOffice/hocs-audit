@@ -22,6 +22,7 @@ public class HeaderConverter {
         try (InputStream headersInputStream = new ClassPathResource(HEADERS_PROPERTIES_FILE).getInputStream()) {
             headerProperties.load(headersInputStream);
         } catch (IOException ex) {
+            // Is this an ERROR (Exception) or Warning?
             log.error("Cannot open header substitutions file for reading {}", HEADERS_PROPERTIES_FILE);
         }
     }

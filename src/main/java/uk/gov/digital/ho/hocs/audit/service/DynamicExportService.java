@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.core.LogEvent;
 import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
@@ -30,10 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-import static net.logstash.logback.argument.StructuredArguments.value;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_RECORD_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.DYNAMIC_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_CASE_TYPE_SPECIFIED;
 
 @Slf4j
 @Service
@@ -65,12 +62,14 @@ public abstract class DynamicExportService {
                 .stream()
                 .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
                 .findFirst()
-                .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType));
+                .orElseThrow(() ->
+                        new AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified {}", caseType)
+                );
     }
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader,
-                             Stream<AuditEvent> data) {
+                             Stream<AuditEvent> data) throws IOException {
         var headers = getConvertedHeaders(getHeaders(), convertHeader);
 
         printData(outputStream, zonedDateTimeConverter, exportDataConverter, headers, data);
@@ -78,7 +77,7 @@ public abstract class DynamicExportService {
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, boolean convertHeader,
-                             Stream<AuditEvent> data, String[] headers) {
+                             Stream<AuditEvent> data, String[] headers) throws IOException {
         var convertedHeaders = getConvertedHeaders(headers, convertHeader);
 
         printData(outputStream, zonedDateTimeConverter, exportDataConverter, convertedHeaders, data);
@@ -86,7 +85,7 @@ public abstract class DynamicExportService {
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter,
                              ExportDataConverter exportDataConverter, String[] headers,
-                             Stream<AuditEvent> data) {
+                             Stream<AuditEvent> data) throws IOException {
         try (OutputStream buffer = new BufferedOutputStream(outputStream);
              OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
              var printer =
@@ -104,11 +103,9 @@ public abstract class DynamicExportService {
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for audit {} for reason {}", CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
+                    throw new AuditExportException(e, DYNAMIC_ROW_EXPORT_FAILURE, "Unable to export dynamic data for audit event %s", audit.getUuid());
                 }
             });
-        } catch (IOException e) {
-            log.error("Unable to export record for reason {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
         }
     }
 
@@ -128,8 +125,7 @@ public abstract class DynamicExportService {
     @Transactional(readOnly = true)
     public abstract void export(LocalDate from, LocalDate to, OutputStream outputStream,
                                 String caseType, boolean convert, boolean convertHeader,
-                                ZonedDateTimeConverter zonedDateTimeConverter)
-            throws IOException;
+                                ZonedDateTimeConverter zonedDateTimeConverter) throws IOException;
 
     protected abstract String[] getHeaders();
 
