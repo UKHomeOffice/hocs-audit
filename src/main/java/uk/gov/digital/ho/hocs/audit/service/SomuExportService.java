@@ -47,7 +47,7 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_CASE_TYPE_SPECIFIED;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.JSON_PARSE_EXCEPTION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.NON_EXISTENT_VARIABLE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.SOMU_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_SOMU_ROW;
 
 @Slf4j
 @Service
@@ -104,7 +104,7 @@ public class SomuExportService {
                         printer.printRecord((Object[]) parsedData);
                     }
                 } catch (IOException e) {
-                    throw new AuditExportException(e, SOMU_ROW_EXPORT_FAILURE, "Unable to export somu data for audit event %s", audit.getUuid());
+                    throw new AuditExportException(e, EXPORT_FAILURE_SOMU_ROW, "Unable to export somu data for audit event %s", audit.getUuid());
                 }
             });
         }

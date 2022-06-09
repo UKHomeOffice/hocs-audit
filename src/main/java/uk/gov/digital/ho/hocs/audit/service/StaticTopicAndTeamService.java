@@ -18,7 +18,7 @@ import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.TOPIC_TEAM_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_TOPIC_TEAM_ROW;
 
 
 @Slf4j
@@ -48,7 +48,7 @@ public class StaticTopicAndTeamService {
                     try {
                         printer.printRecord(caseType, topic.getUuid(), topic.getDisplayName(), team.getUuid(), team.getDisplayName());
                     } catch (IOException e) {
-                        throw new AuditExportException(e, TOPIC_TEAM_ROW_EXPORT_FAILURE, "Unable to export topic team row for topic %s team %s", topic.getUuid(), team.getUuid() );
+                        throw new AuditExportException(e, EXPORT_FAILURE_TOPIC_TEAM_ROW, "Unable to export topic team row for topic %s team %s", topic.getUuid(), team.getUuid() );
                     }
                 });
             });

@@ -18,7 +18,7 @@ import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.USER_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_USER_ROW;
 
 @Slf4j
 @Service
@@ -46,7 +46,7 @@ public class StaticUserService {
                 try {
                     printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
                 } catch (IOException e) {
-                    throw new AuditExportException(e, USER_ROW_EXPORT_FAILURE, "Unable to export user row for %s", user.getId());
+                    throw new AuditExportException(e, EXPORT_FAILURE_USER_ROW, "Unable to export user row for %s", user.getId());
                 }
             });
         }

@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.DYNAMIC_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_DYNAMIC;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_PARAMETER_SPECIFIED;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.SOMU_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_SOMU;
 import static uk.gov.digital.ho.hocs.audit.core.utils.FileNameHelper.getFileName;
 
 @Slf4j
@@ -62,7 +62,7 @@ public class DataExportResource {
         try {
             service.export(fromDate, toDate, response.getOutputStream(), caseType, convert, convertHeader, zonedDateTimeConverter);
         } catch (IOException e) {
-            throw new AuditExportException(e, DYNAMIC_EXPORT_FAILURE, "Unable to export Dynamic Data for %s", exportType);
+            throw new AuditExportException(e, EXPORT_FAILURE_DYNAMIC, "Unable to export Dynamic Data for %s", exportType);
         }
     }
 
@@ -81,7 +81,7 @@ public class DataExportResource {
             setResponseHeaders(response, getFileName(caseType, somuType));
             somuExportService.export(fromDate, toDate, response.getOutputStream(), caseType, somuType, convert, zonedDateTimeConverter);
         } catch (IOException e) {
-            throw new AuditExportException(e, SOMU_EXPORT_FAILURE, "Unable to export Somu Data");
+            throw new AuditExportException(e, EXPORT_FAILURE_SOMU, "Unable to export Somu Data");
         }
     }
 

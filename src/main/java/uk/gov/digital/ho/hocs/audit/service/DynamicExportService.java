@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.DYNAMIC_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_DYNAMIC_ROW;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_CASE_TYPE_SPECIFIED;
 
 @Slf4j
@@ -103,7 +103,7 @@ public abstract class DynamicExportService {
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException(e, DYNAMIC_ROW_EXPORT_FAILURE, "Unable to export dynamic data for audit event %s", audit.getUuid());
+                    throw new AuditExportException(e, EXPORT_FAILURE_DYNAMIC_ROW, "Unable to export dynamic data for audit event %s", audit.getUuid());
                 }
             });
         }

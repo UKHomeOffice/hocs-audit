@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CASE_DATA_DYNAMIC_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_CASE_DATA_DYNAMIC_ROW;
 
 @Slf4j
 @Service
@@ -70,7 +70,7 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException(e, CASE_DATA_DYNAMIC_ROW_EXPORT_FAILURE, "Unable to export case data for audit event %s", audit.getUuid());
+                    throw new AuditExportException(e, EXPORT_FAILURE_CASE_DATA_DYNAMIC_ROW, "Unable to export case data for audit event %s", audit.getUuid());
                 }
             });
         }

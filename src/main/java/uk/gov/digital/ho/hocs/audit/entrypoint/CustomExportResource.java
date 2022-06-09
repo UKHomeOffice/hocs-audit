@@ -14,7 +14,7 @@ import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CUSTOM_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_CUSTOM;
 import static uk.gov.digital.ho.hocs.audit.core.utils.FileNameHelper.getFilename;
 
 @Slf4j
@@ -36,7 +36,7 @@ public class CustomExportResource {
             customExportService.export(response, viewName, convertHeader);
         }
         catch (IOException e) {
-            throw new AuditExportException(e, CUSTOM_EXPORT_FAILURE, "Unable to export Custom row for %s", viewName);
+            throw new AuditExportException(e, EXPORT_FAILURE_CUSTOM, "Unable to export Custom row for %s", viewName);
         }
         response.setStatus(HttpStatus.OK.value());
     }

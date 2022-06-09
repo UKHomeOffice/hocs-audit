@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CUSTOM_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_CUSTOM_ROW;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.INVALID_EXPORT_PERMISSION;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REFRESH_MATERIALISED_VIEW;
@@ -86,7 +86,7 @@ public class CustomExportService {
                             printer.printRecord(converted);
                         }
                         catch (IOException e) {
-                            throw new AuditExportException(e, CUSTOM_ROW_EXPORT_FAILURE, "Unable to export Custom Data for %s", viewName);
+                            throw new AuditExportException(e, EXPORT_FAILURE_CUSTOM_ROW, "Unable to export Custom Data for %s", viewName);
                         }
                     });
             log.info("Completed {} to CSV", viewName, value(EVENT, CSV_EXPORT_COMPLETE));

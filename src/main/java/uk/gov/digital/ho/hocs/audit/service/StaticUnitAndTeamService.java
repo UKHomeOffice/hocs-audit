@@ -18,8 +18,8 @@ import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_COMPLETE;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNIT_TEAM_TEAM_ROW_EXPORT_FAILURE;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.UNIT_TEAM_UNIT_ROW_EXPORT_FAILURE;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_UNIT_TEAM_TEAM_ROW;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EXPORT_FAILURE_UNIT_TEAM_UNIT_ROW;
 
 @Slf4j
 @Service
@@ -50,14 +50,14 @@ public class StaticUnitAndTeamService {
                     try {
                         printer.printRecord(unit.getUuid(), unit.getDisplayName(), null, null);
                     } catch (IOException e) {
-                        throw new AuditExportException(e, UNIT_TEAM_UNIT_ROW_EXPORT_FAILURE, "Unable to export user team row for unit %s", unit.getUuid());
+                        throw new AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_UNIT_ROW, "Unable to export user team row for unit %s", unit.getUuid());
                     }
                 } else {
                     teams.forEach(team -> {
                         try {
                             printer.printRecord(unit.getUuid(), unit.getDisplayName(), team.getUuid(), team.getDisplayName());
                         } catch (IOException e) {
-                            throw new AuditExportException(e, UNIT_TEAM_TEAM_ROW_EXPORT_FAILURE, "Unable to export user team row for unit %s, team %s", unit.getUuid(), team.getUuid());
+                            throw new AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_TEAM_ROW, "Unable to export user team row for unit %s, team %s", unit.getUuid(), team.getUuid());
                         }
                     });
                 }
