@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import java.io.BufferedOutputStream;
@@ -50,14 +50,14 @@ public class StaticUnitAndTeamService {
                     try {
                         printer.printRecord(unit.getUuid(), unit.getDisplayName(), null, null);
                     } catch (IOException e) {
-                        throw new AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_UNIT_ROW, "Unable to export user team row for unit %s", unit.getUuid());
+                        throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_UNIT_ROW, "Unable to export user team row for unit %s", unit.getUuid());
                     }
                 } else {
                     teams.forEach(team -> {
                         try {
                             printer.printRecord(unit.getUuid(), unit.getDisplayName(), team.getUuid(), team.getDisplayName());
                         } catch (IOException e) {
-                            throw new AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_TEAM_ROW, "Unable to export user team row for unit %s, team %s", unit.getUuid(), team.getUuid());
+                            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM_TEAM_ROW, "Unable to export user team row for unit %s, team %s", unit.getUuid(), team.getUuid());
                         }
                     });
                 }

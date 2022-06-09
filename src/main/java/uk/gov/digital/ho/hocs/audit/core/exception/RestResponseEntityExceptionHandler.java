@@ -63,20 +63,20 @@ public class RestResponseEntityExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(AuditExportException.class)
-    public ResponseEntity<String> handle(AuditExportException e) {
+    @ExceptionHandler(ApplicationExceptions.AuditExportException.class)
+    public ResponseEntity<String> handle(ApplicationExceptions.AuditExportException e) {
         log.error("AuditExportException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(EntityPermissionException.class)
-    public ResponseEntity<String> handle(EntityPermissionException e) {
+    @ExceptionHandler(ApplicationExceptions.EntityPermissionException.class)
+    public ResponseEntity<String> handle(ApplicationExceptions.EntityPermissionException e) {
         log.error("EntityPermissionException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), UNAUTHORIZED);
     }
 
-    @ExceptionHandler(InvalidExportTypeException.class)
-    public ResponseEntity<String> handle(InvalidExportTypeException e) {
+    @ExceptionHandler(ApplicationExceptions.InvalidExportTypeException.class)
+    public ResponseEntity<String> handle(ApplicationExceptions.InvalidExportTypeException e) {
         log.error("InvalidExportTypeException: {}", e.getMessage(), value(EVENT, e.getEvent()), value(EXCEPTION, e));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }

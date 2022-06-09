@@ -10,8 +10,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
 import uk.gov.digital.ho.hocs.audit.core.RequestData;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
-import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
@@ -56,7 +55,7 @@ public class CustomExportService {
 
         if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
                 !requestData.getRoles().contains(exportViewDto.getRequiredPermission())) {
-            throw new EntityPermissionException(INVALID_EXPORT_PERMISSION, "No permission to view %s for user %s", viewName, requestData.getUserId());
+            throw new ApplicationExceptions.EntityPermissionException(INVALID_EXPORT_PERMISSION, "No permission to view %s for user %s", viewName, requestData.getUserId());
         }
 
         customExportDataConverter.initialiseAdapters();
@@ -86,7 +85,7 @@ public class CustomExportService {
                             printer.printRecord(converted);
                         }
                         catch (IOException e) {
-                            throw new AuditExportException(e, EXPORT_FAILURE_CUSTOM_ROW, "Unable to export Custom Data for %s", viewName);
+                            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_CUSTOM_ROW, "Unable to export Custom Data for %s", viewName);
                         }
                     });
             log.info("Completed {} to CSV", viewName, value(EVENT, CSV_EXPORT_COMPLETE));

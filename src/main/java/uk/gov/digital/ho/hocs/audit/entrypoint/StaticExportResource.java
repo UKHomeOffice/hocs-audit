@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.service.StaticTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticTopicAndTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticTopicService;
@@ -53,7 +53,7 @@ public class StaticExportResource {
             setResponseHeaders(response, getFilename("topics"));
             staticTopicService.export(response.getOutputStream(), convertHeader);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_TOPIC, "Unable to export Topics");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_TOPIC, "Unable to export Topics");
         }
     }
 
@@ -65,7 +65,7 @@ public class StaticExportResource {
             setResponseHeaders(response, getFileName(caseType, "topics_teams"));
             staticTopicAndTeamService.export(response.getOutputStream(), caseType, convertHeader);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_TOPIC_TEAM, "Unable to export Units and Teams");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_TOPIC_TEAM, "Unable to export Units and Teams");
         }
     }
 
@@ -76,7 +76,7 @@ public class StaticExportResource {
             setResponseHeaders(response, getFilename("teams"));
             staticTeamService.export(response.getOutputStream(), convertHeader);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_TEAM, "Unable to export Teams");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_TEAM, "Unable to export Teams");
         }
     }
 
@@ -87,7 +87,7 @@ public class StaticExportResource {
             setResponseHeaders(response, getFilename("units_teams"));
             staticUnitAndTeamService.export(response.getOutputStream(), convertHeader);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM, "Unable to export Units and Teams");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_UNIT_TEAM, "Unable to export Units and Teams");
         }
     }
 
@@ -98,7 +98,7 @@ public class StaticExportResource {
             setResponseHeaders(response, getFilename("users"));
             staticUserService.export(response.getOutputStream(), convertHeader);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_USER, "Unable to export Users");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_USER, "Unable to export Users");
         }
     }
 

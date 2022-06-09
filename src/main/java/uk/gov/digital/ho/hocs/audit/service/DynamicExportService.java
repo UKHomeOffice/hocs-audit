@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
@@ -63,7 +63,7 @@ public abstract class DynamicExportService {
                 .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
                 .findFirst()
                 .orElseThrow(() ->
-                        new AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified {}", caseType)
+                        new ApplicationExceptions.AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified {}", caseType)
                 );
     }
 
@@ -103,7 +103,7 @@ public abstract class DynamicExportService {
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException(e, EXPORT_FAILURE_DYNAMIC_ROW, "Unable to export dynamic data for audit event %s", audit.getUuid());
+                    throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_DYNAMIC_ROW, "Unable to export dynamic data for audit event %s", audit.getUuid());
                 }
             });
         }

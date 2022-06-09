@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +36,7 @@ public class CustomExportResource {
             customExportService.export(response, viewName, convertHeader);
         }
         catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_CUSTOM, "Unable to export Custom row for %s", viewName);
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_CUSTOM, "Unable to export Custom row for %s", viewName);
         }
         response.setStatus(HttpStatus.OK.value());
     }

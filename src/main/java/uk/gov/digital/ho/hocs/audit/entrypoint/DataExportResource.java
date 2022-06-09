@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
-import uk.gov.digital.ho.hocs.audit.core.exception.InvalidExportTypeException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.service.DynamicExportService;
 import uk.gov.digital.ho.hocs.audit.service.SomuExportService;
@@ -56,13 +55,13 @@ public class DataExportResource {
         var service = dynamicExportServices.get(exportType);
 
         if (service == null) {
-            throw new InvalidExportTypeException(INVALID_PARAMETER_SPECIFIED, "Export service does not exist for type: %s", exportType);
+            throw new ApplicationExceptions.InvalidExportTypeException(INVALID_PARAMETER_SPECIFIED, "Export service does not exist for type: %s", exportType);
         }
 
         try {
             service.export(fromDate, toDate, response.getOutputStream(), caseType, convert, convertHeader, zonedDateTimeConverter);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_DYNAMIC, "Unable to export Dynamic Data for %s", exportType);
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_DYNAMIC, "Unable to export Dynamic Data for %s", exportType);
         }
     }
 
@@ -81,7 +80,7 @@ public class DataExportResource {
             setResponseHeaders(response, getFileName(caseType, somuType));
             somuExportService.export(fromDate, toDate, response.getOutputStream(), caseType, somuType, convert, zonedDateTimeConverter);
         } catch (IOException e) {
-            throw new AuditExportException(e, EXPORT_FAILURE_SOMU, "Unable to export Somu Data");
+            throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_SOMU, "Unable to export Somu Data");
         }
     }
 

@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import java.io.BufferedOutputStream;
@@ -46,7 +46,7 @@ public class StaticUserService {
                 try {
                     printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
                 } catch (IOException e) {
-                    throw new AuditExportException(e, EXPORT_FAILURE_USER_ROW, "Unable to export user row for %s", user.getId());
+                    throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_USER_ROW, "Unable to export user row for %s", user.getId());
                 }
             });
         }

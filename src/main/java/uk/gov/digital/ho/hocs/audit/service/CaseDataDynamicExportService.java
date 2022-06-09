@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
@@ -70,7 +70,7 @@ public abstract class CaseDataDynamicExportService extends DynamicExportService 
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException(e, EXPORT_FAILURE_CASE_DATA_DYNAMIC_ROW, "Unable to export case data for audit event %s", audit.getUuid());
+                    throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_CASE_DATA_DYNAMIC_ROW, "Unable to export case data for audit event %s", audit.getUuid());
                 }
             });
         }

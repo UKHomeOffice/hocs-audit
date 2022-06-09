@@ -13,7 +13,7 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeField;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeSchema;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
-import uk.gov.digital.ho.hocs.audit.core.exception.AuditExportException;
+import uk.gov.digital.ho.hocs.audit.core.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
@@ -104,7 +104,7 @@ public class SomuExportService {
                         printer.printRecord((Object[]) parsedData);
                     }
                 } catch (IOException e) {
-                    throw new AuditExportException(e, EXPORT_FAILURE_SOMU_ROW, "Unable to export somu data for audit event %s", audit.getUuid());
+                    throw new ApplicationExceptions.AuditExportException(e, EXPORT_FAILURE_SOMU_ROW, "Unable to export somu data for audit event %s", audit.getUuid());
                 }
             });
         }
@@ -169,7 +169,7 @@ public class SomuExportService {
                 .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
                 .findFirst()
                 .orElseThrow(() ->
-                        new AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified caseType {}", caseType)
+                        new ApplicationExceptions.AuditExportException(INVALID_CASE_TYPE_SPECIFIED, "Invalid case type specified caseType {}", caseType)
                 )
                 .getShortCode();
     }
