@@ -16,7 +16,7 @@ services:
       - /var/lib/postgresql
 
   localstack:
-    image: localstack/localstack:0.11.1
+    image: localstack/localstack:0.14.3
     ports:
       - "4566:4566"
     networks:
@@ -25,6 +25,7 @@ services:
       HOSTNAME_EXTERNAL: localstack
       DEFAULT_REGION: eu-west-2
       SERVICES: sqs
+      SQS_PROVIDER: "elasticmq"
     volumes:
       - ./config/localstack:/docker-entrypoint-initaws.d
 
