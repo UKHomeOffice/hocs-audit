@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: dev
 
   - name: localstack
-    image: quay.io/ukhomeofficedigital/localstack
+    image: localstack:0.14.3.1
     environment:
       SERVICES: sqs
       DEFAULT_REGION: eu-west-2
