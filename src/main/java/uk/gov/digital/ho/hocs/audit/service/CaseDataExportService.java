@@ -134,7 +134,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
                 .forEach(
                         topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText())
                 );
-        uuidToName.putAll(caseworkClient.getAllActiveCorrespondents().stream()
+        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream()
                 .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
         uuidToName.putAll(infoClient.getCaseTypeActions().stream()
                 .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));

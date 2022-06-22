@@ -25,8 +25,8 @@ public class CaseworkClient {
         this.serviceBaseURL = caseworkServiceUri;
     }
 
-    public Set<GetCorrespondentOutlineResponse> getAllActiveCorrespondents() {
-        GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents", new ParameterizedTypeReference<>() {});
+    public Set<GetCorrespondentOutlineResponse> getAllCorrespondents() {
+        GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents?includeDeleted=true", new ParameterizedTypeReference<>() {});
         return response.getCorrespondents();
     }
 
