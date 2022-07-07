@@ -20,14 +20,18 @@ services:
     ports:
       - "4566:4566"
     networks:
-      - hocs-network
+      hocs-network:
+        aliases:
+          - localhost.localstack.cloud
     environment:
       HOSTNAME_EXTERNAL: localstack
       DEFAULT_REGION: eu-west-2
-      SERVICES: sqs
+      SERVICES: sqs,sns,es,s3
+      OPENSEARCH_ENDPOINT_STRATEGY: "path"
+      LOCALSTACK_HOSTNAME: "localhost.localstack.cloud"
       SQS_PROVIDER: "elasticmq"
     volumes:
-      - ./config/localstack:/docker-entrypoint-initaws.d
+      - ./ci/localstack:/docker-entrypoint-initaws.d
 
 networks:
   hocs-network:

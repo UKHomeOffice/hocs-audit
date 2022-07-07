@@ -9,36 +9,7 @@ trigger:
     exclude:
       - main
 
-services:
-  - name: postgres
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: dev
-
-  - name: localstack
-    image: localstack/localstack:0.14.3
-    environment:
-      SERVICES: sqs
-      DEFAULT_REGION: eu-west-2
-
 steps:
-  - name: setup localstack
-    image: localstack/localstack:0.14.3
-    commands:
-      - ./config/localstack/setup-queues.sh
-    depends_on:
-      - clone
-
-  - name: test project
-    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.5
-    environment:
-      DB_HOST: "postgres"
-      LOCALSTACK_HOST: "localstack"
-    commands:
-      - ./gradlew clean build --no-daemon
-    depends_on:
-      - setup localstack
 
   - name: build & push
     image: plugins/docker
@@ -52,7 +23,7 @@ steps:
         from_secret: QUAY_ROBOT_TOKEN
       DOCKER_USERNAME: ukhomeofficedigital+hocs_quay_robot
     depends_on:
-      - test project
+      - clone
 
 ---
 kind: pipeline
@@ -147,36 +118,7 @@ trigger:
     - main
     - support/*
 
-services:
-  - name: postgres
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: dev
-
-  - name: localstack
-    image: localstack/localstack:0.14.3
-    environment:
-      SERVICES: sqs
-      DEFAULT_REGION: eu-west-2
-
 steps:
-  - name: setup localstack
-    image: localstack/localstack:0.14.3
-    commands:
-      - ./config/localstack/setup-queues.sh
-    depends_on:
-      - clone
-
-  - name: test project
-    image: quay.io/ukhomeofficedigital/hocs-base-image-build:1.0.5
-    environment:
-      DB_HOST: "postgres"
-      LOCALSTACK_HOST: "localstack"
-    commands:
-      - ./gradlew clean build --no-daemon
-    depends_on:
-      - setup localstack
 
   - name: build & push tag main
     image: plugins/docker
@@ -192,7 +134,7 @@ steps:
         from_secret: QUAY_ROBOT_TOKEN
       DOCKER_USERNAME: ukhomeofficedigital+hocs_quay_robot
     depends_on:
-      - test project
+      - clone
     when:
       branch:
         - main
@@ -210,7 +152,7 @@ steps:
         from_secret: QUAY_ROBOT_TOKEN
       DOCKER_USERNAME: ukhomeofficedigital+hocs_quay_robot
     depends_on:
-      - test project
+      - clone
     when:
       branch:
         - support/*
