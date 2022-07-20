@@ -4,5 +4,5 @@ on:
     types: [ labeled, unlabeled, opened, reopened, synchronize ]
 
 jobs:
-  analyze:
+  check:
     uses: UKHomeOffice/hocs-ci-infrastructure/.github/workflows/pr-check.yml@v1

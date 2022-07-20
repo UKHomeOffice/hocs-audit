@@ -4,7 +4,7 @@ on:
     types: [ opened, reopened, synchronize ]
 
 jobs:
-  analyze:
+  test:
     uses: UKHomeOffice/hocs-ci-infrastructure/.github/workflows/test.yml@v1
     with:
       components: 'localstack postgres'
