@@ -1,8 +1,5 @@
-import org.gradle.api.JavaVersion
-
 plugins {
     id 'java'
-    id 'jacoco'
     id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 }
@@ -12,25 +9,6 @@ sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
-}
-
-plugins.withType(JacocoPlugin) {
-    tasks["test"].finalizedBy 'jacocoTestReport'
-}
-
-test {
-    finalizedBy jacocoTestReport // report is always generated after tests run
-}
-
-jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
-    reports {
-        xml.required = true
-        html.required = false
-        csv.required = false
-        //for XML
-        xml.destination file("${buildDir}/reports/jacoco.xml")
-    }
 }
 
 dependencies {

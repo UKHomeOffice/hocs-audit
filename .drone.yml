@@ -40,13 +40,6 @@ steps:
     depends_on:
       - setup localstack
 
-  - name: sonar scanner
-    image: quay.io/ukhomeofficedigital/sonar-scanner
-    commands:
-      - sonar-scanner -Dsonar.projectVersion="$(git rev-parse --abbrev-ref HEAD)"
-    depends_on:
-      - test project
-
   - name: build & push
     image: plugins/docker
     settings:
