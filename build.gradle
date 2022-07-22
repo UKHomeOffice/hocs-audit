@@ -1,7 +1,8 @@
 plugins {
-    id 'org.springframework.boot' version '3.0.0-M4'
+    id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
     id 'java'
+    id 'org.springframework.experimental.aot' version '0.12.1'
 }
 
 def lombokVersion = '1.18.24'
@@ -10,8 +11,8 @@ group = 'uk.gov.digital.ho.hocs'
 sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
+    maven { url 'https://repo.spring.io/release' }
     mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
@@ -53,4 +54,9 @@ jar {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.named('bootBuildImage') {
+    builder = 'paketobuildpacks/builder:tiny'
+    environment = ['BP_NATIVE_IMAGE': 'true']
 }
