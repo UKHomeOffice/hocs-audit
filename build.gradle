@@ -4,6 +4,8 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 }
 
+def lombokVersion = '1.18.24'
+
 group = 'uk.gov.digital.ho.hocs'
 sourceCompatibility = JavaVersion.VERSION_17
 
@@ -29,14 +31,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:8.5.13'
     runtimeOnly 'org.postgresql:postgresql:42.4.0'
 
-<<<<<<< HEAD
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-=======
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
->>>>>>> e5dd573 (Bump spring-context-indexer from 5.3.21 to 5.3.22)
     annotationProcessor 'org.springframework:spring-context-indexer:5.3.22'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
