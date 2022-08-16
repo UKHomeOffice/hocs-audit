@@ -1,0 +1,437 @@
+{
+  "DCU_PRAU_WORKFLOW": {
+    "requiredPermission": "DCU_EXPORT_USER",
+    "displayName": "dcu-prau-workflow",
+    "fields": [
+      {
+        "name": "assignedTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "assignedUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "assignedUser",
+        "adapter": "userEmailAdapter"
+      },
+      {
+        "name": "assignedUserUpdated"
+      },
+      {
+        "name": "caseCompleted"
+      },
+      {
+        "name": "caseCreated"
+      },
+      {
+        "name": "caseDeadline"
+      },
+      {
+        "name": "caseStatus"
+      },
+      {
+        "name": "caseType"
+      },
+      {
+        "name": "currentStage"
+      },
+      {
+        "name": "dateOfCorrespondence"
+      },
+      {
+        "name": "dateReceived"
+      },
+      {
+        "name": "dispatchAllocatedToUser"
+      },
+      {
+        "name": "dispatchDeadline"
+      },
+      {
+        "name": "draftingTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "draftingUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "homeSecPrivateOfficeApprovalStarted"
+      },
+      {
+        "name": "homeSecSignOff"
+      },
+      {
+        "name": "homeSecSignOffStarted"
+      },
+      {
+        "name": "initialDraftAllocatedToUser"
+      },
+      {
+        "name": "initialDraftDeadline"
+      },
+      {
+        "name": "lastModified"
+      },
+      {
+        "name": "latestDataChange"
+      },
+      {
+        "name": "latestStageChange"
+      },
+      {
+        "name": "markupDeadline"
+      },
+      {
+        "name": "markupDecision"
+      },
+      {
+        "name": "markupStarted"
+      },
+      {
+        "name": "member"
+      },
+      {
+        "name": "ministerSignOffStarted"
+      },
+      {
+        "name": "originalChannel"
+      },
+      {
+        "name": "originalDraftTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "originalDraftUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "originalDraftUser",
+        "adapter": "userEmailAdapter"
+      },
+      {
+        "name": "primaryTopic",
+        "adapter": "topicNameAdapter"
+      },
+      {
+        "name": "privateOfficeDeadline"
+      },
+      {
+        "name": "privateOfficeStarted"
+      },
+      {
+        "name": "privateOfficeLatest"
+      },
+      {
+        "name": "privateOfficeTeam"
+      },
+      {
+        "name": "qaResponseAllocatedToUser"
+      },
+      {
+        "name": "qaResponseStarted"
+      },
+      {
+        "name": "draftCount"
+      },
+      {
+        "name": "reDraftStarted"
+      },
+      {
+        "name": "reference"
+      },
+      {
+        "name": "markupTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "markupUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "qaOnlineCount"
+      },
+      {
+        "name": "homeSecInterest"
+      },
+      {
+        "name": "homeSecReply"
+      },
+      {
+        "name": "draftingTeamUnitHistoricName"
+      },
+      {
+        "name": "poTeamUnitHistoricName"
+      },
+      {
+        "name": "overrideDraftingTeamUnitHistoricName"
+      },
+      {
+        "name": "overridePOTeamUnitHistoricName"
+      },
+      {
+        "name": "privateOfficeOverridePOTeamUnitHistoricName"
+      },
+      {
+        "name": "defaultPolicyTeamUnitHistoricName"
+      }
+    ]
+  },
+  "DCU_BUSINESS": {
+    "displayName": "dcu-business",
+    "requiredPermission": "DCU_EXPORT_USER",
+    "fields": [
+      {
+        "name": "assignedTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "assignedUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "assignedUser",
+        "adapter": "userEmailAdapter"
+      },
+      {
+        "name": "assignedUserUpdated"
+      },
+      {
+        "name": "caseCompleted"
+      },
+      {
+        "name": "caseCreated"
+      },
+      {
+        "name": "caseDeadline"
+      },
+      {
+        "name": "caseStatus"
+      },
+      {
+        "name": "caseType"
+      },
+      {
+        "name": "caseUuid"
+      },
+      {
+        "name": "commentCount"
+      },
+      {
+        "name": "copyNumberTen"
+      },
+      {
+        "name": "currentStage"
+      },
+      {
+        "name": "dateOfCorrespondence"
+      },
+      {
+        "name": "dateReceived"
+      },
+      {
+        "name": "dispatchAllocatedToUser"
+      },
+      {
+        "name": "dispatchDeadline"
+      },
+      {
+        "name": "draftingTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "draftingUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "homeSecPrivateOfficeApprovalStarted"
+      },
+      {
+        "name": "homeSecSignedOff"
+      },
+      {
+        "name": "homeSecSignOff"
+      },
+      {
+        "name": "homeSecSignOffStarted"
+      },
+      {
+        "name": "initialDraftAllocatedToUser"
+      },
+      {
+        "name": "initialDraftDeadline"
+      },
+      {
+        "name": "lastModified"
+      },
+      {
+        "name": "lastModifiedBy",
+        "adapter": "userEmailAdapter"
+      },
+      {
+        "name": "latestDataChange"
+      },
+      {
+        "name": "latestStageChange"
+      },
+      {
+        "name": "lordsMinisterSignedOff"
+      },
+      {
+        "name": "markupDeadline"
+      },
+      {
+        "name": "markupDecision"
+      },
+      {
+        "name": "markupStarted"
+      },
+      {
+        "name": "member"
+      },
+      {
+        "name": "ministerSignOffStarted"
+      },
+      {
+        "name": "mpRef"
+      },
+      {
+        "name": "ogdDept"
+      },
+      {
+        "name": "originalChannel"
+      },
+      {
+        "name": "originalDraftTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "originalDraftUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "originalDraftUser",
+        "adapter": "userEmailAdapter"
+      },
+      {
+        "name": "primaryCorrAddress1"
+      },
+      {
+        "name": "primaryCorrAddress2"
+      },
+      {
+        "name": "primaryCorrAddress3"
+      },
+      {
+        "name": "primaryCorrCountry"
+      },
+      {
+        "name": "primaryCorrEmail"
+      },
+      {
+        "name": "primaryCorrFullname"
+      },
+      {
+        "name": "primaryCorrPostcode"
+      },
+      {
+        "name": "primaryCorrTelephone"
+      },
+      {
+        "name": "primaryTopic",
+        "adapter": "topicNameAdapter"
+      },
+      {
+        "name": "privateOfficeDeadline"
+      },
+      {
+        "name": "privateOfficeStarted"
+      },
+      {
+        "name": "privateOfficeLatest"
+      },
+      {
+        "name": "privateOfficeTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "qaResponseAllocatedToUser"
+      },
+      {
+        "name": "qaResponseStarted"
+      },
+      {
+        "name": "draftCount"
+      },
+      {
+        "name": "reDraftStarted"
+      },
+      {
+        "name": "reference"
+      },
+      {
+        "name": "secondCorrAddress1"
+      },
+      {
+        "name": "secondCorrAddress2"
+      },
+      {
+        "name": "secondCorrAddress3"
+      },
+      {
+        "name": "secondCorrCountry"
+      },
+      {
+        "name": "secondCorrEmail"
+      },
+      {
+        "name": "secondCorrFullname"
+      },
+      {
+        "name": "secondCorrPostcode"
+      },
+      {
+        "name": "secondCorrTelephone"
+      },
+      {
+        "name": "secondCorrType"
+      },
+      {
+        "name": "markupTeam",
+        "adapter": "teamNameAdapter"
+      },
+      {
+        "name": "markupUnit",
+        "adapter": "unitNameAdapter"
+      },
+      {
+        "name": "qaOnlineCount"
+      },
+      {
+        "name": "homeSecInterest"
+      },
+      {
+        "name": "homeSecReply"
+      },
+      {
+        "name": "draftingTeamUnitHistoricName"
+      },
+      {
+        "name": "poTeamUnitHistoricName"
+      },
+      {
+        "name": "overrideDraftingTeamUnitHistoricName"
+      },
+      {
+        "name": "overridePOTeamUnitHistoricName"
+      },
+      {
+        "name": "privateOfficeOverridePOTeamUnitHistoricName"
+      },
+      {
+        "name": "defaultPolicyTeamUnitHistoricName"
+      }
+    ]
+  }
+}
