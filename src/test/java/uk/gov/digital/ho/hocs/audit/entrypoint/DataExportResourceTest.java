@@ -29,8 +29,6 @@ public class DataExportResourceTest extends BaseExportResourceTest {
 
     @Test
     public void exportTypeExport() throws IOException {
-        given(infoClient.getCaseExportFields("TEST")).willReturn(new LinkedHashSet<>());
-
         ResponseEntity<String> result = restTemplate.exchange(
                 getExportUri("/export/TEST?fromDate=2020-01-01&toDate=2022-01-01&exportType=CASE_DATA"),
                 GET, HttpEntity.EMPTY, String.class);

@@ -199,19 +199,6 @@ public class InfoClientTest {
     }
 
     @Test
-    public void getCaseExportFields() {
-        String caseType = "C1";
-        Set<String> response = new LinkedHashSet<>(Arrays.asList("ExportField1", "ExportField2"));
-        when(restHelper.get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"), any(ParameterizedTypeReference.class))).thenReturn(response);
-        Set<String> results = infoClient.getCaseExportFields(caseType);
-
-        assertEquals(response, results);
-        verify(restHelper).get(eq(BASE_URL), eq("/schema/caseType/" + caseType + "/reporting"), any(ParameterizedTypeReference.class));
-
-        verifyNoMoreInteractions(restHelper);
-    }
-
-    @Test
     public void getExportViews() {
         List<ExportViewDto> response = buildExportViews();
         when(restHelper.get(eq(BASE_URL), eq("/export"), any(ParameterizedTypeReference.class))).thenReturn(response);
