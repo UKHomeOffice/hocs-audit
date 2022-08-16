@@ -16,6 +16,7 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.config.CaseDataFieldReader;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter;
@@ -50,11 +51,14 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
                     "MPAM_ENQUIRY_REASONS_ALL",
                     "MPAM_BUS_UNITS_ALL"
             });
+    private final CaseDataFieldReader caseDataFieldReader;
 
     public CaseDataExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient,
                                  CaseworkClient caseworkClient, HeaderConverter headerConverter,
-                                 MalformedDateConverter malformedDateConverter) {
+                                 MalformedDateConverter malformedDateConverter, CaseDataFieldReader caseDataFieldReader) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
+
+        this.caseDataFieldReader = caseDataFieldReader;
     }
 
     @Override
@@ -112,7 +116,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     @Override
     protected String[] getAdditionalHeaders(CaseTypeDto caseType) {
-        return infoClient.getCaseExportFields(caseType.getType()).toArray(String[]::new);
+        return caseDataFieldReader.getByCaseType(caseType.getType()).toArray(String[]::new);
     }
 
     @Override

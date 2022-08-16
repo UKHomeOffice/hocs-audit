@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,8 +46,6 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
 
         given(infoClient.getCaseTypes())
                 .willReturn(Set.of(new CaseTypeDto("Test", "a1", "TEST")));
-
-        given(infoClient.getCaseExportFields("TEST")).willReturn(new LinkedHashSet<>(Set.of("PreviousCaseReference")));
     }
 
     @Test
