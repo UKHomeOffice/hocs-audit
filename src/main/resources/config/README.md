@@ -16,3 +16,29 @@ This holds a collection of field names split by case type that should be added t
   ]
 }
 ```
+
+### Custom Export Views
+
+This holds data surrounding custom views, including:
+- The required Keycloak role
+- The display name that is prefixed to the filename
+- The fields and associated adapters for each field
+
+#### Schema
+
+```json
+{
+  <<VIEW_NAME>>: {
+    "displayName": <<REPORT_PREFIX>>
+    "requiredPermission": <<REQUIRED_ROLE>>,
+    "fields": [
+      {
+        "name": <<FIELD_NAME>>,
+        "adapter": <<ADAPTER_NAME>>
+      }
+    ]
+  }
+}
+```
+
+Adapters are optional within the field object. A list of available adapters are located [here](../../java/uk/gov/digital/ho/hocs/audit/service/domain/adapter).

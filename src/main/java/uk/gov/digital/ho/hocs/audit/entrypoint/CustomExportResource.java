@@ -59,8 +59,10 @@ public class CustomExportResource {
         }
     }
 
+    //customExportService.getViewLastRefreshedDate(viewName) does not work if view empty
+
     public String getFilename(String viewName) {
-        return String.format("%s-%s.csv", viewName, customExportService.getViewLastRefreshedDate(viewName).toString());
+        return String.format("%s-%s.csv", viewName, "");
     }
 
 }

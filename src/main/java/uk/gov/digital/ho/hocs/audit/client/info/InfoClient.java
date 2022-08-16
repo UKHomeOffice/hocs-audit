@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.EntityDto;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.TopicDto;
@@ -17,7 +16,6 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.RestHelper;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -78,14 +76,6 @@ public class InfoClient {
 
     public Set<UnitDto> getUnits() {
         return restHelper.get(rootUri, "/unit", new ParameterizedTypeReference<>() {});
-    }
-
-    public List<ExportViewDto> getExportViews() {
-        return restHelper.get(rootUri, "/export", new ParameterizedTypeReference<>() {});
-    }
-
-    public ExportViewDto getExportView(String code) {
-        return restHelper.get(rootUri, String.format("/export/%s", code), ExportViewDto.class);
     }
 
     @Cacheable(value = "getEntitiesForList", unless = "#result == null")

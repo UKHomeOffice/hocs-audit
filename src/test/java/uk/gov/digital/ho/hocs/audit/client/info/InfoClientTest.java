@@ -7,8 +7,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.TopicDto;
@@ -17,18 +15,14 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.RestHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -199,41 +193,6 @@ public class InfoClientTest {
     }
 
     @Test
-    public void getExportViews() {
-        List<ExportViewDto> response = buildExportViews();
-        when(restHelper.get(eq(BASE_URL), eq("/export"), any(ParameterizedTypeReference.class))).thenReturn(response);
-        List<ExportViewDto> results = infoClient.getExportViews();
-
-        assertEquals(response, results);
-        verify(restHelper).get(eq(BASE_URL), eq("/export"), any(ParameterizedTypeReference.class));
-
-        verifyNoMoreInteractions(restHelper);
-    }
-
-    @Test
-    public void getExportView() {
-        ExportViewDto response = buildExportView1();
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class))).thenReturn(response);
-        ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
-
-        assertEquals(response, results);
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class));
-
-        verifyNoMoreInteractions(restHelper);
-    }
-
-    @Test
-    public void getExportView_nullResult() {
-        when(restHelper.get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class))).thenReturn(null);
-        ExportViewDto results = infoClient.getExportView(VIEW_CODE_1);
-
-        assertNull(results);
-        verify(restHelper).get(eq(BASE_URL), eq("/export/" + VIEW_CODE_1), eq(ExportViewDto.class));
-
-        verifyNoMoreInteractions(restHelper);
-    }
-
-    @Test
     public void getCaseTypeActions_shouldReturnListOfActions() {
         CaseTypeActionDto caseTypeAction1 = new CaseTypeActionDto(
                 UUID.randomUUID(),
@@ -271,25 +230,5 @@ public class InfoClientTest {
 
         verifyNoMoreInteractions(restHelper);
     }
-
-
-    private List<ExportViewDto> buildExportViews() {
-        return new ArrayList<>(Arrays.asList(buildExportView1(), buildExportView2()));
-    }
-
-    private ExportViewDto buildExportView1() {
-        ExportViewFieldDto fieldA = new ExportViewFieldDto(1L, 1L, 1L, FIELD_NAME_A, null);
-        ExportViewFieldDto fieldB = new ExportViewFieldDto(2L, 1L, 2L, FIELD_NAME_B, null);
-        List<ExportViewFieldDto> fields1 = new ArrayList<>(Arrays.asList(fieldA, fieldB));
-        return new ExportViewDto(1L, VIEW_CODE_1, VIEW_DISPLAY_NAME_1, PERMISSION_1, fields1);
-    }
-
-    private ExportViewDto buildExportView2() {
-        ExportViewFieldDto fieldC = new ExportViewFieldDto(3L, 2L, 1L, FIELD_NAME_C, null);
-        ExportViewFieldDto fieldD = new ExportViewFieldDto(4L, 2L, 2L, FIELD_NAME_D, null);
-        List<ExportViewFieldDto> fields2 = new ArrayList<>(Arrays.asList(fieldC, fieldD));
-        return new ExportViewDto(2L, VIEW_CODE_2, VIEW_DISPLAY_NAME_2, PERMISSION_2, fields2);
-    }
-
 
 }

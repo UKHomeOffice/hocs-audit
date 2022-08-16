@@ -7,11 +7,11 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
 import uk.gov.digital.ho.hocs.audit.core.RequestData;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.repository.config.CustomExportViewsReader;
+import uk.gov.digital.ho.hocs.audit.repository.config.model.CustomExportViews;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
@@ -35,14 +35,14 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REFRESH_MATERIALISED_VI
 public class CustomExportService {
 
     private final AuditRepository auditRepository;
-    private final InfoClient infoClient;
+    private final CustomExportViewsReader customExportViewsReader;
     private final CustomExportDataConverter customExportDataConverter;
     private final HeaderConverter headerConverter;
     private final RequestData requestData;
 
-    public CustomExportService(AuditRepository auditRepository, InfoClient infoClient, CustomExportDataConverter customExportDataConverter, HeaderConverter headerConverter, RequestData requestData) {
+    public CustomExportService(AuditRepository auditRepository, CustomExportViewsReader customExportViewsReader, CustomExportDataConverter customExportDataConverter, HeaderConverter headerConverter, RequestData requestData) {
         this.auditRepository = auditRepository;
-        this.infoClient = infoClient;
+        this.customExportViewsReader = customExportViewsReader;
         this.customExportDataConverter = customExportDataConverter;
         this.headerConverter = headerConverter;
         this.requestData = requestData;
@@ -50,16 +50,16 @@ public class CustomExportService {
 
     @Transactional(readOnly = true)
     public void export(HttpServletResponse response, String viewName, boolean convertHeader) throws IOException {
-        ExportViewDto exportViewDto = infoClient.getExportView(viewName);
+        var exportView = customExportViewsReader.getByViewName(viewName);
 
-        if (StringUtils.hasText(exportViewDto.getRequiredPermission()) &&
-                !requestData.getRoles().contains(exportViewDto.getRequiredPermission())) {
+        if (StringUtils.hasText(exportView.getRequiredPermission()) &&
+                !requestData.getRoles().contains(exportView.getRequiredPermission())) {
             // TODO: remove the log and add to the entity permission error with suitable LogEvent
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.getUserId(), exportViewDto.getRequiredPermission());
+            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.getUserId(), exportView.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", viewName);
         }
 
-        String[] headers = getHeaders(exportViewDto, convertHeader);
+        String[] headers = getHeaders(exportView, convertHeader);
 
         customExportDataConverter.initialiseAdapters();
 
@@ -73,10 +73,10 @@ public class CustomExportService {
                              .build())) {
             AtomicBoolean connected = new AtomicBoolean(true);
 
-            retrieveAuditData(exportViewDto.getCode())
+            retrieveAuditData(viewName)
                     .parallel()
                     .map(data -> {
-                        Object[] converted = customExportDataConverter.convertData(data, exportViewDto.getFields());
+                        Object[] converted = customExportDataConverter.convertData(data, exportView.getFields());
 
                         if (converted == null) {
                             log.warn("No data to print after converting data {}", data);
@@ -97,7 +97,7 @@ public class CustomExportService {
         }
     }
 
-    private String[] getHeaders(ExportViewDto exportView, boolean convertHeader) {
+    private String[] getHeaders(CustomExportViews.CustomExportView exportView, boolean convertHeader) {
         String[] headers = customExportDataConverter.getHeaders(exportView);
 
         if (convertHeader) {

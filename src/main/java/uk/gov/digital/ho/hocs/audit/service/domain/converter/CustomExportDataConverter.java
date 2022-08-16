@@ -6,13 +6,12 @@ import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetTopicResponse;
 import uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewDto;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldAdapterDto;
-import uk.gov.digital.ho.hocs.audit.client.info.dto.ExportViewFieldDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.TeamDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UnitDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 import uk.gov.digital.ho.hocs.audit.core.LogEvent;
+import uk.gov.digital.ho.hocs.audit.repository.config.model.CustomExportViews;
+import uk.gov.digital.ho.hocs.audit.repository.config.model.CustomExportViews.CustomExportView.ExportField;
 import uk.gov.digital.ho.hocs.audit.service.domain.adapter.ExportViewFieldAdapter;
 import uk.gov.digital.ho.hocs.audit.service.domain.adapter.TeamNameAdapter;
 import uk.gov.digital.ho.hocs.audit.service.domain.adapter.TopicNameAdapter;
@@ -46,19 +45,19 @@ public class CustomExportDataConverter {
         adapters = new HashMap<>();
     }
 
-    public String[] getHeaders(ExportViewDto exportViewDto) {
+    public String[] getHeaders(CustomExportViews.CustomExportView exportView) {
         List<String> headers = new ArrayList<>();
 
-        for (ExportViewFieldDto viewFieldDto : exportViewDto.getFields()) {
-            if (!shouldHide(viewFieldDto)) {
-                headers.add(viewFieldDto.getDisplayName());
+        for (var field : exportView.getFields()) {
+            if (!shouldHide(field)) {
+                headers.add(field.getName());
             }
         }
 
         return headers.toArray(String[]::new);
     }
 
-    public Object[] convertData(Object[] input, List<ExportViewFieldDto> fields) {
+    public Object[] convertData(Object[] input, List<ExportField> fields) {
         Object[] convertedData = null;
 
         if (input != null) {
@@ -68,12 +67,12 @@ public class CustomExportDataConverter {
         return convertedData;
     }
 
-    private Object[] convertCustomDataRow(Object[] rawData, List<ExportViewFieldDto> fields) {
+    private Object[] convertCustomDataRow(Object[] rawData, List<ExportField> fields) {
         List<String> results = new ArrayList<>();
         int index = 0;
-        for (ExportViewFieldDto fieldDto : fields) {
-            if (!shouldHide(fieldDto)) {
-                results.add(applyAdapters(rawData[index], fieldDto.getAdapters()));
+        for (var field : fields) {
+            if (!shouldHide(field)) {
+                results.add(applyAdapter(rawData[index], field.getAdapter()));
             }
             index++;
         }
@@ -81,12 +80,11 @@ public class CustomExportDataConverter {
         return results.toArray();
     }
 
-    private String applyAdapters(Object data, List<ExportViewFieldAdapterDto> adaptersDtos) {
+    private String applyAdapter(Object data, String adapter) {
         Object result = data;
 
-        for (ExportViewFieldAdapterDto adapterDto : adaptersDtos) {
-            ExportViewFieldAdapter adapterToUse = adapters.get(adapterDto.getType());
-
+        if (adapter != null) {
+            ExportViewFieldAdapter adapterToUse = adapters.get(adapter);
             if (adapterToUse != null) {
                 try {
                     result = adapterToUse.convert(result);
@@ -94,21 +92,15 @@ public class CustomExportDataConverter {
                     log.error("Unable to convert value: {} , reason: {}, event: {}", data, e.getMessage(), value(LogEvent.EVENT, CSV_CUSTOM_CONVERTER_FAILURE));
                 }
             } else {
-                throw new IllegalArgumentException("Cannot convert data for Adapter Type: " + adapterDto.getType());
+                throw new IllegalArgumentException("Cannot convert data for Adapter Type: " + adapter);
             }
         }
 
         return result == null ? null : String.valueOf(result);
     }
 
-    private boolean shouldHide(ExportViewFieldDto viewFieldDto) {
-        for (ExportViewFieldAdapterDto adapterDto : viewFieldDto.getAdapters()) {
-            if (ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(adapterDto.getType())) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean shouldHide(ExportField field) {
+        return ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(field.getAdapter());
     }
 
     public void initialiseAdapters() {
