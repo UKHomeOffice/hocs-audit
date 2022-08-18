@@ -468,6 +468,8 @@
     "ExGratiaRefundRequired",
     "ExGratiaTypeOfRefund",
     "ExGratiaPrimaryRefundReason",
+    "ExGratiaSecondRefundReason",
+    "ExGratiaThirdRefundReason",
     "ExGratiaRefundAmount",
     "ExGratiaPaymentMethod",
     "ExGratiaPaymentReferenceNumber",
