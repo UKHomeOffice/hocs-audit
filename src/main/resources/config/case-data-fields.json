@@ -423,8 +423,6 @@
     "SupportNote"
   ],
   "POGR": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "BusinessArea",
     "DateReceived",
     "ComplainantDOB",
@@ -441,6 +439,7 @@
     "ComplaintThirdPartyReference",
     "ComplainantApplicationReference",
     "ComplainantPassportNumber",
+    "DateOfCorrespondence",
     "PrimaryInterimLetter",
     "InterimLetterDateSent",
     "GroInvestigatingTeamSelection",
@@ -462,11 +461,8 @@
     "DispatchDocumentReplaced",
     "DispatchDocumentType",
     "DispatchDocumentTypeOther",
-    "CaseNote_TriageEscalate",
-    "CaseNote_DraftEscalate",
     "EscalationOutcome",
     "Close Reason",
-    "HMPODraftCloseCaseNote",
     "ComplaintReason",
     "ExGratiaDateOfClaim",
     "ExGratiaAuthorisedBy",
@@ -478,8 +474,7 @@
     "ExGratiaThirdRefundReason",
     "ExGratiaRefundAmount",
     "ExGratiaPaymentMethod",
-    "ExGratiaPaymentReferenceNumber",
-    "DateOfCorrespondence"
+    "ExGratiaPaymentReferenceNumber"
   ],
   "POGR2": [
     "RefTypeUpdateCount",
