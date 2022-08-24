@@ -1,7 +1,5 @@
 {
   "BF": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -53,7 +51,6 @@
     "PaymentTypeExGratia"
   ],
   "BF2": [
-    "RefTypeUpdateCount",
     "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
@@ -106,8 +103,6 @@
     "PaymentTypeExGratia"
   ],
   "COMP": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -183,7 +178,6 @@
     "BusAreaBasedOnDirectorate"
   ],
   "COMP2": [
-    "RefTypeUpdateCount",
     "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
@@ -258,8 +252,6 @@
     "BusAreaBasedOnDirectorate"
   ],
   "DTEN": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
@@ -281,8 +273,6 @@
     "DispatchDecision"
   ],
   "FOI": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "OriginalChannel",
     "RequestQuestion",
@@ -297,8 +287,6 @@
     "ResponsibleTeam"
   ],
   "IEDET": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "Channel",
     "OwningCSU",
     "CaseOutcome",
@@ -345,8 +333,6 @@
     "BusAreaOther"
   ],
   "MIN": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
@@ -373,7 +359,6 @@
   ],
   "MPAM": [
     "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusArea",
     "RefType",
@@ -410,8 +395,6 @@
     "MPAMDispatchStatus"
   ],
   "MTS": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusArea",
     "BusUnit",
@@ -532,8 +515,6 @@
     "ExGratiaPaymentReferenceNumber"
   ],
   "SMC": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -595,8 +576,6 @@
     "ResponseDate"
   ],
   "TO": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusinessArea",
     "ChannelReceived",
@@ -621,8 +600,6 @@
     "HomeSecInt"
   ],
   "TRO": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
