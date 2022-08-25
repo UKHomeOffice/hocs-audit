@@ -1,7 +1,5 @@
 {
   "BF": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -53,7 +51,6 @@
     "PaymentTypeExGratia"
   ],
   "BF2": [
-    "RefTypeUpdateCount",
     "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
@@ -106,8 +103,6 @@
     "PaymentTypeExGratia"
   ],
   "COMP": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -183,7 +178,6 @@
     "BusAreaBasedOnDirectorate"
   ],
   "COMP2": [
-    "RefTypeUpdateCount",
     "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
@@ -258,8 +252,6 @@
     "BusAreaBasedOnDirectorate"
   ],
   "DTEN": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
@@ -281,8 +273,6 @@
     "DispatchDecision"
   ],
   "FOI": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "OriginalChannel",
     "RequestQuestion",
@@ -297,8 +287,6 @@
     "ResponsibleTeam"
   ],
   "IEDET": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "Channel",
     "OwningCSU",
     "CaseOutcome",
@@ -345,8 +333,6 @@
     "BusAreaOther"
   ],
   "MIN": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
@@ -373,7 +359,6 @@
   ],
   "MPAM": [
     "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusArea",
     "RefType",
@@ -410,8 +395,6 @@
     "MPAMDispatchStatus"
   ],
   "MTS": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusArea",
     "BusUnit",
@@ -423,7 +406,60 @@
     "SupportNote"
   ],
   "POGR": [
-    "RefTypeUpdateCount",
+    "BusinessArea",
+    "DateReceived",
+    "ComplainantDOB",
+    "ComplainantGender",
+    "ComplaintNationOrigin",
+    "ComplainantCompanyName",
+    "ComplainantCaseAccountNumber",
+    "ComplainantCategory",
+    "ComplainantNro",
+    "ComplainantLocation",
+    "ComplaintDescription",
+    "ComplaintChannel",
+    "ComplaintPriority",
+    "ComplaintThirdPartyReference",
+    "ComplainantApplicationReference",
+    "ComplainantPassportNumber",
+    "DateOfCorrespondence",
+    "PrimaryInterimLetter",
+    "InterimLetterDateSent",
+    "GroInvestigatingTeamSelection",
+    "TriageAccept",
+    "LoaReceived",
+    "LoaDateReceived",
+    "InvestigationOutcome",
+    "DraftOutcome",
+    "TelephoneResponse",
+    "TelephoneResponseDateOfCall",
+    "LoaRequired",
+    "QaOutcome",
+    "DispatchOutcome",
+    "DispatchChannel",
+    "DispatchDate",
+    "DispatchRefundRequired",
+    "DispatchGratisOffered",
+    "DispatchDocumentDamageType",
+    "DispatchDocumentReplaced",
+    "DispatchDocumentType",
+    "DispatchDocumentTypeOther",
+    "EscalationOutcome",
+    "ClosureReason",
+    "ComplaintReason",
+    "ExGratiaDateOfClaim",
+    "ExGratiaAuthorisedBy",
+    "ExGratiaTotalAmount",
+    "ExGratiaRefundRequired",
+    "ExGratiaTypeOfRefund",
+    "ExGratiaPrimaryRefundReason",
+    "ExGratiaSecondRefundReason",
+    "ExGratiaThirdRefundReason",
+    "ExGratiaRefundAmount",
+    "ExGratiaPaymentMethod",
+    "ExGratiaPaymentReferenceNumber"
+  ],
+  "POGR2": [
     "PreviousCaseReference",
     "BusinessArea",
     "DateReceived",
@@ -441,6 +477,7 @@
     "ComplaintThirdPartyReference",
     "ComplainantApplicationReference",
     "ComplainantPassportNumber",
+    "DateOfCorrespondence",
     "PrimaryInterimLetter",
     "InterimLetterDateSent",
     "GroInvestigatingTeamSelection",
@@ -456,11 +493,14 @@
     "DispatchOutcome",
     "DispatchChannel",
     "DispatchDate",
-    "CaseNote_TriageEscalate",
-    "CaseNote_DraftEscalate",
+    "DispatchRefundRequired",
+    "DispatchGratisOffered",
+    "DispatchDocumentDamageType",
+    "DispatchDocumentReplaced",
+    "DispatchDocumentType",
+    "DispatchDocumentTypeOther",
     "EscalationOutcome",
-    "Close Reason",
-    "HMPODraftCloseCaseNote",
+    "ClosureReason",
     "ComplaintReason",
     "ExGratiaDateOfClaim",
     "ExGratiaAuthorisedBy",
@@ -468,19 +508,13 @@
     "ExGratiaRefundRequired",
     "ExGratiaTypeOfRefund",
     "ExGratiaPrimaryRefundReason",
+    "ExGratiaSecondRefundReason",
+    "ExGratiaThirdRefundReason",
     "ExGratiaRefundAmount",
     "ExGratiaPaymentMethod",
-    "ExGratiaPaymentReferenceNumber",
-    "DateOfCorrespondence"
-  ],
-  "POGR2": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
-    "BusinessArea"
+    "ExGratiaPaymentReferenceNumber"
   ],
   "SMC": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "ComplainantDOB",
     "ComplainantGender",
@@ -542,8 +576,6 @@
     "ResponseDate"
   ],
   "TO": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateReceived",
     "BusinessArea",
     "ChannelReceived",
@@ -569,8 +601,6 @@
     "HomeSecInt"
   ],
   "TRO": [
-    "RefTypeUpdateCount",
-    "PreviousCaseReference",
     "DateOfCorrespondence",
     "DateReceived",
     "OriginalChannel",
