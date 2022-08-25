@@ -19,7 +19,7 @@ spec:
               securityContext:
                 runAsNonRoot: true
                 runAsUser: 1000
-              image: quay.io/ukhomeofficedigital/openjdk11:v11.0.5_10
+              image: quay.io/ukhomeofficedigital/hocs-base-image:latest
               env:
                 - name: HOCS_BASICAUTH
                   valueFrom:
@@ -28,8 +28,5 @@ spec:
                       key: plaintext
               command: ["/bin/sh", "-c"]
               args:
-                - >
-                  http_status=$( curl -vk -X POST -u ${HOCS_BASICAUTH} -w '%{http_code}' -H 'User-Agent: Refresh DCU_AGGREGATED_CASES'
-                  https://hocs-audit.{{.KUBE_NAMESPACE}}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh );
-                  if [[ $http_status -eq 200 ]]; then exit 0; else exit 1; fi
+                - http_status=$( wget --no-check-certificate --spider -S "https://${HOCS_BASICAUTH}@hocs-audit.{{.KUBE_NAMESPACE}}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh" 2>&1 | grep "HTTP/" | awk '{print $2}' ); if [[ $http_status -eq 200 ]]; then exit 0; else exit 1; fi
           restartPolicy: Never
