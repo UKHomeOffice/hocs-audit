@@ -29,7 +29,7 @@ dependencies {
     implementation 'org.apache.commons:commons-csv:1.9.0'
 
     implementation 'org.flywaydb:flyway-core:8.5.13'
-    runtimeOnly 'org.postgresql:postgresql:42.4.2'
+    runtimeOnly 'org.postgresql:postgresql:42.5.0'
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
