@@ -581,6 +581,7 @@
     "ChannelReceived",
     "EnquirySubject",
     "EnquiryReason",
+    "OtherEnquiryReason",
     "BusUnitParent",
     "BusUnit",
     "RejectionNote",
