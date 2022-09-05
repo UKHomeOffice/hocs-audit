@@ -9,6 +9,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
+import uk.gov.digital.ho.hocs.audit.client.info.dto.EntityDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeField;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeSchema;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,14 +79,14 @@ public class SomuExportService {
             throws IOException {
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         Stream<AuditEvent> data = getData(from, to, caseType);
-        ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType));
+        ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType), getSomuFields(somuTypeDto));
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, somuTypeDto, data);
     }
 
     protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter,
                              SomuTypeDto somuType, Stream<AuditEvent> data) throws JsonProcessingException {
-        List<SomuTypeField> somuTypeFields = getSomuFields(somuType);
+        var somuTypeFields =  getSomuFields(somuType);
         String[] headers = getHeaders(somuTypeFields);
 
         try (
@@ -131,7 +133,7 @@ public class SomuExportService {
         return data.toArray(new String[0]);
     }
 
-    private ExportDataConverter getDataConverter(boolean convert, String caseType) {
+    private ExportDataConverter getDataConverter(boolean convert, String caseType, List<SomuTypeField> somuTypeFields) {
         if (!convert) {
             return new ExportDataConverter();
         }
@@ -139,7 +141,18 @@ public class SomuExportService {
         Map<String, String> uuidToName = new HashMap<>(infoClient.getUsers().stream()
                 .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
 
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType, auditRepository);
+        Map<String, String> entityListItemToName = new HashMap<>();
+        somuTypeFields.forEach(field -> {
+            var fieldChoices = field.getExtractChoices();
+            if (fieldChoices != null) {
+                fieldChoices.forEach(choice -> {
+                    Set<EntityDto> entities = infoClient.getEntitiesForList(choice);
+                    entities.forEach(e -> entityListItemToName.put(e.getSimpleName(), e.getData().getTitle()));
+                });
+            }
+        });
+
+        return new ExportDataConverter(uuidToName, entityListItemToName, caseType, auditRepository);
 
     }
 
