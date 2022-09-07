@@ -290,7 +290,7 @@
     "Channel",
     "OwningCSU",
     "CaseOutcome",
-    "TriageAccept",
+    "TriageAssign",
     "NoFurtherConsideration",
     "ResponseDate",
     "BusinessArea",
