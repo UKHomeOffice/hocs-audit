@@ -293,7 +293,7 @@
     "TriageAccept",
     "NoFurtherConsideration",
     "ResponseDate",
-    "BusArea",
+    "BusinessArea",
     "CompOrigin",
     "OutcomeOther",
     "DateReceived",
@@ -330,7 +330,6 @@
     "CatRacism",
     "LoaRequired",
     "CompOriginOther",
-    "BusAreaOther"
   ],
   "MIN": [
     "DateOfCorrespondence",
