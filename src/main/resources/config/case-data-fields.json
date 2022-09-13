@@ -309,7 +309,7 @@
     "CompCategoriesSeriousAndMinor",
     "CompCategoriesSerious",
     "LoaRequired",
-    "CompOriginOther",
+    "CompOriginOther"
   ],
   "MIN": [
     "DateOfCorrespondence",
