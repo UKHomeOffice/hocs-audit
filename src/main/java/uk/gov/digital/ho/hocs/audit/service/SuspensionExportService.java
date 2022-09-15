@@ -33,7 +33,12 @@ public class SuspensionExportService extends DynamicExportService {
 
     private static final String[] EVENTS = { "CASE_SUSPENSION_APPLIED", "CASE_SUSPENSION_REMOVED" };
 
-    public SuspensionExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient, CaseworkClient caseworkClient, HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
+    public SuspensionExportService(ObjectMapper objectMapper,
+                                   AuditRepository auditRepository,
+                                   InfoClient infoClient,
+                                   CaseworkClient caseworkClient,
+                                   HeaderConverter headerConverter,
+                                   MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
 
@@ -43,31 +48,38 @@ public class SuspensionExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
-        AuditPayload.Suspension suspensionData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Suspension.class);
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
+        AuditPayload.Suspension suspensionData = objectMapper.readValue(audit.getAuditPayload(),
+            AuditPayload.Suspension.class);
 
-        return new String[] {
-                zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
-                audit.getType(),
-                exportDataConverter.convertValue(audit.getUserID()),
-                exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
-                Objects.toString(suspensionData.getDateSuspensionApplied(), ""),
-                Objects.toString(suspensionData.getDateSuspensionRemoved(), "")
-        };
+        return new String[] { zonedDateTimeConverter.convert(audit.getAuditTimestamp()), audit.getType(),
+            exportDataConverter.convertValue(audit.getUserID()),
+            exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
+            Objects.toString(suspensionData.getDateSuspensionApplied(), ""),
+            Objects.toString(suspensionData.getDateSuspensionRemoved(), "") };
     }
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            events, caseTypeCode);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeCode = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeCode.getShortCode(), EVENTS);
@@ -78,9 +90,8 @@ public class SuspensionExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[] {
-                "timestamp", "event", "userId", "caseUuid", "dateSuspensionApplied", "dateSuspensionRemoved"
-        };
+        return new String[] { "timestamp", "event", "userId", "caseUuid", "dateSuspensionApplied",
+            "dateSuspensionRemoved" };
     }
 
     @Override
@@ -89,9 +100,10 @@ public class SuspensionExportService extends DynamicExportService {
             return new ExportDataConverter();
         }
 
-        Map<String, String> uuidToName = infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername));
+        Map<String, String> uuidToName = infoClient.getUsers().stream().collect(
+            Collectors.toMap(UserDto::getId, UserDto::getUsername));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }

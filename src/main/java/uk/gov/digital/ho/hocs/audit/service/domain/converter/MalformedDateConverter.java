@@ -12,7 +12,7 @@ public class MalformedDateConverter {
         if (auditData == null) {
             return null;
         }
-        for (int i = 0; i < auditData.length; i++){
+        for (int i = 0; i < auditData.length; i++) {
             auditData[i] = dateAdapter.convert(auditData[i]);
         }
         return auditData;

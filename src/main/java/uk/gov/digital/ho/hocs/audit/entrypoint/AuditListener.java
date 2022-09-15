@@ -16,35 +16,26 @@ import java.util.Map;
 public class AuditListener {
 
     private final ObjectMapper objectMapper;
+
     private final AuditEventService auditEventService;
+
     private final RequestData requestData;
 
-
-    public AuditListener(ObjectMapper objectMapper,
-                         AuditEventService auditEventService,
-                         RequestData requestData) {
+    public AuditListener(ObjectMapper objectMapper, AuditEventService auditEventService, RequestData requestData) {
         this.objectMapper = objectMapper;
         this.auditEventService = auditEventService;
         this.requestData = requestData;
     }
 
     @SqsListener(value = "${aws.sqs.audit.url}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
-    public void onAuditEvent(
-            String message,
-            @Headers Map<String, String> headers
-    ) throws JsonProcessingException {
+    public void onAuditEvent(String message, @Headers Map<String, String> headers) throws JsonProcessingException {
         try {
             requestData.parseMessageHeaders(headers);
             CreateAuditDto createAuditEvent = objectMapper.readValue(message, CreateAuditDto.class);
-            auditEventService.createAudit(createAuditEvent.getCaseUUID(),
-                    createAuditEvent.getStageUUID(),
-                    createAuditEvent.getCorrelationID(),
-                    createAuditEvent.getRaisingService(),
-                    createAuditEvent.getAuditPayload(),
-                    createAuditEvent.getNamespace(),
-                    createAuditEvent.getAuditTimestamp(),
-                    createAuditEvent.getType(),
-                    createAuditEvent.getUserID());
+            auditEventService.createAudit(createAuditEvent.getCaseUUID(), createAuditEvent.getStageUUID(),
+                createAuditEvent.getCorrelationID(), createAuditEvent.getRaisingService(),
+                createAuditEvent.getAuditPayload(), createAuditEvent.getNamespace(),
+                createAuditEvent.getAuditTimestamp(), createAuditEvent.getType(), createAuditEvent.getUserID());
         } finally {
             requestData.clear();
         }

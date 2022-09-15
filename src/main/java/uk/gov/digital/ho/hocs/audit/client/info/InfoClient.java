@@ -23,11 +23,11 @@ import java.util.Set;
 public class InfoClient {
 
     private final RestHelper restHelper;
+
     private final String rootUri;
 
     @Autowired
-    public InfoClient(RestHelper restHelper,
-                      @Value("${hocs.info-service}") String infoServiceUri) {
+    public InfoClient(RestHelper restHelper, @Value("${hocs.info-service}") String infoServiceUri) {
         this.restHelper = restHelper;
         this.rootUri = infoServiceUri;
     }
@@ -51,7 +51,8 @@ public class InfoClient {
     }
 
     public Set<TopicTeamDto> getTopicsWithTeams(String caseType) {
-        return restHelper.get(rootUri, String.format("/topics/%s/teams", caseType), new ParameterizedTypeReference<>() {});
+        return restHelper.get(rootUri, String.format("/topics/%s/teams", caseType),
+            new ParameterizedTypeReference<>() {});
     }
 
     public Set<TeamDto> getTeams() {
@@ -63,7 +64,8 @@ public class InfoClient {
     }
 
     public Set<TeamDto> getTeamsForUnit(String unitUUID) {
-        return restHelper.get(rootUri, String.format("/unit/%s/teams", unitUUID), new ParameterizedTypeReference<>() {});
+        return restHelper.get(rootUri, String.format("/unit/%s/teams", unitUUID),
+            new ParameterizedTypeReference<>() {});
     }
 
     public TeamDto getTeam(String uuid) {
@@ -80,7 +82,8 @@ public class InfoClient {
 
     @Cacheable(value = "getEntitiesForList", unless = "#result == null")
     public Set<EntityDto> getEntitiesForList(String simpleName) {
-        return restHelper.get(rootUri, String.format("/entity/list/%s", simpleName), new ParameterizedTypeReference<>() {});
+        return restHelper.get(rootUri, String.format("/entity/list/%s", simpleName),
+            new ParameterizedTypeReference<>() {});
     }
 
     @Cacheable(value = "getCastTypeActions", unless = "#result == null")

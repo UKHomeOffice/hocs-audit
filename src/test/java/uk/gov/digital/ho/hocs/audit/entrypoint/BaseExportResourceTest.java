@@ -1,6 +1,5 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -64,10 +63,8 @@ public abstract class BaseExportResourceTest {
     protected List<CSVRecord> getCSVRows(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
         CSVParser csvParser = new CSVParser(reader,
-                CSVFormat.EXCEL.builder().setSkipHeaderRecord(true).setTrim(true).build());
+            CSVFormat.EXCEL.builder().setSkipHeaderRecord(true).setTrim(true).build());
         return csvParser.getRecords();
     }
-
-
 
 }

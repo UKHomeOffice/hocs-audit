@@ -16,6 +16,7 @@ import java.util.Properties;
 public class HeaderConverter {
 
     private static final String HEADERS_PROPERTIES_FILE = "headers.config";
+
     private final Properties headerProperties = new Properties();
 
     public HeaderConverter() {
@@ -27,9 +28,8 @@ public class HeaderConverter {
     }
 
     public String[] substitute(@NonNull String[] headers) {
-        return Arrays.stream(headers)
-                .map(header -> headerProperties.getProperty(header, header))
-                .toArray(String[]::new);
+        return Arrays.stream(headers).map(header -> headerProperties.getProperty(header, header)).toArray(
+            String[]::new);
     }
 
 }

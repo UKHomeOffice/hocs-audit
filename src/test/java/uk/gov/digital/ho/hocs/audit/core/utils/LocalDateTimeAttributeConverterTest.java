@@ -18,13 +18,7 @@ public class LocalDateTimeAttributeConverterTest {
 
     @Test
     public void shouldConvertToDatabaseColumn() {
-        LocalDateTime date = LocalDateTime.of(
-                2018,
-                1,
-                1,
-                0,
-                1
-        );
+        LocalDateTime date = LocalDateTime.of(2018, 1, 1, 0, 1);
         Timestamp convertedDate = converter.convertToDatabaseColumn(date);
 
         Assertions.assertNotNull(convertedDate);

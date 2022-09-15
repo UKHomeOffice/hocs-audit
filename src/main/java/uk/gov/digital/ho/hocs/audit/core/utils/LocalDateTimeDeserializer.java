@@ -18,4 +18,5 @@ public class LocalDateTimeDeserializer extends StdDeserializer<LocalDateTime> {
     public LocalDateTime deserialize(JsonParser parser, DeserializationContext context) throws IOException {
         return LocalDateTime.parse(parser.readValueAs(String.class));
     }
+
 }

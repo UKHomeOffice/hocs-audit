@@ -35,12 +35,20 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.REFRESH_MATERIALISED_VI
 public class CustomExportService {
 
     private final AuditRepository auditRepository;
+
     private final CustomExportViewsReader customExportViewsReader;
+
     private final CustomExportDataConverter customExportDataConverter;
+
     private final HeaderConverter headerConverter;
+
     private final RequestData requestData;
 
-    public CustomExportService(AuditRepository auditRepository, CustomExportViewsReader customExportViewsReader, CustomExportDataConverter customExportDataConverter, HeaderConverter headerConverter, RequestData requestData) {
+    public CustomExportService(AuditRepository auditRepository,
+                               CustomExportViewsReader customExportViewsReader,
+                               CustomExportDataConverter customExportDataConverter,
+                               HeaderConverter headerConverter,
+                               RequestData requestData) {
         this.auditRepository = auditRepository;
         this.customExportViewsReader = customExportViewsReader;
         this.customExportDataConverter = customExportDataConverter;
@@ -52,10 +60,11 @@ public class CustomExportService {
     public void export(HttpServletResponse response, String viewName, boolean convertHeader) throws IOException {
         var exportView = customExportViewsReader.getByViewName(viewName);
 
-        if (StringUtils.hasText(exportView.getRequiredPermission()) &&
-                !requestData.getRoles().contains(exportView.getRequiredPermission())) {
+        if (StringUtils.hasText(exportView.getRequiredPermission()) && !requestData.getRoles().contains(
+            exportView.getRequiredPermission())) {
             // TODO: remove the log and add to the entity permission error with suitable LogEvent
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}", requestData.getUserId(), exportView.getRequiredPermission());
+            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}",
+                requestData.getUserId(), exportView.getRequiredPermission());
             throw new EntityPermissionException("No permission to view %s", viewName);
         }
 
@@ -63,37 +72,30 @@ public class CustomExportService {
 
         customExportDataConverter.initialiseAdapters();
 
-        try (OutputStream buffer = new BufferedOutputStream(response.getOutputStream());
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .setNullString("")
-                             .build())) {
+        try (OutputStream buffer = new BufferedOutputStream(
+            response.getOutputStream()); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
+            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).setNullString("").build())) {
             AtomicBoolean connected = new AtomicBoolean(true);
 
-            retrieveAuditData(viewName)
-                    .parallel()
-                    .map(data -> {
-                        Object[] converted = customExportDataConverter.convertData(data, exportView.getFields());
+            retrieveAuditData(viewName).parallel().map(data -> {
+                Object[] converted = customExportDataConverter.convertData(data, exportView.getFields());
 
-                        if (converted == null) {
-                            log.warn("No data to print after converting data {}", data);
-                            return new Object[0];
-                        }
+                if (converted == null) {
+                    log.warn("No data to print after converting data {}", data);
+                    return new Object[0];
+                }
 
-                        return converted;
-                    })
-                    .takeWhile(c -> connected.get())
-                    .forEachOrdered(converted -> {
-                        try {
-                            printer.printRecord(converted);
-                        } catch (IOException e) {
-                            connected.set(false);
-                            log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(), value(EVENT, CSV_EXPORT_FAILURE));
-                        }
-                    });
+                return converted;
+            }).takeWhile(c -> connected.get()).forEachOrdered(converted -> {
+                try {
+                    printer.printRecord(converted);
+                } catch (IOException e) {
+                    connected.set(false);
+                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(),
+                        value(EVENT, CSV_EXPORT_FAILURE));
+                }
+            });
         }
     }
 
@@ -108,8 +110,7 @@ public class CustomExportService {
     }
 
     Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode) {
-        return auditRepository
-                .getResultsFromView(exportViewCode);
+        return auditRepository.getResultsFromView(exportViewCode);
     }
 
     @Transactional
@@ -121,6 +122,5 @@ public class CustomExportService {
     public LocalDate getViewLastRefreshedDate(String viewName) {
         return auditRepository.getViewLastRefreshedDate(viewName);
     }
-
 
 }

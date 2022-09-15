@@ -20,9 +20,11 @@ import java.util.List;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
 @SpringBootTest
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:export/setup.sql", config = @SqlConfig(transactionMode = ISOLATED))
-@Sql(scripts = "classpath:export/cleandown.sql", config = @SqlConfig(transactionMode = ISOLATED), executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "classpath:export/cleandown.sql",
+     config = @SqlConfig(transactionMode = ISOLATED),
+     executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public abstract class BaseExportServiceTest {
 
     @MockBean
@@ -43,18 +45,16 @@ public abstract class BaseExportServiceTest {
 
     protected List<CSVRecord> getCsvDataRows(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
-        CSVParser csvParser = new CSVParser(reader,
-                CSVFormat.EXCEL.builder().setTrim(true).build());
+        CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.builder().setTrim(true).build());
         return csvParser.getRecords();
     }
 
     protected String[] getCsvHeaderRow(String csvBody) throws IOException {
         StringReader reader = new StringReader(csvBody);
         CSVParser csvParser = new CSVParser(reader,
-                CSVFormat.EXCEL.builder().setSkipHeaderRecord(true).setTrim(true).build().withHeader());
+            CSVFormat.EXCEL.builder().setSkipHeaderRecord(true).setTrim(true).build().withHeader());
 
-        return csvParser.getHeaderMap()
-                .keySet().toArray(String[]::new);
+        return csvParser.getHeaderMap().keySet().toArray(String[]::new);
     }
 
 }

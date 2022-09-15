@@ -16,37 +16,53 @@ public interface AuditPayload {
     @AllArgsConstructor
     @Getter
     class CaseReference {
+
         private String caseReference;
+
     }
 
     @AllArgsConstructor
     @Getter
     class Case {
+
         private UUID caseUUID;
+
     }
 
     @AllArgsConstructor
     @Getter
     class SomuItem {
+
         private UUID uuid;
+
         private UUID somuTypeUuid;
+
         private Map<String, String> data;
+
     }
 
     @AllArgsConstructor
     @Getter
     class Topic {
+
         private UUID topicUuid;
+
         private String topicName;
+
     }
 
     @AllArgsConstructor
     @Getter
     class StageAllocation {
+
         private UUID stageUUID;
+
         private UUID allocatedToUUID;
+
         private String stage;
+
         private LocalDate deadline;
+
     }
 
     @AllArgsConstructor
@@ -116,6 +132,7 @@ public interface AuditPayload {
 
         @JsonProperty("text")
         private String text;
+
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -172,6 +189,7 @@ public interface AuditPayload {
 
         @JsonProperty("note")
         private String note;
+
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -180,15 +198,25 @@ public interface AuditPayload {
 
         @JsonProperty("caseTypeActionUuid")
         private UUID type;
+
         private String status;
+
         private LocalDate dateSentRMS;
+
         private String outcome;
+
         private String complexCase;
+
         private String note;
+
         private String officerType;
+
         private String officerName;
+
         private String officerDirectorate;
+
         private LocalDateTime created;
+
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -196,6 +224,7 @@ public interface AuditPayload {
     class Interest {
 
         private String partyType;
+
         private String interestDetails;
 
     }
@@ -203,8 +232,11 @@ public interface AuditPayload {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     class Suspension {
+
         private LocalDate dateSuspensionApplied;
+
         private LocalDate dateSuspensionRemoved;
+
     }
 
 }

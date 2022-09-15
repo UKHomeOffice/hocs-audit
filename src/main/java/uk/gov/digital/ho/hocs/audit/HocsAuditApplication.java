@@ -10,13 +10,13 @@ import javax.annotation.PreDestroy;
 @SpringBootApplication
 public class HocsAuditApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(HocsAuditApplication.class, args);
-	}
-	
-	@PreDestroy
-	public void stop() {
-		log.info("Stopping gracefully");
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(HocsAuditApplication.class, args);
+    }
+
+    @PreDestroy
+    public void stop() {
+        log.info("Stopping gracefully");
+    }
 
 }

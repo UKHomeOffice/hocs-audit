@@ -18,15 +18,23 @@ import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.IS
 
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = "classpath:export/cleandown.sql", config = @SqlConfig(transactionMode = ISOLATED), executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:export/cleandown.sql",
+     config = @SqlConfig(transactionMode = ISOLATED),
+     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class AuditEventServiceTest {
 
     private final String correlationID = "CORRELATION_ID";
+
     private final String raisingService = "RAISING_SERVICE";
+
     private final String auditPayload = "{\"Test1\":\"Value1\"}";
+
     private final String namespace = "NAMESPACE";
+
     private final LocalDateTime dateTime = LocalDateTime.now();
+
     private final String auditType = "TYPE";
+
     private final String userID = "USER";
 
     @Autowired
@@ -37,13 +45,7 @@ public class AuditEventServiceTest {
 
     @Test
     public void shouldCreateAudit() {
-        auditService.createAudit(correlationID,
-                raisingService,
-                auditPayload,
-                namespace,
-                dateTime,
-                auditType,
-                userID);
+        auditService.createAudit(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, userID);
 
         Assertions.assertEquals(1, auditRepository.count());
     }
@@ -51,116 +53,63 @@ public class AuditEventServiceTest {
     @Test
     public void shouldNotCreateWithNullCorrelationId() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(null,
-                    raisingService,
-                    auditPayload,
-                    namespace,
-                    dateTime,
-                    auditType,
-                    userID);
+            auditService.createAudit(null, raisingService, auditPayload, namespace, dateTime, auditType, userID);
         });
     }
 
     @Test
     public void shouldNotCreateWithNullRaisingService() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    null,
-                    auditPayload,
-                    namespace,
-                    dateTime,
-                    auditType,
-                    userID);
+            auditService.createAudit(correlationID, null, auditPayload, namespace, dateTime, auditType, userID);
         });
     }
 
     @Test
     public void shouldNotCreateWithNullNamespace() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    auditPayload,
-                    null,
-                    dateTime,
-                    auditType,
-                    userID);
+            auditService.createAudit(correlationID, raisingService, auditPayload, null, dateTime, auditType, userID);
         });
     }
 
     @Test
     public void shouldNotCreateWithNullTimestamp() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    auditPayload,
-                    namespace,
-                    null,
-                    auditType,
-                    userID);
+            auditService.createAudit(correlationID, raisingService, auditPayload, namespace, null, auditType, userID);
         });
     }
 
     @Test
     public void shouldNotCreateWithNullType() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    auditPayload,
-                    namespace,
-                    dateTime,
-                    null,
-                    userID);
+            auditService.createAudit(correlationID, raisingService, auditPayload, namespace, dateTime, null, userID);
         });
     }
 
     @Test
     public void shouldNotCreateWithNullUser() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    auditPayload,
-                    namespace,
-                    dateTime,
-                    auditType,
-                    null);
+            auditService.createAudit(correlationID, raisingService, auditPayload, namespace, dateTime, auditType, null);
         });
     }
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsInvalid() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    "\"Test\" \"Test\"",
-                    namespace,
-                    dateTime,
-                    auditType,
-                    userID);
+            auditService.createAudit(correlationID, raisingService, "\"Test\" \"Test\"", namespace, dateTime, auditType,
+                userID);
         });
     }
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsEmpty() {
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            auditService.createAudit(correlationID,
-                    raisingService,
-                    "",
-                    namespace,
-                    dateTime,
-                    auditType,
-                    userID);
+            auditService.createAudit(correlationID, raisingService, "", namespace, dateTime, auditType, userID);
         });
     }
 
     @Test
     public void shouldCreateAuditWhenAuditPayloadIsNull() {
-        auditService.createAudit(correlationID,
-                raisingService,
-                null,
-                namespace,
-                dateTime,
-                auditType,
-                userID);
+        auditService.createAudit(correlationID, raisingService, null, namespace, dateTime, auditType, userID);
 
         Assertions.assertEquals(1, auditRepository.count());
     }
@@ -170,10 +119,10 @@ public class AuditEventServiceTest {
         UUID caseUuid = UUID.randomUUID();
 
         // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace, dateTime,
+            auditType, userID);
 
-        var audits = auditService.getAuditDataByCaseUUID(caseUuid, new String[]{auditType});
+        var audits = auditService.getAuditDataByCaseUUID(caseUuid, new String[] { auditType });
 
         Assertions.assertEquals(1, audits.size());
     }
@@ -183,10 +132,11 @@ public class AuditEventServiceTest {
         UUID caseUuid = UUID.randomUUID();
 
         // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace, dateTime,
+            auditType, userID);
 
-        var audits = auditService.getAuditDataByCaseUUID(caseUuid, new String[]{auditType}, LocalDate.now().minusDays(1));
+        var audits = auditService.getAuditDataByCaseUUID(caseUuid, new String[] { auditType },
+            LocalDate.now().minusDays(1));
 
         Assertions.assertEquals(1, audits.size());
     }
@@ -196,8 +146,8 @@ public class AuditEventServiceTest {
         UUID caseUuid = UUID.randomUUID();
 
         // setup case preparation
-        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace,
-                dateTime, auditType, userID);
+        auditService.createAudit(caseUuid, UUID.randomUUID(), correlationID, raisingService, null, namespace, dateTime,
+            auditType, userID);
 
         auditService.deleteCaseAudit(caseUuid, true);
 

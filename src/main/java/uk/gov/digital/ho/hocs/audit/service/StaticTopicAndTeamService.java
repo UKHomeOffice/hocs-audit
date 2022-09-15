@@ -26,6 +26,7 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 public class StaticTopicAndTeamService {
 
     private final HeaderConverter headerConverter;
+
     private final InfoClient infoClient;
 
     public StaticTopicAndTeamService(HeaderConverter headerConverter, InfoClient infoClient) {
@@ -36,22 +37,21 @@ public class StaticTopicAndTeamService {
     public void export(OutputStream outputStream, String caseType, boolean convertHeader) throws IOException {
         var headers = getHeaders(convertHeader);
 
-        try (OutputStream buffer = new BufferedOutputStream(outputStream);
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .build())) {
+        try (OutputStream buffer = new BufferedOutputStream(
+            outputStream); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
+            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).build())) {
 
             Set<TopicTeamDto> topicTeams = infoClient.getTopicsWithTeams(caseType);
 
             topicTeams.forEach(topic -> {
                 topic.getTeams().forEach(team -> {
                     try {
-                        printer.printRecord(caseType, topic.getUuid(), topic.getDisplayName(), team.getUuid(), team.getDisplayName());
+                        printer.printRecord(caseType, topic.getUuid(), topic.getDisplayName(), team.getUuid(),
+                            team.getDisplayName());
                     } catch (IOException e) {
-                        throw new AuditExportException("Unable to parse record for reason {}", CSV_RECORD_EXPORT_FAILURE, e.getMessage());
+                        throw new AuditExportException("Unable to parse record for reason {}",
+                            CSV_RECORD_EXPORT_FAILURE, e.getMessage());
                     }
                 });
             });
@@ -61,9 +61,7 @@ public class StaticTopicAndTeamService {
     }
 
     private String[] getHeaders(boolean convertHeaders) {
-        String[] headers = new String[] {
-                "caseType", "topicUUID", "topicName", "teamUUID", "teamName"
-        };
+        String[] headers = new String[] { "caseType", "topicUUID", "topicName", "teamUUID", "teamName" };
 
         if (convertHeaders) {
             return headerConverter.substitute(headers);

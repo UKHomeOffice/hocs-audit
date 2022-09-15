@@ -23,6 +23,7 @@ public enum LogEvent {
     UNCAUGHT_EXCEPTION;
 
     public static final String EVENT = "event_id";
+
     public static final String EXCEPTION = "exception";
 
 }

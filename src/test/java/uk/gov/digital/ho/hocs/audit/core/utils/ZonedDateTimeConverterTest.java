@@ -11,13 +11,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowSpecifiedFormatWhenTimestampFormatValid() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter("yyyy-MM-dd", null);
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter("yyyy-MM-dd", null);
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.of("GMT"))
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.of("GMT")).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -27,13 +24,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowDefaultFormatWhenTimestampFormatNull() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter(null, null);
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.systemDefault()).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -43,13 +37,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowDefaultFormatWhenTimestampFormatEmpty() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter("", null);
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter("", null);
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.of("GMT"))
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.of("GMT")).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -66,13 +57,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowDefaultFormatWhenTimestampFormatValid() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter(null, "Europe/Rome");
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(null, "Europe/Rome");
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.of("GMT"))
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.of("GMT")).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -82,13 +70,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowSystemDefaultWhenZoneIdNull() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter(null, null);
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(null, null);
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.of("GMT"))
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.of("GMT")).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -98,13 +83,10 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldShowSystemDefaultWhenZoneIdEmpty() {
-        ZonedDateTimeConverter zonedDateTimeConverter
-                = new ZonedDateTimeConverter(null, "");
+        ZonedDateTimeConverter zonedDateTimeConverter = new ZonedDateTimeConverter(null, "");
 
-        LocalDateTime localDateTime =
-                LocalDateTime.of(2020, 12, 12, 0, 0, 0)
-                        .atZone(ZoneId.of("GMT"))
-                        .toLocalDateTime();
+        LocalDateTime localDateTime = LocalDateTime.of(2020, 12, 12, 0, 0, 0).atZone(
+            ZoneId.of("GMT")).toLocalDateTime();
 
         String convertedDateTime = zonedDateTimeConverter.convert(localDateTime);
 
@@ -114,8 +96,7 @@ public class ZonedDateTimeConverterTest {
 
     @Test
     public void shouldThrowExceptionIfZoneIdInvalid() {
-        Assertions.assertThrows(ZoneRulesException.class, () ->
-                new ZonedDateTimeConverter(null, "INVALID"));
+        Assertions.assertThrows(ZoneRulesException.class, () -> new ZonedDateTimeConverter(null, "INVALID"));
     }
 
 }

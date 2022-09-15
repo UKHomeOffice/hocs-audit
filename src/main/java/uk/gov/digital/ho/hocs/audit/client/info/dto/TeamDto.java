@@ -21,4 +21,5 @@ public class TeamDto {
 
     @JsonProperty("unitUUID")
     private String unitUUID;
+
 }

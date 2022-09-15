@@ -38,17 +38,26 @@ public class InfoClientTest {
     private InfoClient infoClient;
 
     private static final String BASE_URL = "https://base.url";
-    private static final String PERMISSION_1 = "permission_name1";
-    private static final String PERMISSION_2 = "permission_name2";
-    private static final String VIEW_CODE_1 = "view_name1";
-    private static final String VIEW_CODE_2 = "view_name2";
-    private static final String VIEW_DISPLAY_NAME_1 = "display_name1";
-    private static final String VIEW_DISPLAY_NAME_2 = "display_name2";
-    private static final String FIELD_NAME_A = "FieldA";
-    private static final String FIELD_NAME_B = "FieldB";
-    private static final String FIELD_NAME_C = "FieldC";
-    private static final String FIELD_NAME_D = "FieldD";
 
+    private static final String PERMISSION_1 = "permission_name1";
+
+    private static final String PERMISSION_2 = "permission_name2";
+
+    private static final String VIEW_CODE_1 = "view_name1";
+
+    private static final String VIEW_CODE_2 = "view_name2";
+
+    private static final String VIEW_DISPLAY_NAME_1 = "display_name1";
+
+    private static final String VIEW_DISPLAY_NAME_2 = "display_name2";
+
+    private static final String FIELD_NAME_A = "FieldA";
+
+    private static final String FIELD_NAME_B = "FieldB";
+
+    private static final String FIELD_NAME_C = "FieldC";
+
+    private static final String FIELD_NAME_D = "FieldD";
 
     @BeforeEach
     public void before() {
@@ -67,10 +76,10 @@ public class InfoClientTest {
         verifyNoMoreInteractions(restHelper);
     }
 
-
     @Test
     public void getUsers() {
-        Set<UserDto> response = new HashSet<>(Collections.singletonList(new UserDto("1", "user1", "Bill", "Smith", "bill.smith@email.com")));
+        Set<UserDto> response = new HashSet<>(
+            Collections.singletonList(new UserDto("1", "user1", "Bill", "Smith", "bill.smith@email.com")));
         when(restHelper.get(eq(BASE_URL), eq("/users"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<UserDto> results = infoClient.getUsers();
 
@@ -83,7 +92,8 @@ public class InfoClientTest {
     @Test
     public void getSomuType() {
         SomuTypeDto response = new SomuTypeDto(UUID.randomUUID(), "caseType", "somuType", "{}", true);
-        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), eq(SomuTypeDto.class))).thenReturn(response);
+        when(restHelper.get(eq(BASE_URL), eq("/somuType/caseType/somuType"), eq(SomuTypeDto.class))).thenReturn(
+            response);
 
         SomuTypeDto result = infoClient.getSomuType("caseType", "somuType");
 
@@ -94,7 +104,8 @@ public class InfoClientTest {
 
     @Test
     public void getTopics() {
-        Set<TopicDto> response = new HashSet<>(Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID(), true)));
+        Set<TopicDto> response = new HashSet<>(
+            Collections.singletonList(new TopicDto("Topic text", UUID.randomUUID(), true)));
         when(restHelper.get(eq(BASE_URL), eq("/topics"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<TopicDto> results = infoClient.getTopics();
 
@@ -106,8 +117,10 @@ public class InfoClientTest {
 
     @Test
     public void getTopicsWithTeams() {
-        Set<TopicTeamDto> response = new HashSet<>(Collections.singletonList(new TopicTeamDto("Topic text", UUID.randomUUID(), null)));
-        when(restHelper.get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        Set<TopicTeamDto> response = new HashSet<>(
+            Collections.singletonList(new TopicTeamDto("Topic text", UUID.randomUUID(), null)));
+        when(restHelper.get(eq(BASE_URL), eq("/topics/TEST/teams"), any(ParameterizedTypeReference.class))).thenReturn(
+            response);
 
         Set<TopicTeamDto> results = infoClient.getTopicsWithTeams("TEST");
 
@@ -118,7 +131,8 @@ public class InfoClientTest {
 
     @Test
     public void getTeams() {
-        Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
+        Set<TeamDto> response = new HashSet<>(
+            Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
         when(restHelper.get(eq(BASE_URL), eq("/team"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<TeamDto> results = infoClient.getTeams();
 
@@ -130,7 +144,8 @@ public class InfoClientTest {
 
     @Test
     public void getAllTeams() {
-        Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), false, null)));
+        Set<TeamDto> response = new HashSet<>(
+            Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), false, null)));
         when(restHelper.get(eq(BASE_URL), eq("/team/all"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<TeamDto> results = infoClient.getAllTeams();
 
@@ -143,8 +158,10 @@ public class InfoClientTest {
     @Test
     public void getTeamsForUnit() {
         String unitUUID = UUID.randomUUID().toString();
-        Set<TeamDto> response = new HashSet<>(Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
-        when(restHelper.get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"), any(ParameterizedTypeReference.class))).thenReturn(response);
+        Set<TeamDto> response = new HashSet<>(
+            Collections.singletonList(new TeamDto("Team text", UUID.randomUUID(), true, null)));
+        when(restHelper.get(eq(BASE_URL), eq("/unit/" + unitUUID + "/teams"),
+            any(ParameterizedTypeReference.class))).thenReturn(response);
 
         Set<TeamDto> results = infoClient.getTeamsForUnit(unitUUID);
 
@@ -166,7 +183,6 @@ public class InfoClientTest {
         verifyNoMoreInteractions(restHelper);
     }
 
-
     @Test
     public void getUnitByTeam() {
         String unitUUID = UUID.randomUUID().toString();
@@ -182,7 +198,8 @@ public class InfoClientTest {
 
     @Test
     public void getUnits() {
-        Set<UnitDto> response = new HashSet<>(Collections.singletonList(new UnitDto("Unit text", UUID.randomUUID().toString(), "U1")));
+        Set<UnitDto> response = new HashSet<>(
+            Collections.singletonList(new UnitDto("Unit text", UUID.randomUUID().toString(), "U1")));
         when(restHelper.get(eq(BASE_URL), eq("/unit"), any(ParameterizedTypeReference.class))).thenReturn(response);
         Set<UnitDto> results = infoClient.getUnits();
 
@@ -194,34 +211,16 @@ public class InfoClientTest {
 
     @Test
     public void getCaseTypeActions_shouldReturnListOfActions() {
-        CaseTypeActionDto caseTypeAction1 = new CaseTypeActionDto(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "CT1",
-                "ACTION_1",
-                "ACTION_LABEL_1",
-                1,
-                10,
-                true,
-                "{}"
-        );
-        CaseTypeActionDto caseTypeAction2 = new CaseTypeActionDto(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "CT2",
-                "ACTION_2",
-                "ACTION_LABEL_2",
-                1,
-                20,
-                true,
-                "{}"
-        );
+        CaseTypeActionDto caseTypeAction1 = new CaseTypeActionDto(UUID.randomUUID(), UUID.randomUUID(), "CT1",
+            "ACTION_1", "ACTION_LABEL_1", 1, 10, true, "{}");
+        CaseTypeActionDto caseTypeAction2 = new CaseTypeActionDto(UUID.randomUUID(), UUID.randomUUID(), "CT2",
+            "ACTION_2", "ACTION_LABEL_2", 1, 20, true, "{}");
 
         List<CaseTypeActionDto> caseTypeActionsList = new LinkedList<>();
         caseTypeActionsList.add(caseTypeAction1);
         caseTypeActionsList.add(caseTypeAction2);
-        when(restHelper.get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class))).thenReturn(caseTypeActionsList);
-
+        when(restHelper.get(eq(BASE_URL), eq("/caseType/actions"), any(ParameterizedTypeReference.class))).thenReturn(
+            caseTypeActionsList);
 
         List<CaseTypeActionDto> results = infoClient.getCaseTypeActions();
 

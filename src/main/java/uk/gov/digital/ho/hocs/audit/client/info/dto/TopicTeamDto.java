@@ -19,4 +19,5 @@ public class TopicTeamDto {
 
     @JsonProperty("teams")
     private Set<TeamDto> teams;
+
 }

@@ -54,18 +54,23 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.NON_EXISTENT_VARIABLE;
 @Service
 public class SomuExportService {
 
-    private static final String[] EVENTS = {"SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED"};
+    private static final String[] EVENTS = { "SOMU_ITEM_UPDATED", "SOMU_ITEM_CREATED" };
 
     protected final ObjectMapper objectMapper;
+
     protected final AuditRepository auditRepository;
+
     protected final InfoClient infoClient;
+
     private final MalformedDateConverter malformedDateConverter;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public SomuExportService(ObjectMapper objectMapper, AuditRepository auditRepository,
-                             InfoClient infoClient, MalformedDateConverter malformedDateConverter) {
+    public SomuExportService(ObjectMapper objectMapper,
+                             AuditRepository auditRepository,
+                             InfoClient infoClient,
+                             MalformedDateConverter malformedDateConverter) {
         this.objectMapper = objectMapper;
         this.auditRepository = auditRepository;
         this.infoClient = infoClient;
@@ -73,41 +78,46 @@ public class SomuExportService {
     }
 
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream,
-                       String caseType, String somuType, boolean convert,
-                       ZonedDateTimeConverter zonedDateTimeConverter)
-            throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       String somuType,
+                       boolean convert,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         SomuTypeDto somuTypeDto = infoClient.getSomuType(caseType, somuType);
         Stream<AuditEvent> data = getData(from, to, caseType);
-        ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType), getSomuFields(somuTypeDto));
+        ExportDataConverter dataConverter = getDataConverter(convert, this.getCaseTypeCode(caseType),
+            getSomuFields(somuTypeDto));
 
         printData(outputStream, zonedDateTimeConverter, dataConverter, somuTypeDto, data);
     }
 
-    protected void printData(OutputStream outputStream, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter,
-                             SomuTypeDto somuType, Stream<AuditEvent> data) throws JsonProcessingException {
-        var somuTypeFields =  getSomuFields(somuType);
+    protected void printData(OutputStream outputStream,
+                             ZonedDateTimeConverter zonedDateTimeConverter,
+                             ExportDataConverter exportDataConverter,
+                             SomuTypeDto somuType,
+                             Stream<AuditEvent> data) throws JsonProcessingException {
+        var somuTypeFields = getSomuFields(somuType);
         String[] headers = getHeaders(somuTypeFields);
 
-        try (
-                OutputStream buffer = new BufferedOutputStream(outputStream);
-                OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8); var printer =
-                        new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                                .setHeader(headers)
-                                .setAutoFlush(true)
-                                .setNullString("")
-                                .build())) {
+        try (OutputStream buffer = new BufferedOutputStream(
+            outputStream); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
+            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).setNullString("").build())) {
             data.forEach(audit -> {
                 try {
                     if (filterSomuType(audit, somuType)) {
-                        String[] parsedData = parseData(audit, somuTypeFields, zonedDateTimeConverter, exportDataConverter);
+                        String[] parsedData = parseData(audit, somuTypeFields, zonedDateTimeConverter,
+                            exportDataConverter);
                         entityManager.detach(audit);
 
                         parsedData = malformedDateConverter.correctDateFields(parsedData);
                         printer.printRecord((Object[]) parsedData);
                     }
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for audit {} for reason {}", CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
+                    throw new AuditExportException("Unable to parse record for audit {} for reason {}",
+                        CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
                 }
             });
         } catch (IOException e) {
@@ -115,8 +125,10 @@ public class SomuExportService {
         }
     }
 
-    private String[] parseData(AuditEvent audit, List<SomuTypeField> headers,
-                               ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws IOException {
+    private String[] parseData(AuditEvent audit,
+                               List<SomuTypeField> headers,
+                               ZonedDateTimeConverter zonedDateTimeConverter,
+                               ExportDataConverter exportDataConverter) throws IOException {
         AuditPayload.SomuItem somuData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.SomuItem.class);
 
         List<String> data = new ArrayList<>();
@@ -138,8 +150,8 @@ public class SomuExportService {
             return new ExportDataConverter();
         }
 
-        Map<String, String> uuidToName = new HashMap<>(infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        Map<String, String> uuidToName = new HashMap<>(
+            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
 
         Map<String, String> entityListItemToName = new HashMap<>();
         somuTypeFields.forEach(field -> {
@@ -175,33 +187,32 @@ public class SomuExportService {
     }
 
     private boolean filterSomuType(AuditEvent auditEvent, SomuTypeDto somuTypeDto) throws IOException {
-        AuditPayload.SomuItem somuItem = objectMapper.readValue(auditEvent.getAuditPayload(), AuditPayload.SomuItem.class);
+        AuditPayload.SomuItem somuItem = objectMapper.readValue(auditEvent.getAuditPayload(),
+            AuditPayload.SomuItem.class);
         return StringUtils.equals(somuItem.getSomuTypeUuid().toString(), somuTypeDto.getUuid().toString());
     }
 
     private String getCaseTypeCode(String caseType) {
-        return infoClient.getCaseTypes()
-                .stream()
-                .filter(caseTypeDto -> caseTypeDto.getType().equals(caseType))
-                .findFirst()
-                .orElseThrow(() -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED, caseType))
-                .getShortCode();
+        return infoClient.getCaseTypes().stream().filter(
+            caseTypeDto -> caseTypeDto.getType().equals(caseType)).findFirst().orElseThrow(
+            () -> new AuditExportException("Invalid case type specified %s", LogEvent.INVALID_CASE_TYPE_SPECIFIED,
+                caseType)).getShortCode();
     }
 
     private String[] getHeaders(List<SomuTypeField> somuTypeFields) {
-        String[] headers = new String[]{
-                "timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid"
-        };
+        String[] headers = new String[] { "timestamp", "event", "userId", "caseUuid", "somuItemUuid", "somuTypeUuid" };
 
-        return Stream.concat(Arrays.stream(headers), somuTypeFields.stream().map(SomuTypeField::getExtractColumnLabel))
-                .toArray(String[]::new);
+        return Stream.concat(Arrays.stream(headers),
+            somuTypeFields.stream().map(SomuTypeField::getExtractColumnLabel)).toArray(String[]::new);
     }
 
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseType) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                EVENTS, getCaseTypeCode(caseType));
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            EVENTS, getCaseTypeCode(caseType));
     }
+
 }
