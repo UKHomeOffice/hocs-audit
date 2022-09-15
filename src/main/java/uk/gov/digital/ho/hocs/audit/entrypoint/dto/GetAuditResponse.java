@@ -49,16 +49,10 @@ public class GetAuditResponse {
     private String userID;
 
     public static GetAuditResponse from(AuditEvent auditEvent) {
-        return new GetAuditResponse(
-                auditEvent.getUuid(),
-                auditEvent.getCaseUUID(),
-                auditEvent.getStageUUID(),
-                auditEvent.getCorrelationID(),
-                auditEvent.getRaisingService(),
-                auditEvent.getAuditPayload(),
-                auditEvent.getNamespace(),
-                ZonedDateTime.of(auditEvent.getAuditTimestamp(), ZoneOffset.UTC),
-                auditEvent.getType(),
-                auditEvent.getUserID());
+        return new GetAuditResponse(auditEvent.getUuid(), auditEvent.getCaseUUID(), auditEvent.getStageUUID(),
+            auditEvent.getCorrelationID(), auditEvent.getRaisingService(), auditEvent.getAuditPayload(),
+            auditEvent.getNamespace(), ZonedDateTime.of(auditEvent.getAuditTimestamp(), ZoneOffset.UTC),
+            auditEvent.getType(), auditEvent.getUserID());
     }
+
 }

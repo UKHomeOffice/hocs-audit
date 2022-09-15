@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class RequestDataTest
-{
+public class RequestDataTest {
+
     @Mock
     private HttpServletRequest mockHttpServletRequest;
 
@@ -27,6 +27,7 @@ public class RequestDataTest
 
     @Mock
     private HttpServletResponse mockHttpServletResponse;
+
     @Mock
     private Object mockHandler;
 
@@ -156,4 +157,5 @@ public class RequestDataTest
         requestData.parseMessageHeaders(Map.of());
         assertNotNull(requestData.getUserId());
     }
+
 }

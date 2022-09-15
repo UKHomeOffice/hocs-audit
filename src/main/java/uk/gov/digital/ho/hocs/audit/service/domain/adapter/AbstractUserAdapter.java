@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 public abstract class AbstractUserAdapter implements ExportViewFieldAdapter {
 
     private final Map<String, UserDto> userMap;
@@ -26,4 +25,5 @@ public abstract class AbstractUserAdapter implements ExportViewFieldAdapter {
     }
 
     protected abstract String getUserData(UserDto userDto);
+
 }

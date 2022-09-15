@@ -5,6 +5,7 @@ import uk.gov.digital.ho.hocs.audit.core.LogEvent;
 public class ConfigFileReadException extends RuntimeException {
 
     private final LogEvent event;
+
     private final LogEvent exception;
 
     public ConfigFileReadException(String msg, LogEvent event, Object... args) {

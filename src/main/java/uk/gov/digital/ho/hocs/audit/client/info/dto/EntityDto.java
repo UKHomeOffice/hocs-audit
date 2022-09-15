@@ -10,22 +10,22 @@ import java.util.UUID;
 @Getter
 public class EntityDto {
 
-  @JsonProperty("id")
-  private Long id;
+    @JsonProperty("id")
+    private Long id;
 
-  @JsonProperty("uuid")
-  private UUID uuid;
+    @JsonProperty("uuid")
+    private UUID uuid;
 
-  @JsonProperty("simpleName")
-  private String simpleName;
+    @JsonProperty("simpleName")
+    private String simpleName;
 
-  @JsonProperty("data")
-  private EntityDataDto data;
+    @JsonProperty("data")
+    private EntityDataDto data;
 
-  @JsonProperty("entityListUUID")
-  private UUID entityListUUID;
+    @JsonProperty("entityListUUID")
+    private UUID entityListUUID;
 
-  @JsonProperty("active")
-  private boolean active;
+    @JsonProperty("active")
+    private boolean active;
 
 }

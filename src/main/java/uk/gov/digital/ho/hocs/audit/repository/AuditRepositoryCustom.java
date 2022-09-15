@@ -9,7 +9,11 @@ import java.util.stream.Stream;
 public interface AuditRepositoryCustom {
 
     Stream<Object[]> getResultsFromView(String viewName);
+
     void refreshMaterialisedView(String viewName);
+
     LocalDate getViewLastRefreshedDate(String viewName);
+
     void checkViewNameIsAllowed(String viewName);
+
 }

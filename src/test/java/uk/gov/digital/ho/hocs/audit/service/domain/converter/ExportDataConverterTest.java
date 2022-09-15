@@ -25,8 +25,8 @@ public class ExportDataConverterTest {
     public void convertConstructorCallsForCaseReferences() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Mockito.verify(auditRepository).getCaseReferencesForType("TEST");
         Assertions.assertNotNull(converter);
@@ -49,8 +49,8 @@ public class ExportDataConverterTest {
         };
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of(caseReference));
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertEquals("TEST_REF", converter.convertCaseUuid(caseUuid));
@@ -60,8 +60,8 @@ public class ExportDataConverterTest {
     public void convertCaseUuidWithNonExistentReturnsUuid() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
 
@@ -72,13 +72,11 @@ public class ExportDataConverterTest {
     @Test
     public void convertValueReturnsFromUuidMap() {
         UUID randomUuid = UUID.randomUUID();
-        Map<String, String> uuidMap =
-                Map.of(randomUuid.toString(), "TEST");
+        Map<String, String> uuidMap = Map.of(randomUuid.toString(), "TEST");
 
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(uuidMap, Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(uuidMap, Collections.emptyMap(), "TEST", auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertEquals("TEST", converter.convertValue(randomUuid.toString()));
@@ -86,13 +84,11 @@ public class ExportDataConverterTest {
 
     @Test
     public void convertValueReturnsFromNormalMap() {
-        Map<String, String> entityMap =
-                Map.of("TEST", "This,Test");
+        Map<String, String> entityMap = Map.of("TEST", "This,Test");
 
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), entityMap, "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), entityMap, "TEST", auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertEquals("ThisTest", converter.convertValue("TEST"));
@@ -102,8 +98,8 @@ public class ExportDataConverterTest {
     public void convertValueReturnsInputWithNonExistantValue() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertEquals("This,Test", converter.convertValue("This,Test"));
@@ -113,8 +109,8 @@ public class ExportDataConverterTest {
     public void convertCaseUuidWithNonExistentReturnsReturnsUuid() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
 
@@ -126,8 +122,8 @@ public class ExportDataConverterTest {
     public void convertCaseUuidWithNullReturnsUuid() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertNull(converter.convertCaseUuid(null));
@@ -137,8 +133,8 @@ public class ExportDataConverterTest {
     public void convertValueWithNullReturnsUuid() {
         given(auditRepository.getCaseReferencesForType("TEST")).willReturn(Stream.of());
 
-        var converter =
-                new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST", auditRepository);
+        var converter = new ExportDataConverter(Collections.emptyMap(), Collections.emptyMap(), "TEST",
+            auditRepository);
 
         Assertions.assertNotNull(converter);
         Assertions.assertNull(converter.convertValue(null));

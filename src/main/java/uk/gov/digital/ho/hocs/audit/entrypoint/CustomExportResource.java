@@ -26,10 +26,10 @@ public class CustomExportResource {
     }
 
     @GetMapping(value = "/export/custom/{viewName}", produces = "text/csv;charset=UTF-8")
-    public @ResponseBody
-    void getCustomDataExport(HttpServletResponse response,
-                             @PathVariable("viewName") String viewName,
-                             @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
+    public @ResponseBody void getCustomDataExport(HttpServletResponse response,
+                                                  @PathVariable("viewName") String viewName,
+                                                  @RequestParam(name = "convertHeader", defaultValue = "false")
+                                                  boolean convertHeader) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(viewName));
 
         try {
@@ -48,8 +48,8 @@ public class CustomExportResource {
     }
 
     @PostMapping(value = "/admin/export/custom/{viewName}/refresh")
-    public @ResponseBody
-    void refreshMaterialisedView(HttpServletResponse response, @PathVariable("viewName") String viewName) {
+    public @ResponseBody void refreshMaterialisedView(HttpServletResponse response,
+                                                      @PathVariable("viewName") String viewName) {
         try {
             customExportService.refreshMaterialisedView(viewName);
             response.setStatus(HttpStatus.OK.value());

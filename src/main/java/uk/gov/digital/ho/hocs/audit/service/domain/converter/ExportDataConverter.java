@@ -11,8 +11,11 @@ import java.util.stream.Collectors;
 public class ExportDataConverter {
 
     private final Map<String, String> uuidToName;
+
     private final Map<String, String> caseUUIDToCaseRef;
+
     private final Map<String, String> entityListItemToName;
+
     private final boolean convert;
 
     public ExportDataConverter(Map<String, String> uuidToName,
@@ -26,7 +29,8 @@ public class ExportDataConverter {
         this(false, null, null, null, null);
     }
 
-    private ExportDataConverter(boolean convert, Map<String, String> uuidToName,
+    private ExportDataConverter(boolean convert,
+                                Map<String, String> uuidToName,
                                 Map<String, String> entityListItemToName,
                                 String caseTypeCode,
                                 AuditRepository auditRepository) {
@@ -35,7 +39,8 @@ public class ExportDataConverter {
         this.entityListItemToName = entityListItemToName;
 
         if (convert) {
-            this.caseUUIDToCaseRef = auditRepository.getCaseReferencesForType(caseTypeCode).collect(Collectors.toMap(CaseReference::getCaseUUID, CaseReference::getCaseReference));
+            this.caseUUIDToCaseRef = auditRepository.getCaseReferencesForType(caseTypeCode).collect(
+                Collectors.toMap(CaseReference::getCaseUUID, CaseReference::getCaseReference));
         } else {
             this.caseUUIDToCaseRef = null;
         }
@@ -67,4 +72,5 @@ public class ExportDataConverter {
 
         return caseUUIDToCaseRef.getOrDefault(uuidString, uuidString);
     }
+
 }

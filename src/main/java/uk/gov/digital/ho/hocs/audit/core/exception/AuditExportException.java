@@ -5,6 +5,7 @@ import uk.gov.digital.ho.hocs.audit.core.LogEvent;
 public class AuditExportException extends RuntimeException {
 
     private final LogEvent event;
+
     private final LogEvent exception;
 
     public AuditExportException(String msg, LogEvent event, Object... args) {

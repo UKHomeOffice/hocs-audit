@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 public class UnitNameAdapter implements ExportViewFieldAdapter {
 
     private final Map<String, TeamDto> teamMap;
+
     private final Map<String, UnitDto> unitMap;
 
     public UnitNameAdapter(Set<TeamDto> teams, Set<UnitDto> units) {
@@ -37,4 +37,5 @@ public class UnitNameAdapter implements ExportViewFieldAdapter {
         }
         return null;
     }
+
 }

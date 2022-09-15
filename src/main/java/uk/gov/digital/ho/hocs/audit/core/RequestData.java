@@ -15,12 +15,17 @@ import java.util.UUID;
 public class RequestData implements HandlerInterceptor {
 
     static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+
     static final String USER_ID_HEADER = "X-Auth-UserId";
+
     static final String USERNAME_HEADER = "X-Auth-Username";
+
     static final String GROUP_HEADER = "X-Auth-Groups";
+
     static final String USER_ROLES_HEADER = "X-Auth-Roles";
 
     private static final String ANONYMOUS = "anonymous";
+
     private static final String BLANK = "";
 
     public void parseMessageHeaders(Map<String, String> headers) {
@@ -48,12 +53,18 @@ public class RequestData implements HandlerInterceptor {
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
+    public void postHandle(HttpServletRequest request,
+                           HttpServletResponse response,
+                           Object handler,
+                           ModelAndView modelAndView) {
         MDC.clear();
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public void afterCompletion(HttpServletRequest request,
+                                HttpServletResponse response,
+                                Object handler,
+                                Exception ex) {
         response.setHeader(CORRELATION_ID_HEADER, getCorrelationId());
         response.setHeader(USER_ID_HEADER, getUserId());
         response.setHeader(USERNAME_HEADER, getUsername());

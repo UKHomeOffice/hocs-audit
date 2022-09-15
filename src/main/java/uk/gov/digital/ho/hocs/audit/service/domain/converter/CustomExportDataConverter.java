@@ -35,7 +35,9 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_CUSTOM_CONVERTER_FA
 public class CustomExportDataConverter {
 
     private final InfoClient infoClient;
+
     private final CaseworkClient caseworkClient;
+
     private Map<String, ExportViewFieldAdapter> adapters;
 
     public CustomExportDataConverter(InfoClient infoClient, CaseworkClient caseworkClient) {
@@ -89,7 +91,8 @@ public class CustomExportDataConverter {
                 try {
                     result = adapterToUse.convert(result);
                 } catch (Exception e) {
-                    log.error("Unable to convert value: {} , reason: {}, event: {}", data, e.getMessage(), value(LogEvent.EVENT, CSV_CUSTOM_CONVERTER_FAILURE));
+                    log.error("Unable to convert value: {} , reason: {}, event: {}", data, e.getMessage(),
+                        value(LogEvent.EVENT, CSV_CUSTOM_CONVERTER_FAILURE));
                 }
             } else {
                 throw new IllegalArgumentException("Cannot convert data for Adapter Type: " + adapter);
@@ -118,6 +121,8 @@ public class CustomExportDataConverter {
         adapterList.add(new TopicNameAdapter(topics));
         adapterList.add(new TeamNameAdapter(teams));
 
-        adapters = adapterList.stream().collect(Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
+        adapters = adapterList.stream().collect(
+            Collectors.toMap(ExportViewFieldAdapter::getAdapterType, adapter -> adapter));
     }
+
 }

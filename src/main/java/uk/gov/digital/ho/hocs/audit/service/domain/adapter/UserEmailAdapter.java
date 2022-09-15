@@ -5,7 +5,6 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 
 import java.util.Set;
 
-
 public class UserEmailAdapter extends AbstractUserAdapter {
 
     public UserEmailAdapter(Set<UserDto> users) {

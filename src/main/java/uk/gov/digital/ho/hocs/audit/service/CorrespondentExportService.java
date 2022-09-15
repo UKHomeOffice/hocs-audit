@@ -35,10 +35,14 @@ import java.util.stream.Stream;
 @Service
 public class CorrespondentExportService extends DynamicExportService {
 
-    private static final String[] EVENTS = {"CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED", "CORRESPONDENT_UPDATED"};
+    private static final String[] EVENTS = { "CORRESPONDENT_DELETED", "CORRESPONDENT_CREATED",
+        "CORRESPONDENT_UPDATED" };
 
-    public CorrespondentExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient,
-                                      CaseworkClient caseworkClient, HeaderConverter headerConverter,
+    public CorrespondentExportService(ObjectMapper objectMapper,
+                                      AuditRepository auditRepository,
+                                      InfoClient infoClient,
+                                      CaseworkClient caseworkClient,
+                                      HeaderConverter headerConverter,
                                       MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
@@ -49,8 +53,11 @@ public class CorrespondentExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
-        AuditPayload.Correspondent correspondentData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Correspondent.class);
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
+        AuditPayload.Correspondent correspondentData = objectMapper.readValue(audit.getAuditPayload(),
+            AuditPayload.Correspondent.class);
 
         List<String> data = new ArrayList<>();
         data.add(zonedDateTimeConverter.convert(audit.getAuditTimestamp()));
@@ -80,16 +87,23 @@ public class CorrespondentExportService extends DynamicExportService {
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            events, caseTypeCode);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
@@ -100,10 +114,9 @@ public class CorrespondentExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[]{"timestamp", "event", "userId", "caseUuid",
-                "correspondentUuid", "fullname", "organisation", "address1", "address2",
-                "address3", "country", "postcode", "telephone", "email",
-                "reference", "externalKey"};
+        return new String[] { "timestamp", "event", "userId", "caseUuid", "correspondentUuid", "fullname",
+            "organisation", "address1", "address2", "address3", "country", "postcode", "telephone", "email",
+            "reference", "externalKey" };
     }
 
     @Override
@@ -114,11 +127,12 @@ public class CorrespondentExportService extends DynamicExportService {
 
         Map<String, String> uuidToName = new HashMap<>();
 
-        uuidToName.putAll(infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
-        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream()
-                .collect(Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
+        uuidToName.putAll(
+            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream().collect(
+            Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }

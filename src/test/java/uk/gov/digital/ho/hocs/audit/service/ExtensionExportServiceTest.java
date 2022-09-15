@@ -25,14 +25,13 @@ public class ExtensionExportServiceTest extends BaseExportServiceTest {
     public void setup() {
         zonedDateTimeConverter = new ZonedDateTimeConverter();
 
-        given(infoClient.getCaseTypes())
-                .willReturn(Set.of(new CaseTypeDto("Test", "a1", "TEST")));
+        given(infoClient.getCaseTypes()).willReturn(Set.of(new CaseTypeDto("Test", "a1", "TEST")));
     }
 
     @Test
     public void shouldReturnExport() throws IOException {
-        extensionExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1),
-                outputStream, "TEST", false, false, zonedDateTimeConverter);
+        extensionExportService.export(LocalDate.of(2020, 1, 1), LocalDate.now().plusDays(1), outputStream, "TEST",
+            false, false, zonedDateTimeConverter);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);
@@ -43,7 +42,5 @@ public class ExtensionExportServiceTest extends BaseExportServiceTest {
         var rows = getCsvDataRows(result);
         Assertions.assertEquals(1, rows.size());
     }
-
-
 
 }

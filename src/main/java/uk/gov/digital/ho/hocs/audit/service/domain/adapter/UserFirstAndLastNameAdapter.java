@@ -5,7 +5,6 @@ import uk.gov.digital.ho.hocs.audit.client.info.dto.UserDto;
 
 import java.util.Set;
 
-
 public class UserFirstAndLastNameAdapter extends AbstractUserAdapter {
 
     public UserFirstAndLastNameAdapter(Set<UserDto> users) {

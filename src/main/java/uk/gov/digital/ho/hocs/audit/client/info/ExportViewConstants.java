@@ -13,4 +13,5 @@ public interface ExportViewConstants {
     String FIELD_ADAPTER_UNIT_NAME = "unitNameAdapter";
     String FIELD_ADAPTER_TOPIC_NAME = "topicNameAdapter";
     String FIELD_ADAPTER_DATE = "dateAdapter";
+
 }

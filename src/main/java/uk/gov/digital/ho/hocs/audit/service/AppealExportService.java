@@ -33,21 +33,25 @@ import java.util.stream.Stream;
 @Service
 public class AppealExportService extends DynamicExportService {
 
-    private static final String[] EVENTS = {"APPEAL_CREATED", "APPEAL_UPDATED"};
+    private static final String[] EVENTS = { "APPEAL_CREATED", "APPEAL_UPDATED" };
 
-    public AppealExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient,
-                               CaseworkClient caseworkClient, HeaderConverter headerConverter,
+    public AppealExportService(ObjectMapper objectMapper,
+                               AuditRepository auditRepository,
+                               InfoClient infoClient,
+                               CaseworkClient caseworkClient,
+                               HeaderConverter headerConverter,
                                MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            events, caseTypeCode);
     }
 
     @Override
@@ -56,31 +60,29 @@ public class AppealExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
-        AuditPayload.Appeal appealData =
-                objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Appeal.class);
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
+        AuditPayload.Appeal appealData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Appeal.class);
 
-        return new String[]{
-                zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
-                audit.getType(),
-                exportDataConverter.convertValue(audit.getUserID()),
-                exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
-                Objects.toString(appealData.getCreated(), ""),
-                exportDataConverter.convertValue(Objects.toString(appealData.getType(), "")),
-                appealData.getStatus(),
-                Objects.toString(appealData.getDateSentRMS(), ""),
-                appealData.getOutcome(),
-                appealData.getComplexCase(),
-                appealData.getNote(),
-                appealData.getOfficerType(),
-                exportDataConverter.convertValue(appealData.getOfficerName()),
-                appealData.getOfficerDirectorate()
-        };
+        return new String[] { zonedDateTimeConverter.convert(audit.getAuditTimestamp()), audit.getType(),
+            exportDataConverter.convertValue(audit.getUserID()),
+            exportDataConverter.convertCaseUuid(audit.getCaseUUID()), Objects.toString(appealData.getCreated(), ""),
+            exportDataConverter.convertValue(Objects.toString(appealData.getType(), "")), appealData.getStatus(),
+            Objects.toString(appealData.getDateSentRMS(), ""), appealData.getOutcome(), appealData.getComplexCase(),
+            appealData.getNote(), appealData.getOfficerType(),
+            exportDataConverter.convertValue(appealData.getOfficerName()), appealData.getOfficerDirectorate() };
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
@@ -91,9 +93,8 @@ public class AppealExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[]{"timestamp", "event", "userId", "caseId",
-                "created", "type", "status", "dateSentRMS", "outcome", "complex",
-                "note", "officerType", "officerName", "officerDirectorate"};
+        return new String[] { "timestamp", "event", "userId", "caseId", "created", "type", "status", "dateSentRMS",
+            "outcome", "complex", "note", "officerType", "officerName", "officerDirectorate" };
     }
 
     @Override
@@ -104,11 +105,12 @@ public class AppealExportService extends DynamicExportService {
 
         Map<String, String> uuidToName = new HashMap<>();
 
-        uuidToName.putAll(infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
-        uuidToName.putAll(infoClient.getCaseTypeActions().stream()
-                .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
+        uuidToName.putAll(
+            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        uuidToName.putAll(infoClient.getCaseTypeActions().stream().collect(
+            Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }
