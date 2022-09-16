@@ -15,15 +15,14 @@ import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
 
-public class StaticUserServiceTest extends BaseExportServiceTest{
+public class StaticUserServiceTest extends BaseExportServiceTest {
 
     @Autowired
     private StaticUserService staticUserService;
 
     @Test
     public void shouldReturnExport() throws IOException {
-        UserDto userDto =
-                new UserDto(UUID.randomUUID().toString(), "Username", "First", "Last", "test@example.com");
+        UserDto userDto = new UserDto(UUID.randomUUID().toString(), "Username", "First", "Last", "test@example.com");
 
         given(infoClient.getUsers()).willReturn(Set.of(userDto));
 
@@ -35,12 +34,10 @@ public class StaticUserServiceTest extends BaseExportServiceTest{
         var headers = getCsvHeaderRow(result);
         Assertions.assertEquals(5, headers.length);
 
-        var rows = getCsvDataRows(result)
-                .stream()
-                .map(CSVRecord::toList).collect(Collectors.toList());
+        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
         var expectedRows = List.of(
-                List.of(userDto.getId(), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName(), userDto.getEmail())
-        );
+            List.of(userDto.getId(), userDto.getUsername(), userDto.getFirstName(), userDto.getLastName(),
+                userDto.getEmail()));
 
         Assertions.assertEquals(2, rows.size());
         Assertions.assertTrue(rows.containsAll(expectedRows));

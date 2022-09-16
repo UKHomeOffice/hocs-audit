@@ -20,6 +20,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 class CaseAuditEventResource {
+
     private final AuditEventService auditEventService;
 
     @Autowired
@@ -27,22 +28,28 @@ class CaseAuditEventResource {
         this.auditEventService = auditEventService;
     }
 
-    @GetMapping(value = "/audit/case/{caseUUID}", params = {"types"}, produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID, @RequestParam("types") String types) {
+    @GetMapping(value = "/audit/case/{caseUUID}", params = { "types" }, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID,
+                                                          @RequestParam("types") String types) {
         var filterTypes = types.split(",");
         var auditEvents = auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes);
         return ResponseEntity.ok(GetAuditListResponse.from(auditEvents));
     }
 
-    @GetMapping(value = "/audit/case/{caseUUID}", params = {"types", "fromDate"}, produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID, @RequestParam("types") String types, @RequestParam("fromDate") LocalDate fromDate) {
+    @GetMapping(value = "/audit/case/{caseUUID}", params = { "types", "fromDate" }, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAuditListResponse> getAudits(@PathVariable UUID caseUUID,
+                                                          @RequestParam("types") String types,
+                                                          @RequestParam("fromDate") LocalDate fromDate) {
         var filterTypes = types.split(",");
         var auditEvents = auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes);
         return ResponseEntity.ok(GetAuditListResponse.from(auditEvents));
     }
 
-    @PostMapping(value = "/audit/case/{caseUUID}/delete", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<DeleteCaseAuditResponse> deleteCaseAudit(@PathVariable UUID caseUUID, @RequestBody DeleteCaseAuditDto request) {
+    @PostMapping(value = "/audit/case/{caseUUID}/delete",
+                 consumes = APPLICATION_JSON_VALUE,
+                 produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeleteCaseAuditResponse> deleteCaseAudit(@PathVariable UUID caseUUID,
+                                                                   @RequestBody DeleteCaseAuditDto request) {
         Integer auditCount = auditEventService.deleteCaseAudit(caseUUID, request.getDeleted());
         return ResponseEntity.ok(DeleteCaseAuditResponse.from(caseUUID, request, auditCount));
     }

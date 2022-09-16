@@ -32,7 +32,12 @@ public class TopicExportService extends DynamicExportService {
 
     private static final String[] EVENTS = { "CASE_TOPIC_CREATED", "CASE_TOPIC_DELETED" };
 
-    public TopicExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient, CaseworkClient caseworkClient, HeaderConverter headerConverter, MalformedDateConverter malformedDateConverter) {
+    public TopicExportService(ObjectMapper objectMapper,
+                              AuditRepository auditRepository,
+                              InfoClient infoClient,
+                              CaseworkClient caseworkClient,
+                              HeaderConverter headerConverter,
+                              MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
 
@@ -42,31 +47,34 @@ public class TopicExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter)
-            throws JsonProcessingException {
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
         AuditPayload.Topic topicData = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Topic.class);
 
-        return new String[]{
-                zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
-                audit.getType(),
-                exportDataConverter.convertValue(audit.getUserID()),
-                exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
-                exportDataConverter.convertValue(Objects.toString(topicData.getTopicUuid(), "")),
-                topicData.getTopicName()
-        };
+        return new String[] { zonedDateTimeConverter.convert(audit.getAuditTimestamp()), audit.getType(),
+            exportDataConverter.convertValue(audit.getUserID()),
+            exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
+            exportDataConverter.convertValue(Objects.toString(topicData.getTopicUuid(), "")),
+            topicData.getTopicName() };
     }
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
         LocalDate peggedTo = to.isAfter(LocalDate.now()) ? LocalDate.now() : to;
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), LocalDateTime.of(peggedTo, LocalTime.MAX),
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN),
+            LocalDateTime.of(peggedTo, LocalTime.MAX), events, caseTypeCode);
     }
 
     @Override
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeCode = getCaseTypeCode(caseType);
 
         var dataConverter = getDataConverter(convert, caseTypeCode);
@@ -77,7 +85,7 @@ public class TopicExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[] {"timestamp", "event", "userId", "caseUuid", "topicUuid", "topic"};
+        return new String[] { "timestamp", "event", "userId", "caseUuid", "topicUuid", "topic" };
     }
 
     @Override
@@ -86,14 +94,13 @@ public class TopicExportService extends DynamicExportService {
             return new ExportDataConverter();
         }
 
-        Map<String, String> uuidToName = infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername));
+        Map<String, String> uuidToName = infoClient.getUsers().stream().collect(
+            Collectors.toMap(UserDto::getId, UserDto::getUsername));
 
-        caseworkClient.getAllCaseTopics()
-                .forEach(
-                        topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText())
-                );
+        caseworkClient.getAllCaseTopics().forEach(
+            topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText()));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }

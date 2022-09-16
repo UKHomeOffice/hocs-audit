@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 public class TeamNameAdapter implements ExportViewFieldAdapter {
-
 
     private final Map<String, TeamDto> teamMap;
 
@@ -31,4 +29,5 @@ public class TeamNameAdapter implements ExportViewFieldAdapter {
         }
         return null;
     }
+
 }

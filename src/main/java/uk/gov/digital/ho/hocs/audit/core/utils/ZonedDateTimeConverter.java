@@ -14,9 +14,11 @@ import java.time.format.DateTimeFormatter;
 public class ZonedDateTimeConverter {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS";
+
     private static final String DEFAULT_ZONE_ID = "Europe/London";
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+
     private ZoneId specifiedTimeZoneId = ZoneId.of(DEFAULT_ZONE_ID);
 
     /*
@@ -46,13 +48,12 @@ public class ZonedDateTimeConverter {
      * A helper to return the timestamp as an offset against the specified time zone.
      *
      * @param localDateTime the time you want to show the offset of.
+     *
      * @return the offsetted date time string
      */
     public String convert(LocalDateTime localDateTime) {
-        ZonedDateTime zonedDateTime =
-                localDateTime
-                        .atZone(ZoneId.systemDefault())
-                        .withZoneSameInstant(specifiedTimeZoneId);
+        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(
+            specifiedTimeZoneId);
 
         return zonedDateTime.toLocalDateTime().format(dateTimeFormatter);
     }

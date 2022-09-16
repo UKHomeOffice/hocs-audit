@@ -32,11 +32,15 @@ import java.util.stream.Stream;
 @Service
 public class CaseNoteExportService extends DynamicExportService {
 
-    private static final String[] EVENTS = {"CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED"};
+    private static final String[] EVENTS = { "CASE_NOTE_CREATED", "CASE_NOTE_UPDATED", "CASE_NOTE_DELETED" };
+
     private static final int EXCEL_MAX_CELL_SIZE = 32766;
 
-    public CaseNoteExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient,
-                                 CaseworkClient caseworkClient, HeaderConverter headerConverter,
+    public CaseNoteExportService(ObjectMapper objectMapper,
+                                 AuditRepository auditRepository,
+                                 InfoClient infoClient,
+                                 CaseworkClient caseworkClient,
+                                 HeaderConverter headerConverter,
                                  MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
@@ -47,35 +51,39 @@ public class CaseNoteExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
-        AuditPayload.CaseNote caseNote =
-                objectMapper.readValue(audit.getAuditPayload(), AuditPayload.CaseNote.class);
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
+        AuditPayload.CaseNote caseNote = objectMapper.readValue(audit.getAuditPayload(), AuditPayload.CaseNote.class);
 
         String caseNoteText = Objects.toString(caseNote.getText(), "");
 
-        return new String[]{
-                zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
-                audit.getType(),
-                exportDataConverter.convertValue(audit.getUserID()),
-                exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
-                Objects.toString(audit.getUuid(), ""),
-                caseNote.getCaseNoteType(),
-                caseNoteText.substring(0, Math.min(caseNoteText.length(), EXCEL_MAX_CELL_SIZE - 1))
-        };
+        return new String[] { zonedDateTimeConverter.convert(audit.getAuditTimestamp()), audit.getType(),
+            exportDataConverter.convertValue(audit.getUserID()),
+            exportDataConverter.convertCaseUuid(audit.getCaseUUID()), Objects.toString(audit.getUuid(), ""),
+            caseNote.getCaseNoteType(),
+            caseNoteText.substring(0, Math.min(caseNoteText.length(), EXCEL_MAX_CELL_SIZE - 1)) };
     }
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            events, caseTypeCode);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
@@ -86,7 +94,7 @@ public class CaseNoteExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[]{"timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text"};
+        return new String[] { "timestamp", "event", "userId", "caseUuid", "uuid", "caseNoteType", "text" };
     }
 
     @Override
@@ -95,9 +103,10 @@ public class CaseNoteExportService extends DynamicExportService {
             return new ExportDataConverter();
         }
 
-        Map<String, String> uuidToName = new HashMap<>(infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        Map<String, String> uuidToName = new HashMap<>(
+            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }

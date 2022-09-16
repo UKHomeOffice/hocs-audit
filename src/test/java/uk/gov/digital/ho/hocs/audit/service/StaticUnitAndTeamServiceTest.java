@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
 
-public class StaticUnitAndTeamServiceTest extends BaseExportServiceTest{
+public class StaticUnitAndTeamServiceTest extends BaseExportServiceTest {
 
     @Autowired
     private StaticUnitAndTeamService staticUnitAndTeamService;
@@ -38,12 +38,9 @@ public class StaticUnitAndTeamServiceTest extends BaseExportServiceTest{
         var headers = getCsvHeaderRow(result);
         Assertions.assertEquals(4, headers.length);
 
-        var rows = getCsvDataRows(result)
-                .stream()
-                .map(CSVRecord::toList).collect(Collectors.toList());
-        var expectedRows = List.of(
-                List.of(unitDto.getUuid(), unitDto.getDisplayName(), teamDto.getUuid().toString(), teamDto.getDisplayName()),
-                List.of(unit2Dto.getUuid(), unit2Dto.getDisplayName(), "", ""));
+        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
+        var expectedRows = List.of(List.of(unitDto.getUuid(), unitDto.getDisplayName(), teamDto.getUuid().toString(),
+            teamDto.getDisplayName()), List.of(unit2Dto.getUuid(), unit2Dto.getDisplayName(), "", ""));
 
         Assertions.assertEquals(3, rows.size());
         Assertions.assertTrue(rows.containsAll(expectedRows));

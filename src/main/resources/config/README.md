@@ -20,6 +20,7 @@ This holds a collection of field names split by case type that should be added t
 ### Custom Export Views
 
 This holds data surrounding custom views, including:
+
 - The required Keycloak role
 - The display name that is prefixed to the filename
 - The fields and associated adapters for each field
@@ -41,4 +42,5 @@ This holds data surrounding custom views, including:
 }
 ```
 
-Adapters are optional within the field object. A list of available adapters are located [here](../../java/uk/gov/digital/ho/hocs/audit/service/domain/adapter).
+Adapters are optional within the field object. A list of available adapters are
+located [here](../../java/uk/gov/digital/ho/hocs/audit/service/domain/adapter).

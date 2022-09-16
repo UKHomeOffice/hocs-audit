@@ -8,5 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class SomuTypeSchema {
+
     List<SomuTypeField> fields;
+
 }

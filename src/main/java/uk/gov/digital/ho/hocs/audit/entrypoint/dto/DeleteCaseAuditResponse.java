@@ -26,4 +26,5 @@ public class DeleteCaseAuditResponse {
     public static DeleteCaseAuditResponse from(UUID caseUUID, DeleteCaseAuditDto request, Integer auditCount) {
         return new DeleteCaseAuditResponse(request.getCorrelationID(), caseUUID, request.getDeleted(), auditCount);
     }
+
 }

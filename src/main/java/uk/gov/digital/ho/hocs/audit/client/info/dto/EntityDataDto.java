@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public class EntityDataDto {
 
-  @JsonProperty("title")
-  private String title;
+    @JsonProperty("title")
+    private String title;
+
 }

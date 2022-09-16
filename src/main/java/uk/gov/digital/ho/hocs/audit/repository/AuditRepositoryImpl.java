@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class AuditRepositoryImpl implements AuditRepositoryCustom {
+
     @Value("#{'${postgresViewAllowList}'.split(',')}")
     List<String> allowedViewNames;
 
     public void checkViewNameIsAllowed(String viewName) {
-        if(!allowedViewNames.contains(viewName.toLowerCase())) {
+        if (!allowedViewNames.contains(viewName.toLowerCase())) {
             throw new SecurityException(viewName + " is not in the list of allowed view names");
         }
     }
@@ -28,19 +29,15 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
     public Stream<Object[]> getResultsFromView(@NonNull String viewName) {
         checkViewNameIsAllowed(viewName);
 
-        return em.createNativeQuery(String.format("SELECT * FROM %s", viewName))
-                .unwrap(Query.class)
-                .stream();
+        return em.createNativeQuery(String.format("SELECT * FROM %s", viewName)).unwrap(Query.class).stream();
     }
 
     @Override
     public LocalDate getViewLastRefreshedDate(@NonNull String viewName) {
         checkViewNameIsAllowed(viewName);
 
-        Timestamp timestamp = (Timestamp)
-                em.createNativeQuery(String.format("SELECT last_refresh FROM %s LIMIT 1", viewName))
-                        .unwrap(Query.class)
-                        .getSingleResult();
+        Timestamp timestamp = (Timestamp) em.createNativeQuery(
+            String.format("SELECT last_refresh FROM %s LIMIT 1", viewName)).unwrap(Query.class).getSingleResult();
 
         return timestamp.toLocalDateTime().toLocalDate();
     }
@@ -51,4 +48,5 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
 
         em.createNativeQuery(String.format("REFRESH MATERIALIZED VIEW CONCURRENTLY %s", viewName)).executeUpdate();
     }
+
 }

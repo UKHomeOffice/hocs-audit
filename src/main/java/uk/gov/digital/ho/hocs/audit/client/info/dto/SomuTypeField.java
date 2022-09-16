@@ -8,7 +8,11 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class SomuTypeField {
+
     String name;
+
     String extractColumnLabel;
+
     List<String> extractChoices;
+
 }

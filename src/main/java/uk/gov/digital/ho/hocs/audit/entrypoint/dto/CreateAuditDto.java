@@ -38,7 +38,13 @@ public class CreateAuditDto {
     @JsonProperty(value = "user_id")
     private String userID;
 
-    public CreateAuditDto(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){
+    public CreateAuditDto(String correlationID,
+                          String raisingService,
+                          String auditPayload,
+                          String namespace,
+                          LocalDateTime auditTimestamp,
+                          String type,
+                          String userID) {
         this.correlationID = correlationID;
         this.raisingService = raisingService;
         this.auditPayload = auditPayload;
@@ -48,7 +54,15 @@ public class CreateAuditDto {
         this.userID = userID;
     }
 
-    public CreateAuditDto(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID){
+    public CreateAuditDto(UUID caseUUID,
+                          UUID stageUUID,
+                          String correlationID,
+                          String raisingService,
+                          String auditPayload,
+                          String namespace,
+                          LocalDateTime auditTimestamp,
+                          String type,
+                          String userID) {
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
         this.stageUUID = stageUUID;

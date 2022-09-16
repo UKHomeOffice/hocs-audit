@@ -8,9 +8,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DeleteCaseAuditDto {
 
-    @JsonProperty(value= "correlation_id", required = true)
+    @JsonProperty(value = "correlation_id", required = true)
     private String correlationID;
 
-    @JsonProperty(value= "deleted")
+    @JsonProperty(value = "deleted")
     private Boolean deleted;
+
 }

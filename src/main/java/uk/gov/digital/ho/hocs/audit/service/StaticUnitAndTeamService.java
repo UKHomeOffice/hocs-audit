@@ -27,6 +27,7 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 public class StaticUnitAndTeamService {
 
     private final HeaderConverter headerConverter;
+
     private final InfoClient infoClient;
 
     public StaticUnitAndTeamService(HeaderConverter headerConverter, InfoClient infoClient) {
@@ -37,13 +38,10 @@ public class StaticUnitAndTeamService {
     public void export(OutputStream outputStream, boolean convertHeader) throws IOException {
         var headers = getHeaders(convertHeader);
 
-        try (OutputStream buffer = new BufferedOutputStream(outputStream);
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .build())) {
+        try (OutputStream buffer = new BufferedOutputStream(
+            outputStream); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
+            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).build())) {
             Set<UnitDto> units = infoClient.getUnits();
 
             units.forEach(unit -> {
@@ -53,14 +51,17 @@ public class StaticUnitAndTeamService {
                     try {
                         printer.printRecord(unit.getUuid(), unit.getDisplayName(), null, null);
                     } catch (IOException e) {
-                        throw new AuditExportException("Unable to parse record for reason {}", CSV_RECORD_EXPORT_FAILURE, e.getMessage());
+                        throw new AuditExportException("Unable to parse record for reason {}",
+                            CSV_RECORD_EXPORT_FAILURE, e.getMessage());
                     }
                 } else {
                     teams.forEach(team -> {
                         try {
-                            printer.printRecord(unit.getUuid(), unit.getDisplayName(), team.getUuid(), team.getDisplayName());
+                            printer.printRecord(unit.getUuid(), unit.getDisplayName(), team.getUuid(),
+                                team.getDisplayName());
                         } catch (IOException e) {
-                            throw new AuditExportException("Unable to parse record for reason {}", CSV_RECORD_EXPORT_FAILURE, e.getMessage());
+                            throw new AuditExportException("Unable to parse record for reason {}",
+                                CSV_RECORD_EXPORT_FAILURE, e.getMessage());
                         }
                     });
                 }
@@ -71,9 +72,7 @@ public class StaticUnitAndTeamService {
     }
 
     private String[] getHeaders(boolean convertHeaders) {
-        String[] headers = new String[] {
-                "unitUUID", "unitName", "teamUUID", "teamName"
-        };
+        String[] headers = new String[] { "unitUUID", "unitName", "teamUUID", "teamName" };
 
         if (convertHeaders) {
             return headerConverter.substitute(headers);
@@ -81,8 +80,5 @@ public class StaticUnitAndTeamService {
 
         return headers;
     }
-
-
-
 
 }

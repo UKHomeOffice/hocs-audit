@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
 
-public class StaticTopicServiceTest extends BaseExportServiceTest{
+public class StaticTopicServiceTest extends BaseExportServiceTest {
 
     @Autowired
     private StaticTopicService staticTopicService;
@@ -34,11 +34,8 @@ public class StaticTopicServiceTest extends BaseExportServiceTest{
         var headers = getCsvHeaderRow(result);
         Assertions.assertEquals(3, headers.length);
 
-        var rows = getCsvDataRows(result)
-                .stream()
-                .map(CSVRecord::toList).collect(Collectors.toList());
-        var expectedRows = List.of(
-                List.of(topicDto.getValue().toString(), topicDto.getLabel(), "true"));
+        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
+        var expectedRows = List.of(List.of(topicDto.getValue().toString(), topicDto.getLabel(), "true"));
 
         Assertions.assertEquals(2, rows.size());
         Assertions.assertTrue(rows.containsAll(expectedRows));

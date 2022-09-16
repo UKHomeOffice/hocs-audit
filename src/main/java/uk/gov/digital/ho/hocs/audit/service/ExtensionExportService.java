@@ -35,8 +35,11 @@ public class ExtensionExportService extends DynamicExportService {
 
     private static final String[] EVENTS = { "EXTENSION_APPLIED" };
 
-    public ExtensionExportService(ObjectMapper objectMapper, AuditRepository auditRepository, InfoClient infoClient,
-                                  CaseworkClient caseworkClient, HeaderConverter headerConverter,
+    public ExtensionExportService(ObjectMapper objectMapper,
+                                  AuditRepository auditRepository,
+                                  InfoClient infoClient,
+                                  CaseworkClient caseworkClient,
+                                  HeaderConverter headerConverter,
                                   MalformedDateConverter malformedDateConverter) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
     }
@@ -47,33 +50,37 @@ public class ExtensionExportService extends DynamicExportService {
     }
 
     @Override
-    protected String[] parseData(AuditEvent audit, ZonedDateTimeConverter zonedDateTimeConverter, ExportDataConverter exportDataConverter) throws JsonProcessingException {
-        AuditPayload.Extension extensionData =
-                objectMapper.readValue(audit.getAuditPayload(), AuditPayload.Extension.class);
+    protected String[] parseData(AuditEvent audit,
+                                 ZonedDateTimeConverter zonedDateTimeConverter,
+                                 ExportDataConverter exportDataConverter) throws JsonProcessingException {
+        AuditPayload.Extension extensionData = objectMapper.readValue(audit.getAuditPayload(),
+            AuditPayload.Extension.class);
 
-        return new String[]{
-                zonedDateTimeConverter.convert(audit.getAuditTimestamp()),
-                audit.getType(),
-                exportDataConverter.convertValue(audit.getUserID()),
-                exportDataConverter.convertCaseUuid(audit.getCaseUUID()),
-                Objects.toString(extensionData.getCreated(), ""),
-                exportDataConverter.convertValue(extensionData.getType()),
-                extensionData.getNote()
-        };
+        return new String[] { zonedDateTimeConverter.convert(audit.getAuditTimestamp()), audit.getType(),
+            exportDataConverter.convertValue(audit.getUserID()),
+            exportDataConverter.convertCaseUuid(audit.getCaseUUID()), Objects.toString(extensionData.getCreated(), ""),
+            exportDataConverter.convertValue(extensionData.getType()), extensionData.getNote() };
     }
 
     @Override
     protected Stream<AuditEvent> getData(LocalDate from, LocalDate to, String caseTypeCode, String[] events) {
-        LocalDateTime peggedTo = to.isBefore(LocalDate.now()) ? LocalDateTime.of(to, LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime peggedTo = to.isBefore(LocalDate.now())
+            ? LocalDateTime.of(to, LocalTime.MAX)
+            : LocalDateTime.now();
 
-        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(
-                        from, LocalTime.MIN), peggedTo,
-                events, caseTypeCode);
+        return auditRepository.findAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
+            events, caseTypeCode);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void export(LocalDate from, LocalDate to, OutputStream outputStream, String caseType, boolean convert, boolean convertHeader, ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
+    public void export(LocalDate from,
+                       LocalDate to,
+                       OutputStream outputStream,
+                       String caseType,
+                       boolean convert,
+                       boolean convertHeader,
+                       ZonedDateTimeConverter zonedDateTimeConverter) throws IOException {
         var caseTypeDto = getCaseTypeCode(caseType);
 
         var data = getData(from, to, caseTypeDto.getShortCode(), EVENTS);
@@ -84,10 +91,7 @@ public class ExtensionExportService extends DynamicExportService {
 
     @Override
     protected String[] getHeaders() {
-        return new String[] {
-                "timestamp", "event", "userId", "caseId",
-                "created", "type", "note"
-        };
+        return new String[] { "timestamp", "event", "userId", "caseId", "created", "type", "note" };
     }
 
     @Override
@@ -98,11 +102,12 @@ public class ExtensionExportService extends DynamicExportService {
 
         Map<String, String> uuidToName = new HashMap<>();
 
-        uuidToName.putAll(infoClient.getUsers().stream()
-                .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
-        uuidToName.putAll(infoClient.getCaseTypeActions().stream()
-                .collect(Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
+        uuidToName.putAll(
+            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        uuidToName.putAll(infoClient.getCaseTypeActions().stream().collect(
+            Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
         return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
+
 }

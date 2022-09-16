@@ -15,19 +15,15 @@ import org.springframework.context.annotation.Profile;
 
 @EnableSqs
 @Configuration
-@Profile({"local"})
+@Profile({ "local" })
 public class LocalStackConfiguration {
 
     @Primary
     @Bean
-    public AmazonSQSAsync awsSqsClient(
-            @Value("${aws.sqs.config.url}") String awsBaseUrl) {
-        return AmazonSQSAsyncClientBuilder
-                .standard()
-                .withCredentials(new AWSStaticCredentialsProvider(
-                        new BasicAWSCredentials("test", "test")))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(awsBaseUrl, "eu-west-2"))
-                .build();
+    public AmazonSQSAsync awsSqsClient(@Value("${aws.sqs.config.url}") String awsBaseUrl) {
+        return AmazonSQSAsyncClientBuilder.standard().withCredentials(
+            new AWSStaticCredentialsProvider(new BasicAWSCredentials("test", "test"))).withEndpointConfiguration(
+            new AwsClientBuilder.EndpointConfiguration(awsBaseUrl, "eu-west-2")).build();
     }
 
     @Primary

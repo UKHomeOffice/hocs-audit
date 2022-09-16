@@ -10,15 +10,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Getter
 public class GetAuditListResponse {
+
     private List<GetAuditResponse> audits;
 
     public static GetAuditListResponse from(List<AuditEvent> auditEvents) {
 
-        var auditResponses = auditEvents
-                .stream()
-                .map(GetAuditResponse::from)
-                .collect(Collectors.toList());
+        var auditResponses = auditEvents.stream().map(GetAuditResponse::from).collect(Collectors.toList());
 
         return new GetAuditListResponse(auditResponses);
     }
+
 }

@@ -51,7 +51,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public Formatter<LocalDate> localDateFormatter() {
         return new Formatter<>() {
             @Override
-            public LocalDate parse(String text, Locale locale)  {
+            public LocalDate parse(String text, Locale locale) {
                 return LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
             }
 

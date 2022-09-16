@@ -17,4 +17,5 @@ public class GetCorrespondentOutlineResponse {
 
     @JsonProperty("fullname")
     private String fullname;
+
 }

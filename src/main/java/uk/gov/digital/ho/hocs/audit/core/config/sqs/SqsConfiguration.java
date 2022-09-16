@@ -15,21 +15,18 @@ import org.springframework.context.annotation.Profile;
 
 @EnableSqs
 @Configuration
-@Profile({"sqs"})
+@Profile({ "sqs" })
 public class SqsConfiguration {
 
     @Primary
     @Bean
     public AmazonSQSAsync awsSqsClient(@Value("${aws.sqs.access.key}") String accessKey,
-                               @Value("${aws.sqs.secret.key}") String secretKey,
-                               @Value("${aws.sqs.region}") String region) {
+                                       @Value("${aws.sqs.secret.key}") String secretKey,
+                                       @Value("${aws.sqs.region}") String region) {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
-        return AmazonSQSAsyncClientBuilder
-                .standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
+        return AmazonSQSAsyncClientBuilder.standard().withRegion(region).withCredentials(
+            new AWSStaticCredentialsProvider(credentials)).build();
     }
 
     @Primary
@@ -42,4 +39,5 @@ public class SqsConfiguration {
 
         return factory;
     }
+
 }

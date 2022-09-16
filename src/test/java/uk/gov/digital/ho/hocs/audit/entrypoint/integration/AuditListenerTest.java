@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:export/cleandown.sql", config = @SqlConfig(transactionMode = ISOLATED))
 public class AuditListenerTest extends BaseAwsSqsIntegrationTest {
 
@@ -29,8 +29,8 @@ public class AuditListenerTest extends BaseAwsSqsIntegrationTest {
 
     @Test
     public void consumeMessageFromQueue() throws JsonProcessingException {
-        CreateAuditDto createAuditDto = new CreateAuditDto(UUID.randomUUID().toString(), "SERVICE", "{}",
-                "NAMESPACE", LocalDateTime.now(), "TYPE", "USER");
+        CreateAuditDto createAuditDto = new CreateAuditDto(UUID.randomUUID().toString(), "SERVICE", "{}", "NAMESPACE",
+            LocalDateTime.now(), "TYPE", "USER");
 
         amazonSQSAsync.sendMessage(auditQueue, objectMapper.writeValueAsString(createAuditDto));
 
@@ -40,15 +40,13 @@ public class AuditListenerTest extends BaseAwsSqsIntegrationTest {
 
     @Test
     public void consumeMessageFromQueue_exceptionMakesMessageNotVisible() throws JsonProcessingException {
-        CreateAuditDto createAuditDto = new CreateAuditDto(null, null, null,
-                null, null, null, null);
+        CreateAuditDto createAuditDto = new CreateAuditDto(null, null, null, null, null, null, null);
 
         amazonSQSAsync.sendMessage(auditQueue, objectMapper.writeValueAsString(createAuditDto));
 
         await().until(() -> getNumberOfMessagesOnQueue(auditQueue) == 0);
-        await().timeout(Duration.ofSeconds(20))
-                .pollDelay(Duration.ofSeconds(10))
-                .until(() -> getNumberOfMessagesOnQueue(auditQueueDlq) == 1);
+        await().timeout(Duration.ofSeconds(20)).pollDelay(Duration.ofSeconds(10)).until(
+            () -> getNumberOfMessagesOnQueue(auditQueueDlq) == 1);
     }
 
 }

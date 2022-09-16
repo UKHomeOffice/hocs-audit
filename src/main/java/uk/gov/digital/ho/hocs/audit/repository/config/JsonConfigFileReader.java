@@ -19,13 +19,13 @@ public abstract class JsonConfigFileReader {
     }
 
     protected <T> T readValueFromFile(TypeReference<T> reference) {
-        try(InputStream in =
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format("config/%s.json", getFileName()))) {
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+            String.format("config/%s.json", getFileName()))) {
             return objectMapper.readValue(in, reference);
         } catch (IOException e) {
             throw new ConfigFileReadException(
-                            String.format("Unable to read file: %s into type %s", getFileName(), reference.getType()),
-                            LogEvent.CONFIG_PARSE_FAILURE);
+                String.format("Unable to read file: %s into type %s", getFileName(), reference.getType()),
+                LogEvent.CONFIG_PARSE_FAILURE);
         }
     }
 

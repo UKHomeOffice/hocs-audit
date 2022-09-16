@@ -73,7 +73,13 @@ public class AuditEvent implements Serializable {
     @Setter
     private Boolean deleted;
 
-    public AuditEvent(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent(String correlationID,
+                      String raisingService,
+                      String auditPayload,
+                      String namespace,
+                      LocalDateTime auditTimestamp,
+                      String type,
+                      String userID) {
         this.uuid = UUID.randomUUID();
         this.correlationID = correlationID;
         this.raisingService = raisingService;
@@ -82,17 +88,25 @@ public class AuditEvent implements Serializable {
         this.auditTimestamp = auditTimestamp;
         this.type = type;
         this.userID = userID;
-        if(caseUUID != null) {
+        if (caseUUID != null) {
             this.caseType = caseUUID.toString().substring(34);
         }
         this.deleted = false;
     }
 
-    public AuditEvent(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
+    public AuditEvent(UUID caseUUID,
+                      UUID stageUUID,
+                      String correlationID,
+                      String raisingService,
+                      String auditPayload,
+                      String namespace,
+                      LocalDateTime auditTimestamp,
+                      String type,
+                      String userID) {
         this(correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
         this.caseUUID = caseUUID;
         this.stageUUID = stageUUID;
-        if(caseUUID != null) {
+        if (caseUUID != null) {
             this.caseType = caseUUID.toString().substring(34);
         }
     }

@@ -26,12 +26,28 @@ public class AuditEventService {
         this.auditRepository = auditRepository;
     }
 
-    public AuditEvent createAudit(String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        return createAudit(null, null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    public AuditEvent createAudit(String correlationID,
+                                  String raisingService,
+                                  String auditPayload,
+                                  String namespace,
+                                  LocalDateTime auditTimestamp,
+                                  String type,
+                                  String userID) {
+        return createAudit(null, null, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type,
+            userID);
     }
 
-    public AuditEvent createAudit(UUID caseUUID, UUID stageUUID, String correlationID, String raisingService, String auditPayload, String namespace, LocalDateTime auditTimestamp, String type, String userID) {
-        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload, namespace, auditTimestamp, type, userID);
+    public AuditEvent createAudit(UUID caseUUID,
+                                  UUID stageUUID,
+                                  String correlationID,
+                                  String raisingService,
+                                  String auditPayload,
+                                  String namespace,
+                                  LocalDateTime auditTimestamp,
+                                  String type,
+                                  String userID) {
+        AuditEvent auditEvent = new AuditEvent(caseUUID, stageUUID, correlationID, raisingService, auditPayload,
+            namespace, auditTimestamp, type, userID);
         auditRepository.save(auditEvent);
         log.debug("Created Audit: UUID: {} at timestamp: {}", auditEvent.getUuid(), auditEvent.getAuditTimestamp());
         return auditEvent;
@@ -43,7 +59,8 @@ public class AuditEventService {
             audit.setDeleted(deleted);
             auditRepository.save(audit);
         }
-        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID, value(EVENT, AUDIT_EVENT_DELETED));
+        log.info("Set Deleted=({}) for {} audit lines for caseUUID: {}", deleted, audits.size(), caseUUID,
+            value(EVENT, AUDIT_EVENT_DELETED));
         return audits.size();
     }
 

@@ -54,7 +54,8 @@ public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidExportTypeException.class)
     public ResponseEntity<String> handle(InvalidExportTypeException e) {
-        log.error("InvalidExportTypeException", value(EVENT, INVALID_PARAMETER_SPECIFIED), value(EXCEPTION, e.toString()));
+        log.error("InvalidExportTypeException", value(EVENT, INVALID_PARAMETER_SPECIFIED),
+            value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), NOT_FOUND);
     }
 
@@ -66,19 +67,22 @@ public class RestResponseEntityExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handle(MethodArgumentTypeMismatchException e) {
-        log.error("MethodArgumentTypeMismatchException", value(EVENT, INVALID_PARAMETER_SPECIFIED), value(EXCEPTION, e.toString()));
+        log.error("MethodArgumentTypeMismatchException", value(EVENT, INVALID_PARAMETER_SPECIFIED),
+            value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
     }
 
     @ExceptionHandler(UnsatisfiedServletRequestParameterException.class)
     public ResponseEntity<String> handle(UnsatisfiedServletRequestParameterException e) {
-        log.error("UnsatisfiedServletRequestParameterException", value(EVENT, MISSING_REQUEST_PARAMETER), value(EXCEPTION, e.toString()));
+        log.error("UnsatisfiedServletRequestParameterException", value(EVENT, MISSING_REQUEST_PARAMETER),
+            value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handle(Exception e) {
-        log.error("Uncaught Exception: " + e.getClass().getName(), value(EVENT, UNCAUGHT_EXCEPTION), value(EXCEPTION, e.toString()));
+        log.error("Uncaught Exception: " + e.getClass().getName(), value(EVENT, UNCAUGHT_EXCEPTION),
+            value(EXCEPTION, e.toString()));
         return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
     }
 

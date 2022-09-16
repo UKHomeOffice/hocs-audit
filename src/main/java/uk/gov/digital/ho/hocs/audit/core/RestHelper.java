@@ -31,24 +31,27 @@ public class RestHelper {
     private final RequestData requestData;
 
     @Autowired
-    public RestHelper(RestTemplate restTemplate, @Value("${hocs.basicauth}") String basicAuth, RequestData requestData) {
+    public RestHelper(RestTemplate restTemplate,
+                      @Value("${hocs.basicauth}") String basicAuth,
+                      RequestData requestData) {
         this.restTemplate = restTemplate;
         this.basicAuth = basicAuth;
         this.requestData = requestData;
     }
 
     private static String getBasicAuth(String basicAuth) {
-        return String.format("Basic %s", Base64.getEncoder().encodeToString(basicAuth.getBytes(StandardCharsets.UTF_8)));
+        return String.format("Basic %s",
+            Base64.getEncoder().encodeToString(basicAuth.getBytes(StandardCharsets.UTF_8)));
     }
 
     public <R> R get(String rootUri, String endpoint, Class<R> type) {
         try {
             log.debug("Making GET request {}{}", rootUri, endpoint);
-            return restTemplate
-                    .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
-                    .getBody();
+            return restTemplate.exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(),
+                type).getBody();
         } catch (Exception e) {
-            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION), value(EXCEPTION, e));
+            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION),
+                value(EXCEPTION, e));
             throw e;
         }
     }
@@ -56,11 +59,11 @@ public class RestHelper {
     public <R> R get(String rootUri, String endpoint, ParameterizedTypeReference<R> type) {
         try {
             log.debug("Making GET request {}{}", rootUri, endpoint);
-            return restTemplate
-                    .exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(), type)
-                    .getBody();
+            return restTemplate.exchange(rootUri.concat(endpoint), HttpMethod.GET, getAuthenticatedEntity(),
+                type).getBody();
         } catch (Exception e) {
-            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION), value(EXCEPTION, e));
+            log.error("Error in GET request {}{}", rootUri, endpoint, value(EVENT, REST_CLIENT_EXCEPTION),
+                value(EXCEPTION, e));
             throw e;
         }
     }

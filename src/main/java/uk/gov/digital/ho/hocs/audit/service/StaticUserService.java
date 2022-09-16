@@ -26,6 +26,7 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 public class StaticUserService {
 
     private final HeaderConverter headerConverter;
+
     private final InfoClient infoClient;
 
     public StaticUserService(HeaderConverter headerConverter, InfoClient infoClient) {
@@ -36,21 +37,20 @@ public class StaticUserService {
     public void export(OutputStream outputStream, boolean convertHeader) throws IOException {
         var headers = getHeaders(convertHeader);
 
-        try (OutputStream buffer = new BufferedOutputStream(outputStream);
-             OutputStreamWriter outputWriter = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-             var printer =
-                     new CSVPrinter(outputWriter, CSVFormat.Builder.create()
-                             .setHeader(headers)
-                             .setAutoFlush(true)
-                             .build())) {
+        try (OutputStream buffer = new BufferedOutputStream(
+            outputStream); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
+            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).build())) {
 
             Set<UserDto> users = infoClient.getUsers();
 
             users.forEach(user -> {
                 try {
-                    printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail());
+                    printer.printRecord(user.getId(), user.getUsername(), user.getFirstName(), user.getLastName(),
+                        user.getEmail());
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for reason {}", CSV_RECORD_EXPORT_FAILURE, e.getMessage());
+                    throw new AuditExportException("Unable to parse record for reason {}", CSV_RECORD_EXPORT_FAILURE,
+                        e.getMessage());
                 }
             });
         } catch (IOException e) {
@@ -59,9 +59,7 @@ public class StaticUserService {
     }
 
     private String[] getHeaders(boolean convertHeaders) {
-        String[] headers = new String[] {
-                "userUUID", "username", "firstName", "lastName", "email"
-        };
+        String[] headers = new String[] { "userUUID", "username", "firstName", "lastName", "email" };
 
         if (convertHeaders) {
             return headerConverter.substitute(headers);
@@ -69,4 +67,5 @@ public class StaticUserService {
 
         return headers;
     }
+
 }

@@ -35,8 +35,8 @@ public class CustomExportViews {
 
         @JsonCreator
         public CustomExportView(@JsonProperty("requiredPermission") String requiredPermission,
-                              @JsonProperty("displayName") String displayName,
-                              @JsonProperty("fields") List<ExportField> fields) {
+                                @JsonProperty("displayName") String displayName,
+                                @JsonProperty("fields") List<ExportField> fields) {
             this.requiredPermission = requiredPermission;
             this.displayName = displayName;
             this.fields = fields;
@@ -50,9 +50,7 @@ public class CustomExportViews {
             private final String adapter;
 
             @JsonCreator
-            public ExportField(@JsonProperty("name") String name,
-                                @JsonProperty("adapter") String adapter)
-            {
+            public ExportField(@JsonProperty("name") String name, @JsonProperty("adapter") String adapter) {
                 this.name = name;
                 this.adapter = adapter;
             }

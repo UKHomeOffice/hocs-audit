@@ -26,9 +26,13 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 public class StaticExportResource {
 
     private final StaticTeamService staticTeamService;
+
     private final StaticTopicService staticTopicService;
+
     private final StaticTopicAndTeamService staticTopicAndTeamService;
+
     private final StaticUserService staticUserService;
+
     private final StaticUnitAndTeamService staticUnitAndTeamService;
 
     public StaticExportResource(StaticTeamService staticTeamService,
@@ -47,8 +51,7 @@ public class StaticExportResource {
     public void getTopics(HttpServletResponse response,
                           @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("topics"));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename("topics"));
 
             log.info("Exporting topics to CSV", value(EVENT, CSV_EXPORT_START));
             staticTopicService.export(response.getOutputStream(), convertHeader);
@@ -62,10 +65,11 @@ public class StaticExportResource {
     @GetMapping(value = "/export/topics/{caseType}/teams", produces = "text/csv;charset=UTF-8")
     public void getTopicsWithTeams(HttpServletResponse response,
                                    @PathVariable("caseType") String caseType,
-                                   @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
+                                   @RequestParam(name = "convertHeader", defaultValue = "false")
+                                   boolean convertHeader) {
         try {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFileName(caseType, "topics_teams"));
+                "attachment; filename=" + getFileName(caseType, "topics_teams"));
 
             log.info("Exporting topics and teams to CSV", value(EVENT, CSV_EXPORT_START));
             staticTopicAndTeamService.export(response.getOutputStream(), caseType, convertHeader);
@@ -80,8 +84,7 @@ public class StaticExportResource {
     public void getTeams(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("teams"));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename("teams"));
 
             log.info("Exporting teams to CSV", value(EVENT, CSV_EXPORT_START));
             staticTeamService.export(response.getOutputStream(), convertHeader);
@@ -96,8 +99,7 @@ public class StaticExportResource {
     public void getUnitsForTeams(HttpServletResponse response,
                                  @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("units_teams"));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename("units_teams"));
 
             log.info("Exporting units with teams to CSV", value(EVENT, CSV_EXPORT_START));
             staticUnitAndTeamService.export(response.getOutputStream(), convertHeader);
@@ -112,8 +114,7 @@ public class StaticExportResource {
     public void getUsers(HttpServletResponse response,
                          @RequestParam(name = "convertHeader", defaultValue = "false") boolean convertHeader) {
         try {
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=" + getFilename("users"));
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename("users"));
 
             log.info("Exporting users to CSV", value(EVENT, CSV_EXPORT_START));
             staticUserService.export(response.getOutputStream(), convertHeader);
@@ -131,4 +132,5 @@ public class StaticExportResource {
     private String getFilename(String export) {
         return String.format("%s-%s.csv", export, LocalDate.now());
     }
+
 }

@@ -13,4 +13,5 @@ public class GetCorrespondentOutlinesResponse {
 
     @JsonProperty("correspondents")
     Set<GetCorrespondentOutlineResponse> correspondents;
+
 }

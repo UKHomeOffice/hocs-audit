@@ -16,17 +16,18 @@ import java.util.Set;
 public class CaseworkClient {
 
     private final RestHelper restHelper;
+
     private final String serviceBaseURL;
 
     @Autowired
-    public CaseworkClient(RestHelper restHelper,
-                          @Value("${hocs.case-service}") String caseworkServiceUri) {
+    public CaseworkClient(RestHelper restHelper, @Value("${hocs.case-service}") String caseworkServiceUri) {
         this.restHelper = restHelper;
         this.serviceBaseURL = caseworkServiceUri;
     }
 
     public Set<GetCorrespondentOutlineResponse> getAllCorrespondents() {
-        GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL, "/correspondents?includeDeleted=true", new ParameterizedTypeReference<>() {});
+        GetCorrespondentOutlinesResponse response = restHelper.get(serviceBaseURL,
+            "/correspondents?includeDeleted=true", new ParameterizedTypeReference<>() {});
         return response.getCorrespondents();
     }
 
@@ -34,4 +35,5 @@ public class CaseworkClient {
         GetTopicsResponse response = restHelper.get(serviceBaseURL, "/topics", new ParameterizedTypeReference<>() {});
         return response.getTopics();
     }
+
 }

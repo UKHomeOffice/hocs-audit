@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import static uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants.FIELD_ADAPTER_DATE;
 import static uk.gov.digital.ho.hocs.audit.client.info.ExportViewConstants.GROUPED_DATE_REGEX;
 
-
 @Slf4j
 public class DateAdapter implements ExportViewFieldAdapter {
 
@@ -25,12 +24,13 @@ public class DateAdapter implements ExportViewFieldAdapter {
      * Once identified, this function converts the date to a format without the leading zero (yyyy-mm-dd).
      *
      * @param input The ExportViewFieldAdapter interface supports any kind of object but the calling code only ever passes a string.
+     *
      * @return A string value of the converted (corrected) date or the original value if it is not a date.
      */
     @Override
     public String convert(Object input) {
         if (input instanceof String) {
-            String date = (String)input;
+            String date = (String) input;
             Matcher matcher = DATE_PATTERN.matcher(date);
             if (matcher.find()) {
                 String year = matcher.group(1);
