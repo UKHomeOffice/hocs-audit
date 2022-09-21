@@ -30,9 +30,9 @@ public class CustomExportResource {
                                                   @PathVariable("viewName") String viewName,
                                                   @RequestParam(name = "convertHeader", defaultValue = "false")
                                                   boolean convertHeader) {
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(viewName));
 
         try {
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + getFilename(viewName));
             customExportService.export(response, viewName, convertHeader);
             response.setStatus(200);
         } catch (Exception ex) {
@@ -59,10 +59,8 @@ public class CustomExportResource {
         }
     }
 
-    //customExportService.getViewLastRefreshedDate(viewName) does not work if view empty
-
     public String getFilename(String viewName) {
-        return String.format("%s-%s.csv", viewName, "");
+        return String.format("%s-%s.csv", viewName, customExportService.getViewLastRefreshedDate(viewName));
     }
 
 }
