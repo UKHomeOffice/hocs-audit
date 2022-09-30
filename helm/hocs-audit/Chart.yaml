@@ -1,0 +1,3 @@
+apiVersion: v2
+name: hocs-audit
+version: 1.0.0

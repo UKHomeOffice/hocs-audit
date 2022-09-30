@@ -1,0 +1,80 @@
+---
+nameOverride: hocs-audit
+
+minReplicas: 2
+maxReplicas: 3
+
+deploymentAnnotations:
+  downscaler/downtime: "Mon-Sun 00:00-04:55 Europe/London,Mon-Sun 23:05-24:00 Europe/London"
+
+service:
+  port: 443
+  portName: "http"
+  targetPort: 10443
+
+truststore:
+  image:
+    repository: quay.io/ukhomeofficedigital/cfssl-sidekick-jks
+    version: v0.0.9
+  resources:
+    limits:
+      cpu: 300m
+      memory: 96Mi
+    requests:
+      cpu: 100m
+      memory: 96Mi
+
+keycloak:
+  image:
+    repository: quay.io/keycloak/keycloak-gatekeeper
+    version: 8.0.2
+  resources:
+    limits:
+      cpu: 300m
+      memory: 96Mi
+    requests:
+      cpu: 100m
+      memory: 96Mi
+  port: 8081
+  realm: https://sso.digital.homeoffice.gov.uk/auth/realms/hocs-prod
+  timeout: 300
+  domain: cs.homeoffice.gov.uk
+
+proxy:
+  image:
+    repository: quay.io/ukhomeofficedigital/nginx-proxy
+    version: v4.2.0
+  resources:
+    limits:
+      cpu: 300m
+      memory: 96Mi
+    requests:
+      cpu: 100m
+      memory: 96Mi
+
+app:
+  image:
+    repository: quay.io/ukhomeofficedigital/hocs-audit
+  selectorRole: hocs-backend
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1536Mi
+    requests:
+      cpu: 200m
+      memory: 1536Mi
+  javaOpts: >-
+    -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=70
+    -Djava.security.egd=file:/dev/./urandom
+    -Djavax.net.ssl.trustStore=/etc/keystore/truststore.jks
+    -Dhttps.proxyHost=hocs-outbound-proxy.{{ .Release.Namespace }}.svc.cluster.local
+    -Dhttps.proxyPort=31290
+    -Dhttp.nonProxyHosts=*.{{ .Release.Namespace }}.svc.cluster.local
+  springProfiles: 'sqs'
+  infoService: https://hocs-info-service.{{ .Release.Namespace }}.svc.cluster.local
+  caseService: https://hocs-casework.{{ .Release.Namespace }}.svc.cluster.local
+  port: '8080'
+  preStop: '[ "sh", "-c", "sleep 20" ]'
+
+cron:
+  refresh: '30 5 * * *'
