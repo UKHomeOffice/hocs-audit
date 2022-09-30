@@ -1,0 +1,4 @@
+---
+
+keycloak:
+  domain: wcs-notprod.homeoffice.gov.uk

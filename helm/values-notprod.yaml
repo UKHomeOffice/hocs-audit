@@ -1,0 +1,14 @@
+---
+
+minReplicas: 1
+maxReplicas: 1
+
+deploymentAnnotations:
+  downscaler/downtime: "Mon-Sun 00:00-07:55 Europe/London,Mon-Sun 23:35-24:00 Europe/London"
+
+keycloak:
+  realm: https://sso-dev.notprod.homeoffice.gov.uk/auth/realms/hocs-notprod
+  domain: cs-notprod.homeoffice.gov.uk
+
+cron:
+  refresh: '0 9 * * 1-5'
