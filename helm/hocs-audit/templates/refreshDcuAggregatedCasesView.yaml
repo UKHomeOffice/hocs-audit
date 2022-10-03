@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: hocs-refresh-dcu-caseview
 spec:
-  schedule: {{.REFRESH_CRON}}
+  schedule: {{ .Values.cron.refresh }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -28,5 +28,5 @@ spec:
                       key: plaintext
               command: [ "/bin/sh", "-c" ]
               args:
-                - wget --no-check-certificate --spider -S "https://${HOCS_BASICAUTH}@hocs-audit.{{ .Release.Namespace }}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh"
+                - "curl -vk -X POST -u ${HOCS_BASICAUTH} -H 'User-Agent: Refresh DCU_AGGREGATED_CASES' https://hocs-audit.{{ .Release.Namespace }}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh"
           restartPolicy: Never
