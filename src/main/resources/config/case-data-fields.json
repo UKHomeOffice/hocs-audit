@@ -436,7 +436,8 @@
     "ExGratiaThirdRefundReason",
     "ExGratiaRefundAmount",
     "ExGratiaPaymentMethod",
-    "ExGratiaPaymentReferenceNumber"
+    "ExGratiaPaymentReferenceNumber",
+    "ExGratiaAdditionalInformation"
   ],
   "POGR2": [
     "PreviousCaseReference",
