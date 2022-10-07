@@ -492,7 +492,8 @@
     "ExGratiaThirdRefundReason",
     "ExGratiaRefundAmount",
     "ExGratiaPaymentMethod",
-    "ExGratiaPaymentReferenceNumber"
+    "ExGratiaPaymentReferenceNumber",
+    "ExGratiaAdditionalInformation"
   ],
   "SMC": [
     "DateReceived",
