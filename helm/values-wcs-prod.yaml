@@ -1,5 +1,8 @@
 ---
+hocs-generic-service:
 
-keycloak:
-  realm: https://sso.digital.homeoffice.gov.uk/auth/realms/HOCS
-  domain: wcs.homeoffice.gov.uk
+  clusterPrefix: wcs
+
+  keycloak:
+    realm: https://sso.digital.homeoffice.gov.uk/auth/realms/HOCS
+    domain: wcs.homeoffice.gov.uk
