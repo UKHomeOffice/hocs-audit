@@ -22,5 +22,6 @@ hocs-generic-service:
       requests:
         memory: 512Mi
 
-cron:
+dcuCaseView:
+  enabled: false
   refresh: '0 9 * * 1-5'

@@ -34,5 +34,6 @@ hocs-generic-service:
     timeout: 300
     domain: cs.homeoffice.gov.uk
 
-cron:
+dcuCaseView:
+  enabled: true
   refresh: '30 5 * * *'
