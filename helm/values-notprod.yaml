@@ -23,5 +23,4 @@ hocs-generic-service:
         memory: 512Mi
 
 dcuCaseView:
-  enabled: false
   refresh: '0 9 * * 1-5'
