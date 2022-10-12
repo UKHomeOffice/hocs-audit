@@ -1,1 +1,4 @@
 ---
+
+dcuCaseView:
+  enabled: true
