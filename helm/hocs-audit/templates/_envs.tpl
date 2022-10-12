@@ -1,10 +1,10 @@
 {{- define "deployment.envs" }}
 - name: JAVA_OPTS
-  value: '{{ tpl .Values.app.javaOpts . }}'
+  value: '{{ tpl .Values.app.env.javaOpts . }}'
 - name: SERVER_PORT
-  value: '{{ tpl .Values.app.port . }}'
+  value: '{{ include "hocs-app.port" . }}'
 - name: SPRING_PROFILES_ACTIVE
-  value: '{{ tpl .Values.app.springProfiles . }}'
+  value: '{{ tpl .Values.app.env.springProfiles . }}'
 - name: DB_HOST
   valueFrom:
     secretKeyRef:
@@ -53,9 +53,9 @@
       name: {{ .Release.Namespace }}-audit-sqs
       key: secret_access_key
 - name: HOCS_INFO_SERVICE
-  value: '{{ tpl .Values.app.infoService . }}'
+  value: '{{ tpl .Values.app.env.infoService . }}'
 - name: HOCS_CASE_SERVICE
-  value: '{{ tpl .Values.app.caseService . }}'
+  value: '{{ tpl .Values.app.env.caseService . }}'
 - name: HOCS_BASICAUTH
   valueFrom:
     secretKeyRef:

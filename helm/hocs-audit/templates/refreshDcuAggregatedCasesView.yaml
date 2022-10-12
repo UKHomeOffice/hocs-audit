@@ -1,9 +1,10 @@
+{{- if .Values.dcuCaseView.enabled }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: hocs-refresh-dcu-caseview
 spec:
-  schedule: {{ .Values.cron.refresh }}
+  schedule: {{ .Values.dcuCaseView.refresh }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -30,3 +31,4 @@ spec:
               args:
                 - "curl -vk -X POST -u ${HOCS_BASICAUTH} -H 'User-Agent: Refresh DCU_AGGREGATED_CASES' https://hocs-audit.{{ .Release.Namespace }}.svc.cluster.local/admin/export/custom/DCU_AGGREGATED_CASES/refresh"
           restartPolicy: Never
+  {{- end }}
