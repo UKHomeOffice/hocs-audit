@@ -295,6 +295,7 @@
     "ResponseDate",
     "BusinessArea",
     "CompOrigin",
+    "CompOriginOther",
     "OutcomeOther",
     "DateReceived",
     "ComplainantDOB",
@@ -309,7 +310,6 @@
     "CompCategoriesSeriousAndMinor",
     "CompCategoriesSerious",
     "LoaRequired",
-    "CompOriginOther",
     "PsuReference"
   ],
   "MIN": [
