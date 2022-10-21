@@ -295,6 +295,7 @@
     "ResponseDate",
     "BusinessArea",
     "CompOrigin",
+    "CompOriginOther",
     "OutcomeOther",
     "DateReceived",
     "ComplainantDOB",
@@ -326,7 +327,7 @@
     "CatFraud",
     "CatRacism",
     "LoaRequired",
-    "CompOriginOther"
+    "PsuReference"
   ],
   "MIN": [
     "DateOfCorrespondence",
