@@ -310,7 +310,10 @@
     "CompCategoriesSeriousAndMinor",
     "CompCategoriesSerious",
     "LoaRequired",
-    "PsuReference"
+    "PsuReference",
+    "ComplaintOutcome",
+    "WithdrawalReason",
+    "DateOfResponse"
   ],
   "MIN": [
     "DateOfCorrespondence",
