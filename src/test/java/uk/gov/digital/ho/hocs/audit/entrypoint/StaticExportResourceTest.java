@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.Set;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpMethod.GET;
 
+@ActiveProfiles({"local", "extracts"})
 public class StaticExportResourceTest extends BaseExportResourceTest {
 
     @Test

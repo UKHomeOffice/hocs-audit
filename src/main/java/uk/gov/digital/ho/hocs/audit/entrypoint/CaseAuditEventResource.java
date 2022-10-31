@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Profile("!extracts")
 @RestController
 class CaseAuditEventResource {
 
@@ -44,7 +46,6 @@ class CaseAuditEventResource {
         var auditEvents = auditEventService.getAuditDataByCaseUUID(caseUUID, filterTypes);
         return ResponseEntity.ok(GetAuditListResponse.from(auditEvents));
     }
-
     @PostMapping(value = "/audit/case/{caseUUID}/delete",
                  consumes = APPLICATION_JSON_VALUE,
                  produces = APPLICATION_JSON_VALUE)

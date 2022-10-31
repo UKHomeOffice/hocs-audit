@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @RestController
+@Profile("extracts")
 public class CustomExportResource {
 
     private final CustomExportService customExportService;

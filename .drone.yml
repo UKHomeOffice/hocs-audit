@@ -40,6 +40,22 @@ steps:
       - ./ci/helm/helm-deploy.sh --values ./helm/values-notprod.yaml --values ./helm/values-wcs-notprod.yaml --values ./helm/values-dev.yaml
     depends_on:
       - cs-dev
+
+  - <<: *deploy
+    name: cs-dev-extracts
+    environment:
+      CHART_NAME: hocs-extracts
+      KUBE_NAMESPACE: cs-dev
+    depends_on:
+      - checkout
+
+  - <<: *deploy
+    name: wcs-dev-extracts
+    environment:
+      CHART_NAME: hocs-extracts
+      KUBE_NAMESPACE: wcs-dev
+    depends_on:
+      - cs-dev-extracts
 ---
 kind: pipeline
 type: kubernetes

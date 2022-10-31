@@ -1,6 +1,6 @@
 ---
 hocs-generic-service:
-  nameOverride: hocs-audit
+  nameOverride: hocs-extracts
 
   deployment:
     annotations:
@@ -24,11 +24,13 @@ hocs-generic-service:
         -Dhttps.proxyHost=hocs-outbound-proxy.{{ .Release.Namespace }}.svc.cluster.local
         -Dhttps.proxyPort=31290
         -Dhttp.nonProxyHosts=*.{{ .Release.Namespace }}.svc.cluster.local
-      springProfiles: 'sqs'
+      springProfiles: 'sqs,extracts'
+      infoService: https://hocs-info-service.{{ .Release.Namespace }}.svc.cluster.local
+      caseService: https://hocs-casework.{{ .Release.Namespace }}.svc.cluster.local
 
   keycloak:
-    enabled: false
+    enabled: true
+    realm: https://sso.digital.homeoffice.gov.uk/auth/realms/hocs-prod
+    timeout: 300
+    domain: cs.homeoffice.gov.uk
 
-dcuCaseView:
-  enabled: true
-  refresh: '30 5 * * *'
