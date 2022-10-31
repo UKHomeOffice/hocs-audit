@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 
 @Slf4j
 @RestController
+@Profile("extracts")
 public class StaticExportResource {
 
     private final StaticTeamService staticTeamService;

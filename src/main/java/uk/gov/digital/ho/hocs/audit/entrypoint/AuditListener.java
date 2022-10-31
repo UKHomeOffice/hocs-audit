@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.core.RequestData;
@@ -13,6 +14,7 @@ import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
 import java.util.Map;
 
 @Service
+@Profile("!extracts")
 public class AuditListener {
 
     private final ObjectMapper objectMapper;

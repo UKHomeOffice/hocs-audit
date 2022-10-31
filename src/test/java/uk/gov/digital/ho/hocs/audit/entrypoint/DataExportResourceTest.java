@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.SomuTypeDto;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.HttpMethod.GET;
 
+@ActiveProfiles({"local", "extracts"})
 public class DataExportResourceTest extends BaseExportResourceTest {
 
     @BeforeEach
