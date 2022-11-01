@@ -311,7 +311,7 @@
     "CompCategoriesSerious",
     "LoaRequired",
     "PsuReference",
-    "ComplaintOutcome",
+    "PsuComplaintOutcome",
     "WithdrawalReason",
     "DateOfResponse"
   ],
