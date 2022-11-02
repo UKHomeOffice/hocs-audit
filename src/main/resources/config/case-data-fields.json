@@ -327,7 +327,10 @@
     "CatFraud",
     "CatRacism",
     "LoaRequired",
-    "PsuReference"
+    "PsuReference",
+    "PsuComplaintOutcome",
+    "WithdrawalReason",
+    "DateOfResponse"
   ],
   "MIN": [
     "DateOfCorrespondence",
