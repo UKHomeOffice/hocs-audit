@@ -1,6 +1,8 @@
 ---
 hocs-generic-service:
 
+  isProd: false
+
   autoscale:
     enabled: false
 
@@ -8,3 +10,7 @@ hocs-generic-service:
     replicas: 1
     annotations:
       downscaler/downtime: "Mon-Sun 00:00-07:55 Europe/London,Mon-Sun 18:05-24:00 Europe/London"
+
+  keycloak:
+    realm: https://sso-dev.notprod.homeoffice.gov.uk/auth/realms/hocs-notprod
+    domain: cs-notprod.homeoffice.gov.uk
