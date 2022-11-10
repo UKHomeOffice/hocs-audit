@@ -29,7 +29,7 @@ steps:
         from_secret: cs_notprod
       VERSION: ${DRONE_TAG}
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/values/dev/hocs-audit.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-audit.yaml
     depends_on:
       - checkout
 
@@ -38,7 +38,7 @@ steps:
     environment:
       KUBE_NAMESPACE: wcs-dev
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/values/dev/hocs-audit.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-audit.yaml
     depends_on:
       - cs-dev-audit
 
@@ -49,7 +49,7 @@ steps:
       CHART_VERSION: 2.0.1
       KUBE_NAMESPACE: cs-dev
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/values/dev/hocs-extracts.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-extracts.yaml
     depends_on:
       - checkout
 
@@ -59,6 +59,6 @@ steps:
       CHART_NAME: hocs-extracts
       KUBE_NAMESPACE: wcs-dev
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/values/dev/hocs-extracts.yaml --values ./helm/hocs-extracts-wcs.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-extracts.yaml --values ./helm/hocs-extracts-wcs.yaml
     depends_on:
       - cs-dev-extracts
