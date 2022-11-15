@@ -14,7 +14,7 @@ import uk.gov.digital.ho.hocs.audit.service.AuditEventService;
 import java.util.Map;
 
 @Service
-@Profile("!extracts")
+@Profile("consumer")
 public class AuditListener {
 
     private final ObjectMapper objectMapper;
