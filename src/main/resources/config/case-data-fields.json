@@ -249,7 +249,8 @@
     "Close Reason",
     "Withdrawn",
     "WithdrawalReason",
-    "BusAreaBasedOnDirectorate"
+    "BusAreaBasedOnDirectorate",
+    "CaseCreateContinue"
   ],
   "DTEN": [
     "DateOfCorrespondence",
