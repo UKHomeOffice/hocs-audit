@@ -54,6 +54,5 @@ aws:
 hocs:
   case-service: http://localhost:8082
   info-service: http://localhost:8085
-  basicauth: UNSET
 
 postgresViewAllowList: dcu_aggregated_cases,dcu_business,dcu_prau_workflow
