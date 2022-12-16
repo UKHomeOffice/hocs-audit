@@ -46,7 +46,7 @@ steps:
     name: cs-dev-extracts
     environment:
       CHART_NAME: hocs-extracts
-      CHART_VERSION: ^3.0.0
+      CHART_VERSION: ^4.0.0
       KUBE_NAMESPACE: cs-dev
     commands:
       - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-extracts.yaml
