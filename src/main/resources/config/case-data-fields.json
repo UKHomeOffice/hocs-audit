@@ -177,7 +177,9 @@
     "WithdrawalReason",
     "BusAreaBasedOnDirectorate",
     "PsuReference",
-    "PsuTriageOutcome"
+    "PsuTriageOutcome",
+    "PsuComplaintOutcome",
+    "WithdrawalReason"
   ],
   "COMP2": [
     "PreviousCaseReference",
@@ -254,7 +256,9 @@
     "BusAreaBasedOnDirectorate",
     "CaseCreateContinue",
     "PsuReference",
-    "PsuTriageOutcome"
+    "PsuTriageOutcome",
+    "PsuComplaintOutcome",
+    "WithdrawalReason"
   ],
   "DTEN": [
     "DateOfCorrespondence",
