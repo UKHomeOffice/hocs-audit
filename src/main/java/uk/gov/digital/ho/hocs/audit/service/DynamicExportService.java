@@ -114,8 +114,8 @@ public abstract class DynamicExportService {
                     printer.printRecord((Object[]) parsedData);
                     printer.flush();
                 } catch (IOException e) {
-                    throw new AuditExportException("Unable to parse record for audit {} for reason {}",
-                        CSV_RECORD_EXPORT_FAILURE, audit.getUuid(), e.getMessage());
+                    throw new AuditExportException(String.format("Unable to parse record for audit %s for reason %s", audit.getUuid(), e.getMessage()),
+                        CSV_RECORD_EXPORT_FAILURE, e);
                 }
             });
         } catch (IOException e) {
