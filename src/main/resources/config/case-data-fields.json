@@ -175,7 +175,8 @@
     "CloseReasonText",
     "Withdrawn",
     "WithdrawalReason",
-    "BusAreaBasedOnDirectorate"
+    "BusAreaBasedOnDirectorate",
+    "PsuReference"
   ],
   "COMP2": [
     "PreviousCaseReference",
@@ -250,7 +251,8 @@
     "Withdrawn",
     "WithdrawalReason",
     "BusAreaBasedOnDirectorate",
-    "CaseCreateContinue"
+    "CaseCreateContinue",
+    "PsuReference"
   ],
   "DTEN": [
     "DateOfCorrespondence",
