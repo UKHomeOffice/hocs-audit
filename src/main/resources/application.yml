@@ -31,9 +31,9 @@ spring:
       javax:
         persistence:
           query:
-            timeout: 60000
+            timeout: ${db.query.timeout:60000}
           lock:
-            timeout: 60000
+            timeout: ${db.query.timeout:60000}
 management:
   endpoints:
     enabled-by-default: false
