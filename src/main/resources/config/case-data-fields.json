@@ -49,6 +49,14 @@
     "PaymentRequested",
     "PaymentTypeConsolatory",
     "PaymentTypeExGratia",
+    "CatAssault",
+    "CatFraud",
+    "CatOtherUnprof",
+    "CatRacism",
+    "CatRude",
+    "CatSexAssault",
+    "CatTheft",
+    "CatUnfair",
     "PsuReference"
   ],
   "BF2": [
