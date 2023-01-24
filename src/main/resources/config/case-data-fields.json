@@ -48,7 +48,8 @@
     "TransferToCaseRef",
     "PaymentRequested",
     "PaymentTypeConsolatory",
-    "PaymentTypeExGratia"
+    "PaymentTypeExGratia",
+    "PsuReference"
   ],
   "BF2": [
     "PreviousCaseReference",
@@ -100,7 +101,8 @@
     "CompType",
     "PaymentRequested",
     "PaymentTypeConsolatory",
-    "PaymentTypeExGratia"
+    "PaymentTypeExGratia",
+    "PsuReference"
   ],
   "COMP": [
     "DateReceived",
