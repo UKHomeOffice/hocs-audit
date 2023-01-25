@@ -22,8 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -45,32 +43,6 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         zonedDateTimeConverter = new ZonedDateTimeConverter();
 
         given(infoClient.getCaseTypes()).willReturn(Set.of(new CaseTypeDto("Test", "a1", "TEST")));
-    }
-
-    @Test
-    public void shouldReturnLatestCaseDataReport() throws IOException {
-        LocalDate from = LocalDate.of(2020, 1, 1);
-        caseDataExportService.export(from, LocalDate.now().plusDays(1), outputStream, "TEST", false, false,
-            zonedDateTimeConverter);
-
-        // Verify that the latest table is used with future dates
-        verify(auditRepository).findAuditEventLatestEventsAfterDate(eq(LocalDateTime.of(from, LocalTime.MIN)),
-            any(LocalDateTime.class), eq(CaseDataExportService.EVENTS), eq("a1"));
-
-        var result = outputStream.toString(StandardCharsets.UTF_8);
-        Assertions.assertNotNull(result);
-
-        var headers = getCsvHeaderRow(result);
-        Assertions.assertEquals(10, headers.length);
-
-        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
-        var expectedRows = List.of(
-            List.of("2020-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000",
-                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", ""),
-            List.of(getTodaysLocalDateTime(), "CASE_UPDATED", "40000000-0000-0000-0000-000000000000",
-                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-1"));
-        Assertions.assertEquals(3, rows.size());
-        Assertions.assertTrue(rows.containsAll(expectedRows));
     }
 
     @Test

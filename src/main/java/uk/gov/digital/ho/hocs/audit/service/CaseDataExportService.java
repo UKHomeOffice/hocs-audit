@@ -157,10 +157,6 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
             ? LocalDateTime.of(to, LocalTime.MAX)
             : LocalDateTime.now();
 
-        if (peggedTo.toLocalDate().equals(LocalDate.now())) {
-            return auditRepository.findAuditEventLatestEventsAfterDate(LocalDateTime.of(from, LocalTime.MIN),
-                LocalDateTime.now(), events, caseTypeCode);
-        }
         return auditRepository.findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN), peggedTo,
             events, caseTypeCode);
     }
