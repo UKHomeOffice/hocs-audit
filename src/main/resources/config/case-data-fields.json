@@ -60,7 +60,8 @@
     "PsuReference",
     "PsuTriageOutcome",
     "PsuComplaintOutcome",
-    "WithdrawalReason"
+    "WithdrawalReason",
+    "DateOfResponse"
   ],
   "BF2": [
     "PreviousCaseReference",
@@ -116,7 +117,8 @@
     "PsuReference",
     "PsuTriageOutcome",
     "PsuComplaintOutcome",
-    "WithdrawalReason"
+    "WithdrawalReason",
+    "DateOfResponse"
   ],
   "COMP": [
     "DateReceived",
