@@ -20,3 +20,4 @@ hocs-generic-service:
 
 dcuCaseView:
   enabled: true
+  refresh: '30 9 * * *'
