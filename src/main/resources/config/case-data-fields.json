@@ -58,7 +58,9 @@
     "CatTheft",
     "CatUnfair",
     "PsuReference",
-    "PsuTriageOutcome"
+    "PsuTriageOutcome",
+    "PsuComplaintOutcome",
+    "WithdrawalReason"
   ],
   "BF2": [
     "PreviousCaseReference",
@@ -112,7 +114,9 @@
     "PaymentTypeConsolatory",
     "PaymentTypeExGratia",
     "PsuReference",
-    "PsuTriageOutcome"
+    "PsuTriageOutcome",
+    "PsuComplaintOutcome",
+    "WithdrawalReason"
   ],
   "COMP": [
     "DateReceived",
