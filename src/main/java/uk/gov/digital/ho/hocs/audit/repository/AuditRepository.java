@@ -54,15 +54,6 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
 
     @QueryHints(value = { @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
         @QueryHint(name = HINT_CACHEABLE, value = "false"), @QueryHint(name = READ_ONLY, value = "true") })
-    @Query(value = "SELECT a.* FROM audit_event_latest_events a " + "WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND " + "a.type IN ?3 AND " + "a.case_type = ?4 AND " + "a.deleted = false ORDER BY a.case_uuid, a.type, a.audit_timestamp DESC " + "FOR UPDATE",
-           nativeQuery = true)
-    Stream<AuditEvent> findAuditEventLatestEventsAfterDate(LocalDateTime of,
-                                                           LocalDateTime to,
-                                                           String[] events,
-                                                           String caseType);
-
-    @QueryHints(value = { @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
-        @QueryHint(name = HINT_CACHEABLE, value = "false"), @QueryHint(name = READ_ONLY, value = "true") })
     @Query(value = "SELECT audit_payload->>'reference' AS caseReference, cast(case_uuid AS VARCHAR(36)) as caseUuid FROM audit_event_latest_events WHERE type = 'CASE_CREATED' AND case_type = ?1",
            nativeQuery = true)
     Stream<CaseReference> getCaseReferencesForType(String caseType);
