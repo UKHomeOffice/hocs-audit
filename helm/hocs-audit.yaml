@@ -17,3 +17,6 @@ hocs-generic-service:
       requests:
         cpu: 50m
         memory: 512Mi
+
+dcuCaseView:
+  enabled: true
