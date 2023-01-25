@@ -57,7 +57,8 @@
     "CatSexAssault",
     "CatTheft",
     "CatUnfair",
-    "PsuReference"
+    "PsuReference",
+    "PsuTriageOutcome"
   ],
   "BF2": [
     "PreviousCaseReference",
@@ -110,7 +111,8 @@
     "PaymentRequested",
     "PaymentTypeConsolatory",
     "PaymentTypeExGratia",
-    "PsuReference"
+    "PsuReference",
+    "PsuTriageOutcome"
   ],
   "COMP": [
     "DateReceived",
