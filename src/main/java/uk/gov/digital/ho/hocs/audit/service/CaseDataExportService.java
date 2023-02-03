@@ -42,9 +42,11 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED" };
 
-    private static final Map<String, String[]> ENTITY_LISTS = Map.of("MPAM",
-        new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" }, "MTS",
-        new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" });
+    private static final Map<String, String[]> ENTITY_LISTS = Map.of(
+        "MPAM", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
+        "MTS", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
+        "COMP", new String[] { "COMP_BUS_AREA_ALL", "COMP_CCT_ENQ_REASON"}
+    );
 
     private final CaseDataFieldReader caseDataFieldReader;
 
