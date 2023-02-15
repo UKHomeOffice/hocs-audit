@@ -46,6 +46,8 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
         "MPAM", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
         "MTS", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
         "COMP", new String[] { "COMP_IANDP_BUS_AREA", "COMP_RASI_BUS_AREA", "COMP_VCIC_BUS_AREA", "COMP_VCOS_BUS_AREA",
+            "COMP_OTHER_BUS_AREA", "COMP_EUSS_FP_BUS_AREA", "COMP_CCT_ENQ_REASON" },
+        "COMP2", new String[] { "COMP_IANDP_BUS_AREA", "COMP_RASI_BUS_AREA", "COMP_VCIC_BUS_AREA", "COMP_VCOS_BUS_AREA",
             "COMP_OTHER_BUS_AREA", "COMP_EUSS_FP_BUS_AREA", "COMP_CCT_ENQ_REASON" }
     );
 
