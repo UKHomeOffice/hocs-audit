@@ -1,14 +1,47 @@
-name: 'CodeQL'
+name: "CodeQL Scan"
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-    paths:
-      - 'src/main/java/**'
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '45 12 * * 1'
 
 jobs:
   analyze:
-    uses: UKHomeOffice/hocs-github-actions/.github/workflows/codeql-analysis-gradle.yml@v2
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
