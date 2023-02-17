@@ -286,7 +286,8 @@
     "PsuReference",
     "PsuTriageOutcome",
     "PsuComplaintOutcome",
-    "WithdrawalReason"
+    "WithdrawalReason",
+    "ChooseExternalContractor"
   ],
   "DTEN": [
     "DateOfCorrespondence",
