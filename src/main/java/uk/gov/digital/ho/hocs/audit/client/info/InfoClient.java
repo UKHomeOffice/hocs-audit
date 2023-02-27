@@ -82,7 +82,7 @@ public class InfoClient {
 
     @Cacheable(value = "getEntitiesForList", unless = "#result == null")
     public Set<EntityDto> getEntitiesForList(String simpleName) {
-        return restHelper.get(rootUri, String.format("/entity/list/%s", simpleName),
+        return restHelper.get(rootUri, String.format("/entity/list/%s?activeOnly=false", simpleName),
             new ParameterizedTypeReference<>() {});
     }
 
