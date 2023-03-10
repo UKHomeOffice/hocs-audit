@@ -64,8 +64,6 @@
   "BF2": [
     "PreviousCaseReference",
     "DateReceived",
-    "ComplainantDOB",
-    "ComplainantGender",
     "ComplainantNationality",
     "ComplainantCompanyName",
     "ComplainantHORef",
@@ -74,7 +72,6 @@
     "LoaDate",
     "Withdrawn",
     "WithdrawalReason",
-    "Channel",
     "PrevCompRef",
     "3rdPartyRef",
     "Region",
