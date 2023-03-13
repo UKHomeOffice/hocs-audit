@@ -1,0 +1,34 @@
+---
+hocs-generic-service:
+
+  deployment:
+    annotations:
+      downscaler/downtime: "Mon-Fri 00:00-07:50 Europe/London,Mon-Fri 18:05-24:00 Europe/London"
+
+  truststore:
+    resources:
+      requests:
+        cpu: 50m
+
+  app:
+    image:
+      repository: quay.io/ukhomeofficedigital/hocs-audit
+    env:
+      javaOpts: >-
+        -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=65
+        -Djava.security.egd=file:/dev/./urandom
+        -Djavax.net.ssl.trustStore=/etc/keystore/truststore.jks
+        -Dhttps.proxyHost=hocs-outbound-proxy.cs-dev.svc.cluster.local
+        -Dhttps.proxyPort=31290
+        -Dhttp.nonProxyHosts=*.cs-dev.svc.cluster.local
+      springProfiles: 'sqs, consumer'
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 512Mi
+
+dcuCaseView:
+  enabled: true
+  refresh: '30 9 * * *'

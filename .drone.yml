@@ -10,7 +10,7 @@ trigger:
 
 steps:
   - name: checkout
-    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.0
+    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.1
     commands:
       - git fetch --tags
       - git checkout ${DRONE_TAG}
@@ -18,10 +18,10 @@ steps:
 
   - &deploy
     name: cs-dev-audit
-    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.0
+    image: quay.io/ukhomeofficedigital/hocs-helm-kubectl:1.1.1
     environment:
       CHART_NAME: hocs-audit
-      CHART_VERSION: ^6.0.0
+      CHART_VERSION: ^7.0.0
       KUBE_CLUSTER: acp-notprod
       KUBE_NAMESPACE: cs-dev
       KUBE_SERVER: https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
@@ -29,7 +29,7 @@ steps:
         from_secret: cs_notprod
       VERSION: ${DRONE_TAG}
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-audit.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/cs-dev/hocs-audit.yaml
     depends_on:
       - checkout
 
@@ -38,7 +38,7 @@ steps:
     environment:
       KUBE_NAMESPACE: wcs-dev
     commands:
-      - ./ci/helm/helm-chart-deploy.sh --values ./helm/hocs-audit.yaml
+      - ./ci/helm/helm-chart-deploy.sh --values ./helm/wcs-dev/hocs-audit.yaml
     depends_on:
       - cs-dev-audit
 
