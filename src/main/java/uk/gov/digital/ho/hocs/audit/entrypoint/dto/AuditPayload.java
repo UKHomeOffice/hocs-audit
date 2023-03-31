@@ -239,4 +239,16 @@ public interface AuditPayload {
 
     }
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    class Document {
+
+        private UUID documentUUID;
+
+        private String documentType;
+
+        private String documentTitle;
+
+    }
+
 }
