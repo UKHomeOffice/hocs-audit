@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.audit.service;
 
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,9 @@ import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.BDDMockito.given;
 
@@ -39,8 +42,12 @@ public class DocumentExportServiceTest extends BaseExportServiceTest {
         var headers = getCsvHeaderRow(result);
         Assertions.assertEquals(4, headers.length);
 
-        var rows = getCsvDataRows(result);
-        Assertions.assertEquals(1, rows.size());
+        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
+        var expectedRows = List.of(
+            List.of("10000000-0000-0000-0000-000000000001", "2020-01-01T00:00:00.000000", "title", "type")
+        );
+        Assertions.assertTrue(rows.containsAll(expectedRows));
+        Assertions.assertEquals(2, rows.size());
     }
 
 }

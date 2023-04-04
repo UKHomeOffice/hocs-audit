@@ -105,14 +105,7 @@ public class DocumentExportService extends DynamicExportService {
             return new ExportDataConverter();
         }
 
-        Map<String, String> uuidToName = new HashMap<>();
-
-        uuidToName.putAll(
-            infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
-        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream().collect(
-            Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
-
-        return new ExportDataConverter(uuidToName, Collections.emptyMap(), caseType.getShortCode(), auditRepository);
+        return new ExportDataConverter(new HashMap<>(), Collections.emptyMap(), caseType.getShortCode(), auditRepository);
     }
 
 }
