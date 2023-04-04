@@ -6,6 +6,7 @@ public enum ExportType {
     CASE_DATA,
     CASE_NOTES,
     CORRESPONDENTS,
+    DOCUMENTS,
     EXTENSIONS,
     INTERESTS,
     TOPICS,
