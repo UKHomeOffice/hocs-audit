@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 @Service
 public class CaseDataExportService extends CaseDataDynamicExportService {
 
-    static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED" };
+    static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED", "CASE_REOPENED" };
 
     private static final Map<String, String[]> ENTITY_LISTS = Map.of(
         "MPAM", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
