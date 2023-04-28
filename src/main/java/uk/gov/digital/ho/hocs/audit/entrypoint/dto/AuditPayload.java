@@ -87,6 +87,9 @@ public interface AuditPayload {
         @JsonProperty("dateReceived")
         private LocalDate dateReceived;
 
+        @JsonProperty("migratedReference")
+        private String migratedReference;
+
     }
 
     @NoArgsConstructor
@@ -120,6 +123,9 @@ public interface AuditPayload {
 
         @JsonProperty("dateReceived")
         private LocalDate dateReceived;
+
+        @JsonProperty("migratedReference")
+        private String migratedReference;
 
     }
 
