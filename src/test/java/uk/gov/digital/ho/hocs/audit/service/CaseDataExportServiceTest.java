@@ -80,7 +80,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         Assertions.assertNotNull(result);
 
         var headers = getCsvHeaderRow(result);
-        Assertions.assertEquals(10, headers.length);
+        Assertions.assertEquals(11, headers.length);
         Assertions.assertArrayEquals(headerConverter.substitute(concatStringArrays(caseDataExportService.getHeaders(),
             caseDataExportService.getAdditionalHeaders(new CaseTypeDto("Test", "a1", "TEST")))), headers);
 

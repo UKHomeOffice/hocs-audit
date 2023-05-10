@@ -121,6 +121,9 @@ public interface AuditPayload {
         @JsonProperty("dateReceived")
         private LocalDate dateReceived;
 
+        @JsonProperty("migratedReference")
+        private String migratedReference;
+
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
