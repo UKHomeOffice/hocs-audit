@@ -59,14 +59,14 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         Assertions.assertNotNull(result);
 
         var headers = getCsvHeaderRow(result);
-        Assertions.assertEquals(10, headers.length);
+        Assertions.assertEquals(11, headers.length);
 
         var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
         var expectedRows = List.of(
             List.of("2020-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000",
-                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", ""),
+                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-MIGREF", ""),
             List.of("2020-01-01T01:00:00.000000", "CASE_UPDATED", "40000000-0000-0000-0000-000000000000",
-                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-1"));
+                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-MIGREF", "TEST-1"));
         Assertions.assertEquals(3, rows.size());
         Assertions.assertTrue(rows.containsAll(expectedRows));
     }
