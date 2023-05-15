@@ -88,6 +88,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
         data.add(Objects.toString(caseData.getCaseDeadline(), ""));
         data.add(exportDataConverter.convertValue(Objects.toString(caseData.getPrimaryCorrespondent(), "")));
         data.add(exportDataConverter.convertValue(Objects.toString(caseData.getPrimaryTopic(), "")));
+        data.add(caseData.getMigratedReference());
 
         if (caseData.getData() != null) {
             for (String field : additionalHeaders) {
@@ -118,7 +119,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
     @Override
     protected String[] getHeaders() {
         return new String[] { "timestamp", "event", "userId", "caseUuid", "reference", "caseType", "deadline",
-            "primaryCorrespondent", "primaryTopic" };
+            "primaryCorrespondent", "primaryTopic", "migratedReference" };
     }
 
     @Override

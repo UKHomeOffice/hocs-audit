@@ -47,7 +47,7 @@ public class DocumentExportServiceTest extends BaseExportServiceTest {
             List.of("10000000-0000-0000-0000-000000000001", "2020-01-01T00:00:00.000000", "title", "type")
         );
         Assertions.assertTrue(rows.containsAll(expectedRows));
-        Assertions.assertEquals(2, rows.size());
+        Assertions.assertEquals(3, rows.size());
     }
 
 }
