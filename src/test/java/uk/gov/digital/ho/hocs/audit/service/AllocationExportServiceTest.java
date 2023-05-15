@@ -40,7 +40,7 @@ public class AllocationExportServiceTest extends BaseExportServiceTest {
         Assertions.assertEquals(7, headers.length);
 
         var rows = getCsvDataRows(result);
-        Assertions.assertEquals(2, rows.size());
+        Assertions.assertEquals(3, rows.size());
     }
 
 }
