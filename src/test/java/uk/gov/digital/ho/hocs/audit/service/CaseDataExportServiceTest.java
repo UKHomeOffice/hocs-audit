@@ -48,7 +48,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
     @Test
     public void shouldReturnBetweenCaseDataReport() throws IOException {
         LocalDate from = LocalDate.of(2020, 1, 1);
-        LocalDate to = LocalDate.now().minusWeeks(1);
+        LocalDate to = LocalDate.of(2020, 1, 31);
 
         caseDataExportService.export(from, to, outputStream, "TEST", false, false, zonedDateTimeConverter);
 
@@ -64,8 +64,34 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
         var expectedRows = List.of(
             List.of("2020-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000",
-                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-MIGREF", ""),
+                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "", ""),
             List.of("2020-01-01T01:00:00.000000", "CASE_UPDATED", "40000000-0000-0000-0000-000000000000",
+                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "", "TEST-1"));
+        Assertions.assertEquals(3, rows.size());
+        Assertions.assertTrue(rows.containsAll(expectedRows));
+    }
+
+    @Test
+    public void shouldReturnBetweenCmsCaseDataReport() throws IOException {
+        LocalDate from = LocalDate.of(2023, 1, 1);
+        LocalDate to = LocalDate.of(2023, 1, 31);
+
+        caseDataExportService.export(from, to, outputStream, "TEST", false, false, zonedDateTimeConverter);
+
+        verify(auditRepository).findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN),
+            LocalDateTime.of(to, LocalTime.MAX), CaseDataExportService.EVENTS, "a1");
+
+        var result = outputStream.toString(StandardCharsets.UTF_8);
+        Assertions.assertNotNull(result);
+
+        var headers = getCsvHeaderRow(result);
+        Assertions.assertEquals(11, headers.length);
+
+        var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
+        var expectedRows = List.of(
+            List.of("2023-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000",
+                "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-MIGREF", ""),
+            List.of("2023-01-01T01:00:00.000000", "CASE_UPDATED", "40000000-0000-0000-0000-000000000000",
                 "10000000-0000-0000-0000-000000000000", "TEST", "", "", "", "", "TEST-MIGREF", "TEST-1"));
         Assertions.assertEquals(3, rows.size());
         Assertions.assertTrue(rows.containsAll(expectedRows));
@@ -86,11 +112,17 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
 
         var rows = getCsvDataRows(result).stream().map(CSVRecord::toList).collect(Collectors.toList());
         var expectedRows = List.of(
-            List.of("2020-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000", "TEST",
+            List.of("2023-01-01T00:00:00.000000", "CASE_CREATED", "40000000-0000-0000-0000-000000000000", "TEST",
                 "TEST", "", "", "", "", "TEST-MIGREF", ""),
             List.of(getTodaysLocalDateTime(), "CASE_UPDATED", "40000000-0000-0000-0000-000000000000", "TEST", "TEST",
-                "", "", "", "", "TEST-MIGREF", "TEST-1"));
+                "", "", "", "", "", "TEST-1")
+            );
+            ;
         Assertions.assertEquals(3, rows.size());
+
+        System.out.println(rows);
+        System.out.println(expectedRows);
+
         Assertions.assertTrue(rows.containsAll(expectedRows));
     }
 
