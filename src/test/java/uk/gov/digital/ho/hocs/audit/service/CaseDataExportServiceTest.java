@@ -119,10 +119,6 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
             );
             ;
         Assertions.assertEquals(3, rows.size());
-
-        System.out.println(rows);
-        System.out.println(expectedRows);
-
         Assertions.assertTrue(rows.containsAll(expectedRows));
     }
 
