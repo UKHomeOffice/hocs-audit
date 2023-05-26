@@ -1,5 +1,7 @@
 # hocs-audit
 
+**DB Partitions created until 01/01/27**
+
 [![CodeQL](https://github.com/UKHomeOffice/hocs-audit/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UKHomeOffice/hocs-audit/actions/workflows/codeql-analysis.yml)
 
 This is the Home Office Correspondence Service (HOCS) auditing service. This service is designed to
