@@ -801,6 +801,7 @@
     "BF_Probate",
     "BF_RegistrationQA",
     "BF_WithClaimant",
+    "BF_WorkInProgress",
     "IsHighProfileDetainedDeported",
     "IsHighProfileDataBreach",
     "IsHighProfileApologyHomeSecretary",
