@@ -34,7 +34,7 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("timeline")
+@ActiveProfiles({"local", "timeline"})
 public abstract class BaseExportResourceTest {
 
     @Autowired
