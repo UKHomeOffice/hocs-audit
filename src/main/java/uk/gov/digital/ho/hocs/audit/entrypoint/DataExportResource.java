@@ -72,7 +72,11 @@ public class DataExportResource {
         }
 
         try {
-            log.info("Exporting {} to CSV", exportType, value(EVENT, CSV_EXPORT_START));
+            log.info(
+                "Exporting {} to CSV with fromDate: {}, toDate: {}, caseType: {}, convert: {}, convertHeader: {}, timestampFormat: {}, timeZoneId: {}",
+                exportType, fromDate, toDate, caseType, convert, convertHeader, timestampFormat, timeZoneId,
+                value(EVENT, CSV_EXPORT_START)
+            );
             service.export(fromDate, toDate, response.getOutputStream(), caseType, convert, convertHeader,
                 zonedDateTimeConverter);
             log.info("Completed export of {} to CSV", exportType, value(EVENT, CSV_EXPORT_COMPLETE));
