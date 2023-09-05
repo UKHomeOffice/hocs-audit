@@ -24,10 +24,13 @@ import java.util.stream.Stream;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-public class CaseDataExportServiceTest extends BaseExportServiceTest {
+public class CaseDataVersionTwoExportServiceTest extends BaseExportServiceTest {
+
+    private final static String[] uniqueEvents = { "CASE_CREATED" };
+    private final static String[] duplicatedEvents = { "CASE_UPDATED", "CASE_COMPLETED" };
 
     @Autowired
-    private CaseDataExportService caseDataExportService;
+    private CaseDataVersionTwoExportService caseDataExportService;
 
     @Autowired
     private HeaderConverter headerConverter;
@@ -51,8 +54,9 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
 
         caseDataExportService.export(from, to, outputStream, "TEST", false, false, zonedDateTimeConverter);
 
+
         verify(auditRepository).findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN),
-            LocalDateTime.of(to, LocalTime.MAX), CaseDataExportService.EVENTS, "a1");
+            LocalDateTime.of(to, LocalTime.MAX), "a1", uniqueEvents, duplicatedEvents);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);
@@ -78,7 +82,7 @@ public class CaseDataExportServiceTest extends BaseExportServiceTest {
         caseDataExportService.export(from, to, outputStream, "TEST", false, false, zonedDateTimeConverter);
 
         verify(auditRepository).findLastAuditDataByDateRangeAndEvents(LocalDateTime.of(from, LocalTime.MIN),
-            LocalDateTime.of(to, LocalTime.MAX), CaseDataExportService.EVENTS, "a1");
+            LocalDateTime.of(to, LocalTime.MAX), "a1", uniqueEvents, duplicatedEvents);
 
         var result = outputStream.toString(StandardCharsets.UTF_8);
         Assertions.assertNotNull(result);
