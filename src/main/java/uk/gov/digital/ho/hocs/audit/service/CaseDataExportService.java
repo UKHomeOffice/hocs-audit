@@ -143,7 +143,10 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
         uuidToName.putAll(
             infoClient.getUnits().stream().collect(Collectors.toMap(UnitDto::getUuid, UnitDto::getDisplayName)));
         caseworkClient.getAllCaseTopics().forEach(
-            topic -> uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText()));
+            topic -> {
+                uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText());
+                uuidToName.putIfAbsent(topic.getUuid().toString(), topic.getTopicText());
+            });
         uuidToName.putAll(caseworkClient.getAllCorrespondents().stream().collect(
             Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
         uuidToName.putAll(infoClient.getCaseTypeActions().stream().collect(
