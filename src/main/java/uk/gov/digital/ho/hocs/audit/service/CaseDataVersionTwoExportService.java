@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
@@ -21,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Service
+@Profile("extracts")
 public class CaseDataVersionTwoExportService extends CaseDataExportService {
 
     public CaseDataVersionTwoExportService(

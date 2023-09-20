@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.service.domain.converter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCorrespondentOutlineResponse;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 
 @Service
 @Slf4j
+@Profile("extracts")
 public class CorrespondentUuidToNameCache {
 
     private final CaseworkClient caseworkClient;
@@ -49,7 +51,7 @@ public class CorrespondentUuidToNameCache {
         this.objectMapper = objectMapper;
 
         try {
-            refreshCacheFromInfo();
+            refreshCacheFromCasework();
         } catch (Exception e) {
             log.error("Failed to cache correspondents from casework", e);
             lookup = null;
@@ -58,7 +60,7 @@ public class CorrespondentUuidToNameCache {
 
     public Map<String, String> getUuidToNameLookup() {
         if (lookup == null) {
-            refreshCacheFromInfo();
+            refreshCacheFromCasework();
         }
 
         updateLookupFromRecentAuditEvents();
@@ -66,7 +68,7 @@ public class CorrespondentUuidToNameCache {
         return Collections.unmodifiableMap(lookup);
     }
 
-    public void refreshCacheFromInfo() {
+    public void refreshCacheFromCasework() {
         lastUpdate = LocalDateTime.now();
 
         lookup =

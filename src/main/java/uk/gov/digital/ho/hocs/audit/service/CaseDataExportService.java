@@ -3,6 +3,7 @@ package uk.gov.digital.ho.hocs.audit.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
@@ -41,11 +42,11 @@ import java.util.stream.Stream;
 import static net.logstash.logback.argument.StructuredArguments.value;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_LOAD_CONVERSION_DATA_END;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_LOAD_CONVERSION_DATA_START;
-import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_START;
 import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
 
 @Service
 @Slf4j
+@Profile("extracts")
 public class CaseDataExportService extends CaseDataDynamicExportService {
 
     static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED" };

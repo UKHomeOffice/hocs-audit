@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.AuditPayload;
@@ -18,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -25,9 +30,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @SpringBootTest
+@ActiveProfiles({"local", "extracts"})
 public class CorrespondentUuidToNameCacheTest {
     @Mock
     CaseworkClient caseworkClient;
@@ -88,6 +92,21 @@ public class CorrespondentUuidToNameCacheTest {
         assertEquals(2, uuidToNameLookup.size());
         assertEquals("Correspondent Updated", uuidToNameLookup.get("2398f672-aed7-42d4-b7ba-5a86d942c34c"));
         assertEquals("Correspondent Three", uuidToNameLookup.get("4343d51a-f815-4797-b957-b19975dbdf4d"));
+    }
+
+    @Test
+    public void whenCaseworkIsNotAvailableDuringBootstrap_theErrorIsIgnoredAndTheCacheLoadedOnFirstAccess() {
+        when(caseworkClient.getAllCorrespondents()).thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
+
+        CorrespondentUuidToNameCache cache = new CorrespondentUuidToNameCache(
+            caseworkClient,
+            auditRepository,
+            objectMapper
+        );
+
+        assertThrows(HttpServerErrorException.class, cache::getUuidToNameLookup);
+        verify(caseworkClient, times(2)).getAllCorrespondents();
+        verifyNoMoreInteractions(caseworkClient, auditRepository);
     }
 
     private CorrespondentUuidToNameCache setupCache() {
