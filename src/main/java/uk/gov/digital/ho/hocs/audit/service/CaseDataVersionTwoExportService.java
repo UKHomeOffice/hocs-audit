@@ -8,6 +8,7 @@ import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.config.CaseDataFieldReader;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CorrespondentUuidToNameCache;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
 
@@ -29,9 +30,11 @@ public class CaseDataVersionTwoExportService extends CaseDataExportService {
         CaseworkClient caseworkClient,
         HeaderConverter headerConverter,
         MalformedDateConverter malformedDateConverter,
+        CorrespondentUuidToNameCache correspondentUuidToNameCache,
         CaseDataFieldReader caseDataFieldReader)
     {
-        super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter, caseDataFieldReader);
+        super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter,
+            correspondentUuidToNameCache, caseDataFieldReader);
     }
 
     private final static Set<String> UNIQUE_EVENT_TYPES = Set.of("CASE_CREATED");

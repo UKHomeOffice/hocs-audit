@@ -138,7 +138,7 @@ public interface AuditPayload {
 
     }
 
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor
     @Getter
     class Correspondent {
 

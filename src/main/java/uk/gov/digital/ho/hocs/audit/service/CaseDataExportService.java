@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
@@ -19,6 +18,7 @@ import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.config.CaseDataFieldReader;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CorrespondentUuidToNameCache;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
@@ -42,6 +42,8 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED" };
 
+    private final CorrespondentUuidToNameCache correspondentUuidToNameCache;
+
     private static final Map<String, String[]> ENTITY_LISTS = Map.of(
         "MPAM", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
         "MTS", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
@@ -53,15 +55,19 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     private final CaseDataFieldReader caseDataFieldReader;
 
-    public CaseDataExportService(ObjectMapper objectMapper,
-                                 AuditRepository auditRepository,
-                                 InfoClient infoClient,
-                                 CaseworkClient caseworkClient,
-                                 HeaderConverter headerConverter,
-                                 MalformedDateConverter malformedDateConverter,
-                                 CaseDataFieldReader caseDataFieldReader) {
+    public CaseDataExportService(
+        ObjectMapper objectMapper,
+        AuditRepository auditRepository,
+        InfoClient infoClient,
+        CaseworkClient caseworkClient,
+        HeaderConverter headerConverter,
+        MalformedDateConverter malformedDateConverter,
+        CorrespondentUuidToNameCache correspondentUuidToNameCache,
+        CaseDataFieldReader caseDataFieldReader
+    ) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
 
+        this.correspondentUuidToNameCache = correspondentUuidToNameCache;
         this.caseDataFieldReader = caseDataFieldReader;
     }
 
@@ -147,8 +153,7 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
                 uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText());
                 uuidToName.putIfAbsent(topic.getUuid().toString(), topic.getTopicText());
             });
-        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream().collect(
-            Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
+        uuidToName.putAll(correspondentUuidToNameCache.getUuidToNameLookup());
         uuidToName.putAll(infoClient.getCaseTypeActions().stream().collect(
             Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
 
