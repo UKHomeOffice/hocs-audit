@@ -4,11 +4,14 @@ import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
 import uk.gov.digital.ho.hocs.audit.core.utils.ZonedDateTimeConverter;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CorrespondentUuidToNameCache;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import java.io.IOException;
@@ -18,12 +21,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+@ActiveProfiles({"extracts", "local"})
 public class CaseDataVersionTwoExportServiceTest extends BaseExportServiceTest {
 
     private final static String[] uniqueEvents = { "CASE_CREATED" };
@@ -40,11 +45,15 @@ public class CaseDataVersionTwoExportServiceTest extends BaseExportServiceTest {
     @SpyBean
     private AuditRepository auditRepository;
 
+    @Mock
+    CorrespondentUuidToNameCache correspondentUuidToNameCache;
+
     @BeforeEach
     public void setup() {
         zonedDateTimeConverter = new ZonedDateTimeConverter();
 
         given(infoClient.getCaseTypes()).willReturn(Set.of(new CaseTypeDto("Test", "a1", "TEST")));
+        given(correspondentUuidToNameCache.getUuidToNameLookup()).willReturn(Map.of());
     }
 
     @Test
