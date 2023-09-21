@@ -1,6 +1,7 @@
 package uk.gov.digital.ho.hocs.audit.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
@@ -8,6 +9,7 @@ import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.config.CaseDataFieldReader;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CorrespondentUuidToNameCache;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
 
@@ -20,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Service
+@Profile("extracts")
 public class CaseDataVersionTwoExportService extends CaseDataExportService {
 
     public CaseDataVersionTwoExportService(
@@ -29,9 +32,11 @@ public class CaseDataVersionTwoExportService extends CaseDataExportService {
         CaseworkClient caseworkClient,
         HeaderConverter headerConverter,
         MalformedDateConverter malformedDateConverter,
+        CorrespondentUuidToNameCache correspondentUuidToNameCache,
         CaseDataFieldReader caseDataFieldReader)
     {
-        super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter, caseDataFieldReader);
+        super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter,
+            correspondentUuidToNameCache, caseDataFieldReader);
     }
 
     private final static Set<String> UNIQUE_EVENT_TYPES = Set.of("CASE_CREATED");

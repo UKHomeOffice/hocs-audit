@@ -2,10 +2,11 @@ package uk.gov.digital.ho.hocs.audit.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
-import uk.gov.digital.ho.hocs.audit.client.casework.dto.GetCorrespondentOutlineResponse;
 import uk.gov.digital.ho.hocs.audit.client.info.InfoClient;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeActionDto;
 import uk.gov.digital.ho.hocs.audit.client.info.dto.CaseTypeDto;
@@ -19,6 +20,7 @@ import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.config.CaseDataFieldReader;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
+import uk.gov.digital.ho.hocs.audit.service.domain.converter.CorrespondentUuidToNameCache;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
@@ -37,10 +39,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static net.logstash.logback.argument.StructuredArguments.value;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_LOAD_CONVERSION_DATA_END;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.CSV_EXPORT_LOAD_CONVERSION_DATA_START;
+import static uk.gov.digital.ho.hocs.audit.core.LogEvent.EVENT;
+
 @Service
+@Slf4j
+@Profile("extracts")
 public class CaseDataExportService extends CaseDataDynamicExportService {
 
     static final String[] EVENTS = { "CASE_CREATED", "CASE_UPDATED", "CASE_COMPLETED" };
+
+    private final CorrespondentUuidToNameCache correspondentUuidToNameCache;
 
     private static final Map<String, String[]> ENTITY_LISTS = Map.of(
         "MPAM", new String[] { "MPAM_ENQUIRY_SUBJECTS", "MPAM_ENQUIRY_REASONS_ALL", "MPAM_BUS_UNITS_ALL" },
@@ -53,15 +64,19 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
 
     private final CaseDataFieldReader caseDataFieldReader;
 
-    public CaseDataExportService(ObjectMapper objectMapper,
-                                 AuditRepository auditRepository,
-                                 InfoClient infoClient,
-                                 CaseworkClient caseworkClient,
-                                 HeaderConverter headerConverter,
-                                 MalformedDateConverter malformedDateConverter,
-                                 CaseDataFieldReader caseDataFieldReader) {
+    public CaseDataExportService(
+        ObjectMapper objectMapper,
+        AuditRepository auditRepository,
+        InfoClient infoClient,
+        CaseworkClient caseworkClient,
+        HeaderConverter headerConverter,
+        MalformedDateConverter malformedDateConverter,
+        CorrespondentUuidToNameCache correspondentUuidToNameCache,
+        CaseDataFieldReader caseDataFieldReader
+    ) {
         super(objectMapper, auditRepository, infoClient, caseworkClient, headerConverter, malformedDateConverter);
 
+        this.correspondentUuidToNameCache = correspondentUuidToNameCache;
         this.caseDataFieldReader = caseDataFieldReader;
     }
 
@@ -136,25 +151,43 @@ public class CaseDataExportService extends CaseDataDynamicExportService {
         Map<String, String> uuidToName = new HashMap<>();
         Map<String, String> entityListItemToName = new HashMap<>();
 
+        log.info("Start loading users", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
         uuidToName.putAll(
             infoClient.getUsers().stream().collect(Collectors.toMap(UserDto::getId, UserDto::getUsername)));
+        log.info("End loading users", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
+
+        log.info("Start loading teams", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
         uuidToName.putAll(infoClient.getAllTeams().stream().collect(
             Collectors.toMap(team -> team.getUuid().toString(), TeamDto::getDisplayName)));
+        log.info("End loading teams", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
+
+        log.info("Start loading units", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
         uuidToName.putAll(
             infoClient.getUnits().stream().collect(Collectors.toMap(UnitDto::getUuid, UnitDto::getDisplayName)));
+        log.info("End loading units", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
+
+        log.info("Start loading topics", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
         caseworkClient.getAllCaseTopics().forEach(
             topic -> {
                 uuidToName.putIfAbsent(topic.getTopicUUID().toString(), topic.getTopicText());
                 uuidToName.putIfAbsent(topic.getUuid().toString(), topic.getTopicText());
             });
-        uuidToName.putAll(caseworkClient.getAllCorrespondents().stream().collect(
-            Collectors.toMap(corr -> corr.getUuid().toString(), GetCorrespondentOutlineResponse::getFullname)));
+        log.info("End loading topics", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
+
+        log.info("Start loading correspondents", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
+        uuidToName.putAll(correspondentUuidToNameCache.getUuidToNameLookup());
+        log.info("End loading correspondents", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
+
+        log.info("Start loading caseTypeActions", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
         uuidToName.putAll(infoClient.getCaseTypeActions().stream().collect(
             Collectors.toMap(action -> action.getUuid().toString(), CaseTypeActionDto::getActionLabel)));
+        log.info("End loading correspondents", value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
 
         for (String listName : ENTITY_LISTS.getOrDefault(caseType.getType(), new String[0])) {
+            log.info("Start loading entity list {}", listName, value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_START));
             Set<EntityDto> entities = infoClient.getEntitiesForList(listName);
             entities.forEach(e -> entityListItemToName.put(e.getSimpleName(), e.getData().getTitle()));
+            log.info("End loading entity list {}", listName, value(EVENT, CSV_EXPORT_LOAD_CONVERSION_DATA_END));
         }
 
         return new ExportDataConverter(uuidToName, entityListItemToName, caseType.getShortCode(), auditRepository);
