@@ -13,7 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
 import uk.gov.digital.ho.hocs.audit.service.CustomExportService;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Slf4j
 @RestController
