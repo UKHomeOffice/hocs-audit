@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.repository.entity.CaseReference;
 
-import javax.persistence.QueryHint;
+import jakarta.persistence.QueryHint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

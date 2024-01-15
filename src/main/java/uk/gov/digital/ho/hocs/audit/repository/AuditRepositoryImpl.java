@@ -4,8 +4,8 @@ import lombok.NonNull;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;

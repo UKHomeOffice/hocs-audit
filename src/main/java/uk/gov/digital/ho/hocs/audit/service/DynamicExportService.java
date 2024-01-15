@@ -20,8 +20,8 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.ExportDataConverter
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.MalformedDateConverter;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
