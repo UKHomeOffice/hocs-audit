@@ -14,7 +14,7 @@ import uk.gov.digital.ho.hocs.audit.service.StaticTopicService;
 import uk.gov.digital.ho.hocs.audit.service.StaticUnitAndTeamService;
 import uk.gov.digital.ho.hocs.audit.service.StaticUserService;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 
 import static net.logstash.logback.argument.StructuredArguments.value;

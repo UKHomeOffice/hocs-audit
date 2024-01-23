@@ -2,8 +2,8 @@ package uk.gov.digital.ho.hocs.audit.entrypoint;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
-import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
+import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import io.awspring.cloud.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;

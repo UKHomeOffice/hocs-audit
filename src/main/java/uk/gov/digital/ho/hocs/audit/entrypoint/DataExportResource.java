@@ -16,7 +16,7 @@ import uk.gov.digital.ho.hocs.audit.service.DynamicExportService;
 import uk.gov.digital.ho.hocs.audit.service.SomuExportService;
 import uk.gov.digital.ho.hocs.audit.service.domain.ExportType;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
