@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.digital.ho.hocs.audit.repository.entity.AuditEvent;
 import uk.gov.digital.ho.hocs.audit.repository.entity.CaseReference;
 
-import javax.persistence.QueryHint;
+import jakarta.persistence.QueryHint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +39,14 @@ public interface AuditRepository extends JpaRepository<AuditEvent, String>, Audi
                                                          LocalDateTime dateTo,
                                                          String[] types,
                                                          String caseType);
+
+    @QueryHints(value = { @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
+        @QueryHint(name = HINT_CACHEABLE, value = "false"), @QueryHint(name = READ_ONLY, value = "true") })
+    @Query(value = "SELECT a.* FROM audit_event a WHERE a.audit_timestamp BETWEEN ?1 AND ?2 AND a.type in ?3 AND a.deleted = false ORDER BY a.audit_timestamp ASC",
+           nativeQuery = true)
+    Stream<AuditEvent> findAuditDataByDateRangeAndEvents(LocalDateTime dateFrom,
+                                                         LocalDateTime dateTo,
+                                                         String[] types);
 
     @QueryHints(value = { @QueryHint(name = HINT_FETCH_SIZE, value = "5000"),
         @QueryHint(name = HINT_CACHEABLE, value = "false"), @QueryHint(name = READ_ONLY, value = "true") })

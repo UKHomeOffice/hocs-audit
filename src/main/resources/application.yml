@@ -28,7 +28,7 @@ spring:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
-      javax:
+      jakarta:
         persistence:
           query:
             timeout: 60000

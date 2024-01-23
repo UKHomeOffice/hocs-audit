@@ -15,7 +15,7 @@ import uk.gov.digital.ho.hocs.audit.repository.config.model.CustomExportViews;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataConverter;
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
