@@ -4,5 +4,5 @@ hocs-generic-service:
   clusterPrefix: wcs
 
   keycloak:
-    realm: https://acp-sso.notprod.acp.homeoffice.gov.uk/realms/hocs-notprod
+    realm: https://sso-dev.notprod.homeoffice.gov.uk/auth/realms/hocs-notprod
     domain: wcs-notprod.homeoffice.gov.uk
