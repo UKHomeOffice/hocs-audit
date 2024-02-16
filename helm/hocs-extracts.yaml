@@ -8,7 +8,7 @@ hocs-generic-service:
   clusterPrefix: cs
 
   keycloak:
-    realm: https://sso-dev.notprod.homeoffice.gov.uk/auth/realms/hocs-notprod
+    realm: https://acp-sso.notprod.acp.homeoffice.gov.uk/realms/hocs-notprod
     domain: cs-notprod.homeoffice.gov.uk
 
   app:
