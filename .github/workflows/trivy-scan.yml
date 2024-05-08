@@ -10,7 +10,7 @@ on:
 
 jobs:
   scan:
-    uses: UKHomeOffice/sas-github-workflows/.github/workflows/trivy-gradle.yml@3bfd60192418c462f7f86f0d79a6c8c26257ebe1
+    uses: UKHomeOffice/sas-github-workflows/.github/workflows/trivy-gradle.yml@v2
     with:
       severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
       checkoutSubmodule: true
