@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     implementation 'org.apache.commons:commons-csv:1.11.0'
 
-    implementation 'org.flywaydb:flyway-core:9.19.3'
+    implementation 'org.flywaydb:flyway-core:10.14.0'
     runtimeOnly 'org.postgresql:postgresql:42.7.3'
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
