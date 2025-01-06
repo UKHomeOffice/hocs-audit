@@ -2,36 +2,38 @@ SET search_path TO audit;
 
 CREATE MATERIALIZED VIEW DCU_AGGREGATED_CASES_TEMP AS
 WITH CTE_Correspondents AS (
-    SELECT * FROM (
-                      SELECT
-                                  audit_payload::jsonb->'address'->>'address1' AS address1,
-                                  audit_payload::jsonb->'address'->>'address2' AS address2,
-                                  audit_payload::jsonb->'address'->>'address3' AS address3,
-                                  audit_payload::jsonb->'address'->>'postcode' AS postcode,
-                                  audit_payload::jsonb->'address'->>'country' AS country,
-                                  audit_payload::jsonb->>'fullname' AS fullname,
-                                  audit_payload::jsonb->>'email' AS email,
-                                  audit_payload::jsonb->>'telephone' AS telephone,
-                                  audit_payload::jsonb->>'uuid' AS "correspondentUUID",
-                                  audit_payload::jsonb->>'externalKey' AS "externalKey",
-                                  audit_payload::jsonb->>'reference' AS "reference",
-                                  case_uuid::text,
-                                  RANK() OVER (
-                                      PARTITION BY case_uuid, audit_payload::jsonb->>'uuid'
-                                      ORDER BY audit_timestamp DESC
-                                      ) AS MostRecentUpdate_RK,
-                                  audit_payload::jsonb->>'type' as "correspondentType"
-                      FROM audit_event
-                      WHERE "type" IN ('CORRESPONDENT_CREATED', 'CORRESPONDENT_UPDATED')
-                        AND audit_payload::jsonb->>'uuid' NOT IN (
-                          SELECT audit_payload::jsonb->>'uuid'
-                          FROM audit_event
-                          WHERE "type" = 'CORRESPONDENT_DELETED'
-                            AND audit_payload::jsonb->>'uuid' IS NOT NULL
-                      )
-                        AND NOT deleted
-                      ORDER BY audit_timestamp DESC
-                  ) ranked
+    SELECT *
+    FROM (
+             SELECT audit_payload::jsonb -> 'address' ->> 'address1' AS address1,
+                    audit_payload::jsonb -> 'address' ->> 'address2' AS address2,
+                    audit_payload::jsonb -> 'address' ->> 'address3' AS address3,
+                    audit_payload::jsonb -> 'address' ->> 'postcode' AS postcode,
+                    audit_payload::jsonb -> 'address' ->> 'country'  AS country,
+                    audit_payload::jsonb ->> 'fullname'              AS fullname,
+                    audit_payload::jsonb ->> 'email'                 AS email,
+                    audit_payload::jsonb ->> 'telephone'             AS telephone,
+                    audit_payload::jsonb ->> 'uuid'                  AS "correspondentUUID",
+                    audit_payload::jsonb ->> 'externalKey'           AS "externalKey",
+                    audit_payload::jsonb ->> 'reference'             AS "reference",
+                    case_uuid::TEXT,
+                    RANK() OVER (
+                        PARTITION BY case_uuid, audit_payload::jsonb ->> 'uuid'
+                        ORDER BY audit_timestamp DESC
+                    )                                                AS MostRecentUpdate_RK,
+                    audit_payload::jsonb ->> 'type'                  AS "correspondentType"
+             FROM audit_event
+             WHERE "type" IN ('CORRESPONDENT_CREATED', 'CORRESPONDENT_UPDATED')
+               AND "case_type" IN ('a1', 'a2', 'a3')
+               AND audit_payload::jsonb ->> 'uuid' NOT IN (
+                 SELECT audit_payload::jsonb ->> 'uuid'
+                 FROM audit_event
+                 WHERE "type" = 'CORRESPONDENT_DELETED'
+                   AND "case_type" IN ('a1', 'a2', 'a3')
+                   AND audit_payload::jsonb ->> 'uuid' IS NOT NULL
+                   AND NOT deleted
+               )
+               AND NOT deleted
+             ORDER BY audit_timestamp DESC) ranked
     WHERE MostRecentUpdate_RK = 1
 ),
      CTE_CommentCounts AS (
@@ -40,34 +42,34 @@ WITH CTE_Correspondents AS (
              count(audit_timestamp) AS "commentCount"
          FROM audit_event
          WHERE "type" = ('CASE_NOTE_CREATED')
+           AND case_type IN ('a1', 'a2', 'a3')
            AND case_uuid IS NOT NULL
            AND NOT deleted
          GROUP BY case_uuid
      )
-SELECT
-    grouped.*,
-    COALESCE(commentCounts."commentCount", 0) AS "commentCount",
-    NULLIF(pc.address1, '') as "primaryCorrAddress1",
-    NULLIF(pc.address2, '') as "primaryCorrAddress2",
-    NULLIF(pc.address3, '') as "primaryCorrAddress3",
-    NULLIF(pc.country, '') as "primaryCorrCountry",
-    NULLIF(pc.email, '') as "primaryCorrEmail",
-    NULLIF(pc.fullname, '') as "primaryCorrFullname",
-    NULLIF(pc.postcode, '') as "primaryCorrPostcode",
-    NULLIF(pc.telephone, '') as "primaryCorrTelephone",
-    NULLIF(sc.address1, '') as "secondCorrAddress1",
-    NULLIF(sc.address2, '') as "secondCorrAddress2",
-    NULLIF(sc.address3, '') as "secondCorrAddress3",
-    NULLIF(sc.country, '') as "secondCorrCountry",
-    NULLIF(sc.email, '') as "secondCorrEmail",
-    NULLIF(sc.fullname, '') as "secondCorrFullname",
-    NULLIF(sc.postcode, '') as "secondCorrPostcode",
-    NULLIF(sc.reference, '') as "secondCorrReference",
-    NULLIF(sc.telephone, '') as "secondCorrTelephone",
-    NULLIF(sc."correspondentType", '') as "secondCorrType",
-    CASE WHEN pc."correspondentType" = 'MEMBER' THEN pc."externalKey" ELSE NULL END AS "mpRef",
-    CASE WHEN pc."correspondentType" = 'MEMBER' THEN pc."fullname" ELSE NULL END AS "member",
-    now()::timestamp(0) AS last_refresh
+SELECT grouped.*,
+       COALESCE(commentCounts."commentCount", 0)                             AS "commentCount",
+       NULLIF(pc.address1, '')                                               AS "primaryCorrAddress1",
+       NULLIF(pc.address2, '')                                               AS "primaryCorrAddress2",
+       NULLIF(pc.address3, '')                                               AS "primaryCorrAddress3",
+       NULLIF(pc.country, '')                                                AS "primaryCorrCountry",
+       NULLIF(pc.email, '')                                                  AS "primaryCorrEmail",
+       NULLIF(pc.fullname, '')                                               AS "primaryCorrFullname",
+       NULLIF(pc.postcode, '')                                               AS "primaryCorrPostcode",
+       NULLIF(pc.telephone, '')                                              AS "primaryCorrTelephone",
+       NULLIF(sc.address1, '')                                               AS "secondCorrAddress1",
+       NULLIF(sc.address2, '')                                               AS "secondCorrAddress2",
+       NULLIF(sc.address3, '')                                               AS "secondCorrAddress3",
+       NULLIF(sc.country, '')                                                AS "secondCorrCountry",
+       NULLIF(sc.email, '')                                                  AS "secondCorrEmail",
+       NULLIF(sc.fullname, '')                                               AS "secondCorrFullname",
+       NULLIF(sc.postcode, '')                                               AS "secondCorrPostcode",
+       NULLIF(sc.reference, '')                                              AS "secondCorrReference",
+       NULLIF(sc.telephone, '')                                              AS "secondCorrTelephone",
+       NULLIF(sc."correspondentType", '')                                    AS "secondCorrType",
+       CASE WHEN pc."correspondentType" = 'MEMBER' THEN pc."externalKey" END AS "mpRef",
+       CASE WHEN pc."correspondentType" = 'MEMBER' THEN pc."fullname" END    AS "member",
+       NOW()::TIMESTAMP(0)                                                   AS last_refresh
 FROM (
          SELECT
              case_uuid::text as "caseUuid",
@@ -396,3 +398,4 @@ SELECT
      ,"defaultPolicyTeamUnitHistoricName"
      ,"last_refresh"
 FROM DCU_AGGREGATED_CASES;
+
