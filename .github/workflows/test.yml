@@ -7,5 +7,6 @@ jobs:
   test:
     uses: UKHomeOffice/sas-github-workflows/.github/workflows/test-gradle.yml@v2
     with:
+      dockerComposeBinary: 'docker compose'
       dockerComposeComponents: 'localstack postgres'
     secrets: inherit
