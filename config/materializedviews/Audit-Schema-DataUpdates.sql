@@ -2,39 +2,38 @@ SET search_path TO audit;
 
 CREATE MATERIALIZED VIEW DCU_AGGREGATED_CASES_TEMP AS
 WITH CTE_Correspondents AS (
-    SELECT * FROM (
-                      SELECT
-                                  audit_payload::jsonb->'address'->>'address1' AS address1,
-                                  audit_payload::jsonb->'address'->>'address2' AS address2,
-                                  audit_payload::jsonb->'address'->>'address3' AS address3,
-                                  audit_payload::jsonb->'address'->>'postcode' AS postcode,
-                                  audit_payload::jsonb->'address'->>'country' AS country,
-                                  audit_payload::jsonb->>'fullname' AS fullname,
-                                  audit_payload::jsonb->>'email' AS email,
-                                  audit_payload::jsonb->>'telephone' AS telephone,
-                                  audit_payload::jsonb->>'uuid' AS "correspondentUUID",
-                                  audit_payload::jsonb->>'externalKey' AS "externalKey",
-                                  audit_payload::jsonb->>'reference' AS "reference",
-                                  case_uuid::text,
-                                  RANK() OVER (
-                                      PARTITION BY case_uuid, audit_payload::jsonb->>'uuid'
-                                      ORDER BY audit_timestamp DESC
-                                      ) AS MostRecentUpdate_RK,
-                                  audit_payload::jsonb->>'type' as "correspondentType"
-                      FROM audit_event
-                      WHERE "type" IN ('CORRESPONDENT_CREATED', 'CORRESPONDENT_UPDATED')
-                        AND "case_type" IN ('a1', 'a2', 'a3')
-                        AND audit_payload::jsonb->>'uuid' NOT IN (
-                          SELECT audit_payload::jsonb->>'uuid'
-                          FROM audit_event
-                          WHERE "type" = 'CORRESPONDENT_DELETED'
-                            AND "case_type" IN ('a1', 'a2', 'a3')
-                            AND audit_payload::jsonb->>'uuid' IS NOT NULL
-                            AND NOT deleted
-                        )
-                        AND NOT deleted
-                      ORDER BY audit_timestamp DESC
-                  ) ranked
+    SELECT *
+    FROM (
+             SELECT audit_payload::jsonb -> 'address' ->> 'address1' AS address1,
+                    audit_payload::jsonb -> 'address' ->> 'address2' AS address2,
+                    audit_payload::jsonb -> 'address' ->> 'address3' AS address3,
+                    audit_payload::jsonb -> 'address' ->> 'postcode' AS postcode,
+                    audit_payload::jsonb -> 'address' ->> 'country'  AS country,
+                    audit_payload::jsonb ->> 'fullname'              AS fullname,
+                    audit_payload::jsonb ->> 'email'                 AS email,
+                    audit_payload::jsonb ->> 'telephone'             AS telephone,
+                    audit_payload::jsonb ->> 'uuid'                  AS "correspondentUUID",
+                    audit_payload::jsonb ->> 'externalKey'           AS "externalKey",
+                    audit_payload::jsonb ->> 'reference'             AS "reference",
+                    case_uuid::TEXT,
+                    RANK() OVER (
+                        PARTITION BY case_uuid, audit_payload::jsonb ->> 'uuid'
+                        ORDER BY audit_timestamp DESC
+                    )                                                AS MostRecentUpdate_RK,
+                    audit_payload::jsonb ->> 'type'                  AS "correspondentType"
+             FROM audit_event
+             WHERE "type" IN ('CORRESPONDENT_CREATED', 'CORRESPONDENT_UPDATED')
+               AND "case_type" IN ('a1', 'a2', 'a3')
+               AND audit_payload::jsonb ->> 'uuid' NOT IN (
+                 SELECT audit_payload::jsonb ->> 'uuid'
+                 FROM audit_event
+                 WHERE "type" = 'CORRESPONDENT_DELETED'
+                   AND "case_type" IN ('a1', 'a2', 'a3')
+                   AND audit_payload::jsonb ->> 'uuid' IS NOT NULL
+                   AND NOT deleted
+               )
+               AND NOT deleted
+             ORDER BY audit_timestamp DESC) ranked
     WHERE MostRecentUpdate_RK = 1
 ),
      CTE_CommentCounts AS (
@@ -399,3 +398,4 @@ SELECT
      ,"defaultPolicyTeamUnitHistoricName"
      ,"last_refresh"
 FROM DCU_AGGREGATED_CASES;
+
