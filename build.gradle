@@ -56,7 +56,7 @@ jar {
 test {
     useJUnitPlatform()
 
-    systemProperty 'spring.profiles.active', 'local,test'
+    systemProperty 'spring.profiles.active', 'local,test,postgres'
 
     testLogging {
         exceptionFormat = 'full'
