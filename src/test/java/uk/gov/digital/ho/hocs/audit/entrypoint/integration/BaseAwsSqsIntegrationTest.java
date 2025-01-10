@@ -1,24 +1,24 @@
 package uk.gov.digital.ho.hocs.audit.entrypoint.integration;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.amazonaws.services.sqs.model.PurgeQueueRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @SpringBootTest
 @ActiveProfiles({"local", "consumer"})
 public class BaseAwsSqsIntegrationTest {
 
-    private static final String APPROXIMATE_NUMBER_OF_MESSAGES = "ApproximateNumberOfMessages";
-
     @Autowired
-    protected AmazonSQSAsync amazonSQSAsync;
+    protected SqsAsyncClient amazonSQSAsync;
 
     @Value("${aws.sqs.audit.url}")
     protected String auditQueue;
@@ -28,23 +28,32 @@ public class BaseAwsSqsIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
-        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueueDlq));
+        amazonSQSAsync.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueue).build());
+        amazonSQSAsync.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueueDlq).build());
     }
 
     @AfterEach
     public void teardown() {
-        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueue));
-        amazonSQSAsync.purgeQueue(new PurgeQueueRequest(auditQueueDlq));
+        amazonSQSAsync.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueue).build());
+        amazonSQSAsync.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueueDlq).build());
     }
 
-    public int getNumberOfMessagesOnQueue(String queue) {
-        return getValueFromQueue(queue, APPROXIMATE_NUMBER_OF_MESSAGES);
+    public int getNumberOfMessagesOnQueue(String queue) throws ExecutionException, InterruptedException {
+        return getValueFromQueue(queue, QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES);
     }
 
-    private int getValueFromQueue(String queue, String attribute) {
-        var queueAttributes = amazonSQSAsync.getQueueAttributes(queue, List.of(attribute));
-        var messageCount = queueAttributes.getAttributes().get(attribute);
+    private int getValueFromQueue(
+        String queue,
+        QueueAttributeName attribute
+    ) throws ExecutionException, InterruptedException {
+        var queueAttributes = amazonSQSAsync.getQueueAttributes(
+            GetQueueAttributesRequest
+                .builder()
+                .queueUrl(queue)
+                .attributeNames(attribute)
+                .build()
+        );
+        var messageCount = queueAttributes.get().attributes().get(attribute);
         return messageCount == null ? 0 : Integer.parseInt(messageCount);
     }
 
