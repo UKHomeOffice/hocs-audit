@@ -14,3 +14,7 @@ aws:
 
 
 postgresViewAllowList: allow1,allow2
+
+management:
+  endpoints:
+    enabled-by-default: true

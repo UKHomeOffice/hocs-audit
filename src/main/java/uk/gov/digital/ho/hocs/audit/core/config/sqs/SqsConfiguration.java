@@ -1,43 +1,53 @@
 package uk.gov.digital.ho.hocs.audit.core.config.sqs;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
+
+import io.awspring.cloud.autoconfigure.sqs.SqsProperties.Listener;
+import io.awspring.cloud.sqs.config.SqsBootstrapConfiguration;
+import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import io.awspring.cloud.messaging.config.SimpleMessageListenerContainerFactory;
-import io.awspring.cloud.messaging.config.annotation.EnableSqs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
-@EnableSqs
+@Import(SqsBootstrapConfiguration.class)
 @Configuration
 @Profile({ "sqs" })
 public class SqsConfiguration {
 
     @Primary
     @Bean
-    public AmazonSQSAsync awsSqsClient(@Value("${aws.sqs.access.key}") String accessKey,
+    public SqsAsyncClient awsSqsClient(@Value("${aws.sqs.access.key}") String accessKey,
                                        @Value("${aws.sqs.secret.key}") String secretKey,
-                                       @Value("${aws.sqs.region}") String region) {
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+                                       @Value("${aws.sqs.region}") Region region) {
+        AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
-        return AmazonSQSAsyncClientBuilder.standard().withRegion(region).withCredentials(
-            new AWSStaticCredentialsProvider(credentials)).build();
+        return SqsAsyncClient.builder()
+                             .region(region)
+                             .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                             .build();
     }
 
     @Primary
     @Bean
-    public SimpleMessageListenerContainerFactory simpleMessageListenerContainerFactory(AmazonSQSAsync amazonSqs) {
-        SimpleMessageListenerContainerFactory factory = new SimpleMessageListenerContainerFactory();
-
-        factory.setAmazonSqs(amazonSqs);
-        factory.setMaxNumberOfMessages(10);
-
-        return factory;
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient amazonSqs) {
+        return SqsMessageListenerContainerFactory
+            .builder()
+            .sqsAsyncClient(amazonSqs)
+            .build();
     }
 
+    @Primary
+    @Bean
+    public Listener listener() {
+        var listener = new Listener();
+        listener.setMaxConcurrentMessages(10);
+        return listener;
+    }
 }

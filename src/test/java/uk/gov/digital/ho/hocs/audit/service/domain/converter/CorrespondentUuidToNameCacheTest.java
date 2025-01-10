@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.digital.ho.hocs.audit.client.casework.CaseworkClient;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles({"local", "extracts"})
+@DirtiesContext
 public class CorrespondentUuidToNameCacheTest {
     @Mock
     CaseworkClient caseworkClient;
