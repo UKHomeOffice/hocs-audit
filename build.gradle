@@ -55,4 +55,9 @@ jar {
 
 test {
     useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat = 'full'
+        showStackTraces = true
+    }
 }
