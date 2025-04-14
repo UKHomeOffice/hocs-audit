@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import uk.gov.digital.ho.hocs.audit.entrypoint.dto.CreateAuditDto;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 
@@ -33,13 +32,7 @@ public class AuditListenerTest extends BaseAwsSqsIntegrationTest {
         CreateAuditDto createAuditDto = new CreateAuditDto(UUID.randomUUID().toString(), "SERVICE", "{}", "NAMESPACE",
             LocalDateTime.now(), "TYPE", "USER");
 
-        amazonSQSAsync.sendMessage(
-            SendMessageRequest
-                .builder()
-                .queueUrl(auditQueue)
-                .messageBody(objectMapper.writeValueAsString(createAuditDto))
-                .build()
-        );
+        amazonSQSAsync.sendMessage(auditQueue, objectMapper.writeValueAsString(createAuditDto));
 
         await().until(() -> getNumberOfMessagesOnQueue(auditQueue) == 0);
         await().until(() -> auditRepository.count() == 1);
@@ -49,13 +42,7 @@ public class AuditListenerTest extends BaseAwsSqsIntegrationTest {
     public void consumeMessageFromQueue_exceptionMakesMessageNotVisible() throws JsonProcessingException {
         CreateAuditDto createAuditDto = new CreateAuditDto(null, null, null, null, null, null, null);
 
-        amazonSQSAsync.sendMessage(
-            SendMessageRequest
-                .builder()
-                .queueUrl(auditQueue)
-                .messageBody(objectMapper.writeValueAsString(createAuditDto))
-                .build()
-        );
+        amazonSQSAsync.sendMessage(auditQueue, objectMapper.writeValueAsString(createAuditDto));
 
         await().until(() -> getNumberOfMessagesOnQueue(auditQueue) == 0);
         await().timeout(Duration.ofSeconds(20)).pollDelay(Duration.ofSeconds(10)).until(
