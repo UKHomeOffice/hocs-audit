@@ -50,9 +50,9 @@ public class CustomExportDataConverter {
     public String[] getHeaders(CustomExportViews.CustomExportView exportView) {
         List<String> headers = new ArrayList<>();
 
-        for (var field : exportView.getFields()) {
-            if (!shouldHide(field)) {
-                headers.add(field.getName());
+        for (var field : exportView.fields()) {
+            if (shouldShow(field)) {
+                headers.add(field.name());
             }
         }
 
@@ -73,8 +73,8 @@ public class CustomExportDataConverter {
         List<String> results = new ArrayList<>();
         int index = 0;
         for (var field : fields) {
-            if (!shouldHide(field)) {
-                results.add(applyAdapter(rawData[index], field.getAdapter()));
+            if (shouldShow(field)) {
+                results.add(applyAdapter(rawData[index], field.adapter()));
             }
             index++;
         }
@@ -102,8 +102,8 @@ public class CustomExportDataConverter {
         return result == null ? null : String.valueOf(result);
     }
 
-    private boolean shouldHide(ExportField field) {
-        return ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(field.getAdapter());
+    private boolean shouldShow(ExportField field) {
+        return !ExportViewConstants.FIELD_ADAPTER_HIDDEN.equals(field.adapter());
     }
 
     public void initialiseAdapters() {

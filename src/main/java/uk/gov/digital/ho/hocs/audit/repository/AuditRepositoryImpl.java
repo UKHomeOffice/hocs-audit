@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import uk.gov.digital.ho.hocs.audit.entrypoint.dto.CustomExportFilter;
+
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class AuditRepositoryImpl implements AuditRepositoryCustom {
 
     @Value("#{'${postgresViewAllowList}'.split(',')}")
@@ -26,16 +29,26 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
     private EntityManager em;
 
     @Override
-    public Stream<Object[]> getResultsFromView(@NonNull String viewName) {
+    public Stream<Object[]> getResultsFromView(@NonNull String viewName, CustomExportFilter.ValidatedFilter filter) {
         checkViewNameIsAllowed(viewName);
 
-        return em.createNativeQuery(String.format("SELECT * FROM %s", viewName)).unwrap(Query.class).stream();
+        // View name limited to specific values, which are safe
+        // Where clause validated against specification for view
+        // noinspection unchecked,SqlSourceToSinkFlow
+        return em.createNativeQuery(
+            String.format(
+                "SELECT * FROM %s %s",
+                viewName,
+                filter.whereClause()
+            )
+        ).unwrap(Query.class).stream();
     }
 
     @Override
     public LocalDate getViewLastRefreshedDate(@NonNull String viewName) {
         checkViewNameIsAllowed(viewName);
 
+        //noinspection SqlSourceToSinkFlow View name limited to specific values, which are safe
         Timestamp timestamp = (Timestamp) em.createNativeQuery(
             String.format("SELECT last_refresh FROM %s LIMIT 1", viewName)).unwrap(Query.class).getSingleResult();
 
@@ -46,6 +59,7 @@ public class AuditRepositoryImpl implements AuditRepositoryCustom {
     public void refreshMaterialisedView(@NonNull String viewName) {
         checkViewNameIsAllowed(viewName);
 
+        //noinspection SqlSourceToSinkFlow View name limited to specific values, which are safe
         em.createNativeQuery(String.format("REFRESH MATERIALIZED VIEW CONCURRENTLY %s", viewName)).executeUpdate();
     }
 

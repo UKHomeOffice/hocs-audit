@@ -2,7 +2,8 @@ package uk.gov.digital.ho.hocs.audit.entrypoint;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.awspring.cloud.sqs.annotation.SqsListener;
+import io.awspring.cloud.messaging.listener.annotation.SqsListener;
+import io.awspring.cloud.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class AuditListener {
         this.requestData = requestData;
     }
 
-    @SqsListener(value = "${aws.sqs.audit.url}", acknowledgementMode = "ON_SUCCESS")
+    @SqsListener(value = "${aws.sqs.audit.url}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void onAuditEvent(String message, @Headers Map<String, String> headers) throws JsonProcessingException {
         try {
             requestData.parseMessageHeaders(headers);

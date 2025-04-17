@@ -2,6 +2,7 @@
   "DCU_PRAU_WORKFLOW": {
     "requiredPermission": "DCU_EXPORT_USER",
     "displayName": "dcu-prau-workflow",
+    "viewName": "dcu_prau_workflow",
     "fields": [
       {
         "name": "assignedTeam",
@@ -181,6 +182,7 @@
   "DCU_BUSINESS": {
     "displayName": "dcu-business",
     "requiredPermission": "DCU_EXPORT_USER",
+    "viewName": "dcu_business",
     "fields": [
       {
         "name": "assignedTeam",
@@ -198,16 +200,20 @@
         "name": "assignedUserUpdated"
       },
       {
-        "name": "caseCompleted"
+        "name": "caseCompleted",
+        "filter": {"type": "DateRange", "nullable":  true}
       },
       {
-        "name": "caseCreated"
+        "name": "caseCreated",
+        "filter": {"type": "DateRange", "nullable":  false}
       },
       {
-        "name": "caseDeadline"
+        "name": "caseDeadline",
+        "filter": {"type": "DateRange", "nullable":  false}
       },
       {
-        "name": "caseStatus"
+        "name": "caseStatus",
+        "filter": {"type": "Value", "options": ["Case Completed","In Progress", "NRN", "OGD"]}
       },
       {
         "name": "caseType"
@@ -263,14 +269,16 @@
         "name": "initialDraftDeadline"
       },
       {
-        "name": "lastModified"
+        "name": "lastModified",
+        "filter": {"type": "DateRange", "nullable":  false}
       },
       {
         "name": "lastModifiedBy",
         "adapter": "userEmailAdapter"
       },
       {
-        "name": "latestDataChange"
+        "name": "latestDataChange",
+        "filter": {"type": "DateRange", "nullable":  false}
       },
       {
         "name": "latestStageChange"
