@@ -26,26 +26,26 @@ spec:
             - name: PGHOST
               valueFrom:
                 secretKeyRef:
-                  name: cs-qa-audit-rds
+                  name: cs-dev-audit-rds
                   key: host
             - name: PGDATABASE
               valueFrom:
                 secretKeyRef:
-                  name: cs-qa-audit-rds
+                  name: cs-dev-audit-rds
                   key: name
             - name: DB_SCHEMA_NAME
               valueFrom:
                 secretKeyRef:
-                  name: cs-qa-audit-rds
+                  name: cs-dev-audit-rds
                   key: schema_name
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  name: cs-qa-audit-rds
+                  name: cs-dev-audit-rds
                   key: user_name
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cs-qa-audit-rds
+                  name: cs-dev-audit-rds
                   key: password
       restartPolicy: Never
