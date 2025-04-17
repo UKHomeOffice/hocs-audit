@@ -216,7 +216,8 @@
         "filter": {"type": "Value", "options": ["Case Completed","In Progress", "NRN", "OGD"]}
       },
       {
-        "name": "caseType"
+        "name": "caseType",
+        "filter": {"type": "Value", "options": ["DTEN", "MIN", "TRO"]}
       },
       {
         "name": "caseUuid"
