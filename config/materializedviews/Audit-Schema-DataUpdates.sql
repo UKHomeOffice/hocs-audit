@@ -244,6 +244,13 @@ WITH NO DATA;
 
 CREATE UNIQUE INDEX idx_dcu_aggregated_cases_temp_case_uuid ON DCU_AGGREGATED_CASES_TEMP("caseUuid");
 
+CREATE INDEX idx_dcu_aggregated_cases_temp_case_completed ON DCU_AGGREGATED_CASES_TEMP("caseCompleted");
+CREATE INDEX idx_dcu_aggregated_cases_temp_case_created ON DCU_AGGREGATED_CASES_TEMP("caseCreated");
+CREATE INDEX idx_dcu_aggregated_cases_temp_case_deadline ON DCU_AGGREGATED_CASES_TEMP("caseDeadline");
+CREATE INDEX idx_dcu_aggregated_cases_temp_case_status ON DCU_AGGREGATED_CASES_TEMP("caseStatus");
+CREATE INDEX idx_dcu_aggregated_cases_temp_last_modified ON DCU_AGGREGATED_CASES_TEMP("lastModified");
+CREATE INDEX idx_dcu_aggregated_cases_temp_latest_data_change ON DCU_AGGREGATED_CASES_TEMP("latestDataChange");
+
 REFRESH MATERIALIZED VIEW DCU_AGGREGATED_CASES_TEMP;
 
 DROP MATERIALIZED VIEW IF EXISTS DCU_AGGREGATED_CASES CASCADE;
@@ -251,6 +258,13 @@ DROP MATERIALIZED VIEW IF EXISTS DCU_AGGREGATED_CASES CASCADE;
 ALTER TABLE DCU_AGGREGATED_CASES_TEMP RENAME TO DCU_AGGREGATED_CASES;
 
 ALTER INDEX idx_dcu_aggregated_cases_temp_case_uuid RENAME TO idx_dcu_aggregated_cases_case_uuid;
+
+ALTER INDEX idx_dcu_aggregated_cases_temp_case_completed RENAME TO idx_dcu_aggregated_cases_case_completed;
+ALTER INDEX idx_dcu_aggregated_cases_temp_case_created RENAME TO idx_dcu_aggregated_cases_case_created;
+ALTER INDEX idx_dcu_aggregated_cases_temp_case_deadline RENAME TO idx_dcu_aggregated_cases_case_deadline;
+ALTER INDEX idx_dcu_aggregated_cases_temp_case_status RENAME TO idx_dcu_aggregated_cases_case_status;
+ALTER INDEX idx_dcu_aggregated_cases_temp_last_modified RENAME TO idx_dcu_aggregated_cases_last_modified;
+ALTER INDEX idx_dcu_aggregated_cases_temp_latest_data_change RENAME TO idx_dcu_aggregated_cases_latest_data_change;
 
 DROP VIEW IF EXISTS DCU_PRAU_WORKFLOW;
 
@@ -399,3 +413,4 @@ SELECT
      ,"last_refresh"
 FROM DCU_AGGREGATED_CASES;
 
+-- REFRESH MATERIALIZED VIEW DCU_AGGREGATED_CASES;

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import uk.gov.digital.ho.hocs.audit.core.RequestData;
 import uk.gov.digital.ho.hocs.audit.core.exception.EntityPermissionException;
+import uk.gov.digital.ho.hocs.audit.entrypoint.dto.CustomExportFilter;
 import uk.gov.digital.ho.hocs.audit.repository.AuditRepository;
 import uk.gov.digital.ho.hocs.audit.repository.config.CustomExportViewsReader;
 import uk.gov.digital.ho.hocs.audit.repository.config.model.CustomExportViews;
@@ -16,6 +17,7 @@ import uk.gov.digital.ho.hocs.audit.service.domain.converter.CustomExportDataCon
 import uk.gov.digital.ho.hocs.audit.service.domain.converter.HeaderConverter;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,11 +46,13 @@ public class CustomExportService {
 
     private final RequestData requestData;
 
-    public CustomExportService(AuditRepository auditRepository,
-                               CustomExportViewsReader customExportViewsReader,
-                               CustomExportDataConverter customExportDataConverter,
-                               HeaderConverter headerConverter,
-                               RequestData requestData) {
+    public CustomExportService(
+        AuditRepository auditRepository,
+        CustomExportViewsReader customExportViewsReader,
+        CustomExportDataConverter customExportDataConverter,
+        HeaderConverter headerConverter,
+        RequestData requestData
+    ) {
         this.auditRepository = auditRepository;
         this.customExportViewsReader = customExportViewsReader;
         this.customExportDataConverter = customExportDataConverter;
@@ -57,29 +61,42 @@ public class CustomExportService {
     }
 
     @Transactional(readOnly = true)
-    public void export(HttpServletResponse response, String viewName, boolean convertHeader) throws IOException {
+    public void export(
+        HttpServletResponse response,
+        String viewName,
+        boolean convertHeader,
+        CustomExportFilter filter
+    ) throws IOException, CustomExportFilter.FilterValidationException {
         var exportView = customExportViewsReader.getByViewName(viewName);
 
-        if (StringUtils.hasText(exportView.getRequiredPermission()) && !requestData.getRoles().contains(
-            exportView.getRequiredPermission())) {
+        if (StringUtils.hasText(exportView.requiredPermission()) && !requestData.getRoles().contains(
+            exportView.requiredPermission())) {
             // TODO: remove the log and add to the entity permission error with suitable LogEvent
-            log.error("Cannot export due to permission not assigned to the user, user {}, permission {}",
-                requestData.getUserId(), exportView.getRequiredPermission());
+            log.error(
+                "Cannot export due to permission not assigned to the user, user {}, permission {}",
+                requestData.getUserId(), exportView.requiredPermission()
+            );
             throw new EntityPermissionException("No permission to view %s", viewName);
         }
+
+        var validatedFilter = filter.validate(exportView);
 
         String[] headers = getHeaders(exportView, convertHeader);
 
         customExportDataConverter.initialiseAdapters();
 
         try (OutputStream buffer = new BufferedOutputStream(
-            response.getOutputStream()); OutputStreamWriter outputWriter = new OutputStreamWriter(buffer,
-            StandardCharsets.UTF_8); var printer = new CSVPrinter(outputWriter,
-            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).setNullString("").build())) {
+            response.getOutputStream()); OutputStreamWriter outputWriter = new OutputStreamWriter(
+            buffer,
+            StandardCharsets.UTF_8
+        ); var printer = new CSVPrinter(
+            outputWriter,
+            CSVFormat.Builder.create().setHeader(headers).setAutoFlush(true).setNullString("").build()
+        )) {
             AtomicBoolean connected = new AtomicBoolean(true);
 
-            retrieveAuditData(viewName).parallel().map(data -> {
-                Object[] converted = customExportDataConverter.convertData(data, exportView.getFields());
+            retrieveAuditData(viewName, validatedFilter).parallel().map(data -> {
+                Object[] converted = customExportDataConverter.convertData(data, exportView.fields());
 
                 if (converted == null) {
                     log.warn("No data to print after converting data {}", data);
@@ -92,8 +109,10 @@ public class CustomExportService {
                     printer.printRecord(converted);
                 } catch (IOException e) {
                     connected.set(false);
-                    log.error("Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(),
-                        value(EVENT, CSV_EXPORT_FAILURE));
+                    log.error(
+                        "Unable to parse record for custom report, reason: {}, event: {}", e.getMessage(),
+                        value(EVENT, CSV_EXPORT_FAILURE)
+                    );
                 }
             });
         }
@@ -109,8 +128,8 @@ public class CustomExportService {
         return headers;
     }
 
-    Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode) {
-        return auditRepository.getResultsFromView(exportViewCode);
+    Stream<Object[]> retrieveAuditData(@NonNull String exportViewCode, CustomExportFilter.ValidatedFilter filter) {
+        return auditRepository.getResultsFromView(exportViewCode, filter);
     }
 
     @Transactional
