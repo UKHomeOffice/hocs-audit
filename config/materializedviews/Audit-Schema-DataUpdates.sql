@@ -248,6 +248,7 @@ CREATE INDEX idx_dcu_aggregated_cases_temp_case_completed ON DCU_AGGREGATED_CASE
 CREATE INDEX idx_dcu_aggregated_cases_temp_case_created ON DCU_AGGREGATED_CASES_TEMP("caseCreated");
 CREATE INDEX idx_dcu_aggregated_cases_temp_case_deadline ON DCU_AGGREGATED_CASES_TEMP("caseDeadline");
 CREATE INDEX idx_dcu_aggregated_cases_temp_case_status ON DCU_AGGREGATED_CASES_TEMP("caseStatus");
+CREATE INDEX idx_dcu_aggregated_cases_temp_case_type ON DCU_AGGREGATED_CASES_TEMP("caseType");
 CREATE INDEX idx_dcu_aggregated_cases_temp_last_modified ON DCU_AGGREGATED_CASES_TEMP("lastModified");
 CREATE INDEX idx_dcu_aggregated_cases_temp_latest_data_change ON DCU_AGGREGATED_CASES_TEMP("latestDataChange");
 
@@ -263,6 +264,7 @@ ALTER INDEX idx_dcu_aggregated_cases_temp_case_completed RENAME TO idx_dcu_aggre
 ALTER INDEX idx_dcu_aggregated_cases_temp_case_created RENAME TO idx_dcu_aggregated_cases_case_created;
 ALTER INDEX idx_dcu_aggregated_cases_temp_case_deadline RENAME TO idx_dcu_aggregated_cases_case_deadline;
 ALTER INDEX idx_dcu_aggregated_cases_temp_case_status RENAME TO idx_dcu_aggregated_cases_case_status;
+ALTER INDEX idx_dcu_aggregated_cases_temp_case_type RENAME TO idx_dcu_aggregated_cases_case_type;
 ALTER INDEX idx_dcu_aggregated_cases_temp_last_modified RENAME TO idx_dcu_aggregated_cases_last_modified;
 ALTER INDEX idx_dcu_aggregated_cases_temp_latest_data_change RENAME TO idx_dcu_aggregated_cases_latest_data_change;
 

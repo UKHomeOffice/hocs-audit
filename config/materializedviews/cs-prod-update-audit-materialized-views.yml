@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: hocs-update-materialized-views
-          image: quay.io/ukhomeofficedigital/hocs-toolbox:1.7.1
+          image: quay.io/ukhomeofficedigital/hocs-toolbox:1.7.3
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
