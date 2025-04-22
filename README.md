@@ -5,7 +5,8 @@
 [![CodeQL](https://github.com/UKHomeOffice/hocs-audit/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UKHomeOffice/hocs-audit/actions/workflows/codeql-analysis.yml)
 
 This is the Home Office Correspondence Service (HOCS) auditing service. This service is designed to
-receive audit event messages from an SQS queue for persistent storage.
+receive audit event messages from an SQS queue for persistent storage. It can also be run with the 
+`extracts` profile to serve CSV reports built from the stored audit events.
 
 ## Getting Started
 
@@ -80,6 +81,14 @@ An example audit event message looks like:
     "user_id": "UserID"
 }
 ```
+
+The service is deployed in two modes, controlled by the presence or absence of the `extracts` spring profile.
+
+Without the profile the service will listen on the audit sqs queue and persist received events to the database.
+
+With the `extracts` profile, it will serve CSV reports built from the persisted audit events. Some details about
+how these reports are configured is available in the 
+[readme for the configuration resources](./src/main/resources/config/README.md).
 
 ## Versioning
 
