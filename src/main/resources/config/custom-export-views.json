@@ -161,21 +161,6 @@
       },
       {
         "name": "draftingTeamUnitHistoricName"
-      },
-      {
-        "name": "poTeamUnitHistoricName"
-      },
-      {
-        "name": "overrideDraftingTeamUnitHistoricName"
-      },
-      {
-        "name": "overridePOTeamUnitHistoricName"
-      },
-      {
-        "name": "privateOfficeOverridePOTeamUnitHistoricName"
-      },
-      {
-        "name": "defaultPolicyTeamUnitHistoricName"
       }
     ]
   },
@@ -425,21 +410,6 @@
       },
       {
         "name": "draftingTeamUnitHistoricName"
-      },
-      {
-        "name": "poTeamUnitHistoricName"
-      },
-      {
-        "name": "overrideDraftingTeamUnitHistoricName"
-      },
-      {
-        "name": "overridePOTeamUnitHistoricName"
-      },
-      {
-        "name": "privateOfficeOverridePOTeamUnitHistoricName"
-      },
-      {
-        "name": "defaultPolicyTeamUnitHistoricName"
       }
     ]
   }
